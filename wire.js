@@ -226,6 +226,11 @@ function wire(){
 
   document.querySelectorAll('[data-explore-tab]').forEach(b=>b.onclick=()=>{state.exploreTab=b.dataset.exploreTab;render()});
   document.querySelectorAll('[data-profile-tab]').forEach(b=>b.onclick=()=>{state.profileTab=b.dataset.profileTab;render()});
+  const openProfileMenu=document.querySelector('[data-open-profile-menu]');if(openProfileMenu)openProfileMenu.onclick=()=>{state.modal='profileUtility';render()};
+  document.querySelectorAll('[data-open-tools]').forEach(b=>b.onclick=()=>{state.modal=null;state.view='tools';render()});
+  document.querySelectorAll('[data-open-tool]').forEach(b=>b.onclick=()=>{state.view='tool:'+b.dataset.openTool;render()});
+  document.querySelectorAll('[data-tools-back]').forEach(b=>b.onclick=()=>{state.view='profile';render()});
+  document.querySelectorAll('[data-tool-back]').forEach(b=>b.onclick=()=>{state.view='tools';render()});
   document.querySelectorAll('[data-open-hand-detail]').forEach(b=>b.onclick=()=>{state.handReturnView=state.view;state.view='hand:'+b.dataset.openHandDetail;render()});
   document.querySelectorAll('[data-hand-detail-back]').forEach(b=>b.onclick=()=>{state.view=state.handReturnView||'profile';render()});
 
