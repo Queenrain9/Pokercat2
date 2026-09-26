@@ -436,26 +436,48 @@ function wire(){
   });
   document.querySelectorAll('[data-career-delete]').forEach(b=>b.onclick=()=>{
     if(!state.loggedIn){requireAuth('커리어를 수정하려면 로그인해 주세요.',{type:'view',view:'profile'});return}
-    state.careerHighs=state.careerHighs.filter(x=>x.id!==b.dataset.careerDelete);persistCareerHighs();render();toast('커리어 기록을 삭제했어요');
+    const id=b.dataset.careerDelete;
+    const item=state.careerHighs.find(x=>x.id===id);
+    if(!item)return;
+    if(!window.confirm(`"${item.title}" 기록을 삭제할까요?`))return;
+    const previous=state.careerHighs;
+    state.careerHighs=state.careerHighs.filter(x=>x.id!==id);
+    try{persistCareerHighs()}catch{
+      state.careerHighs=previous;toast('삭제 내용을 저장하지 못했어요');return;
+    }
+    state.editingCareerId=null;state.profileTab='career';render();toast('커리어 기록을 삭제했어요');
   });
   const saveCareer=document.querySelector('[data-save-career]');if(saveCareer)saveCareer.onclick=()=>{
     const title=(document.querySelector('#careerTitle')?.value||'').trim();
-    if(!title){toast('기록명을 입력해 주세요');return}
+    if(!title){toast('기록명을 입력해 주세요');document.querySelector('#careerTitle')?.focus();return}
+    if(title.length>80){toast('기록명은 80자 이내로 입력해 주세요');return}
     const old=state.careerHighs.find(x=>x.id===state.editingCareerId);
+    const date=document.querySelector('#careerDate')?.value||'';
+    if(date&&!/^\d{4}-\d{2}-\d{2}$/.test(date)){toast('날짜를 확인해 주세요');return}
     const now=new Date().toISOString();
-    const record={
-      id:old?.id||('career-'+Date.now()),title,
+    const record=normalizeCareerRecord({
+      ...(old||{}),
+      id:old?.id||('career-'+Date.now()),
+      title,
       category:document.querySelector('#careerCategory')?.value||'기타',
       tournamentName:(document.querySelector('#careerTournament')?.value||'').trim(),
-      date:document.querySelector('#careerDate')?.value||'',
+      date,
       prize:(document.querySelector('#careerPrize')?.value||'').trim(),
       description:(document.querySelector('#careerDescription')?.value||'').trim(),
       imageUrl:old?.imageUrl||old?.photoUrl||null,
       verification:old?.verification||{status:'unverified',provider:null,verifiedAt:null},
-      createdAt:old?.createdAt||now,updatedAt:now
-    };
-    if(old)state.careerHighs=state.careerHighs.map(x=>x.id===old.id?record:x);else state.careerHighs=[record,...state.careerHighs];
-    persistCareerHighs();state.modal=null;state.editingCareerId=null;state.profileTab='career';render();toast('커리어를 저장했어요');
+      createdAt:old?.createdAt||now,
+      updatedAt:now
+    },0);
+    if(!record){toast('커리어 내용을 확인해 주세요');return}
+    const previous=state.careerHighs;
+    state.careerHighs=old
+      ?state.careerHighs.map(x=>x.id===old.id?record:x)
+      :[record,...state.careerHighs];
+    try{persistCareerHighs()}catch{
+      state.careerHighs=previous;toast('커리어 기록을 저장하지 못했어요');return;
+    }
+    state.modal=null;state.editingCareerId=null;state.profileTab='career';render();toast(old?'커리어를 수정했어요':'커리어를 저장했어요');
   };
 
   document.querySelectorAll('[data-toast]').forEach(b=>b.onclick=()=>toast(b.dataset.toast));
