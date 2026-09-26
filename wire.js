@@ -342,10 +342,12 @@ function applyPendingAuth(pending){
 
 function joinRoomById(id){
   const room=getRoom(id);if(!room)return;
-  if(room.visibility==='private'&&room.hostId!=='queenbee'&&!room.invitedUserIds.includes('queenbee')){state.view='room:'+id;render();toast('초대받은 사용자만 입장할 수 있어요');return}
-  if(room.seats.includes('queenbee')){state.view='room:'+id;render();toast('이미 착석 중이에요');return}
-  const idx=room.seats.findIndex(x=>!x);if(idx<0){state.view='room:'+id;render();toast('빈 좌석이 없어요');return}
-  room.seats[idx]='queenbee';persistRooms();state.view='room:'+id;render();toast('테이블에 입장했어요');
+  if(!canEnterRoom(room)){state.view='room:'+id;render();toast('이 게임방의 공개 대상이 아니에요');return}
+  if(room.status==='playing'){state.view='room:'+id;render();toast('이미 시작된 게임은 현재 관전만 가능해요');return}
+  const seats=roomSeats(room);
+  if(seats.includes('queenbee')){state.view='room:'+id;render();toast('이미 착석 중이에요');return}
+  const idx=seats.findIndex(x=>!x);if(idx<0){state.view='room:'+id;render();toast('빈 좌석이 없어요');return}
+  seats[idx]='queenbee';persistRooms();state.view='room:'+id;render();toast('대기방에 착석했어요');
 }
 
 function toast(msg){const old=document.querySelector('.toast');if(old)old.remove();const el=document.createElement('div');el.className='toast';el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),1700)}
