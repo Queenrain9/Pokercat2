@@ -10,7 +10,9 @@ function profileView(key){
 
   let homePubLine='';
   if(hp){
-    homePubLine=`<button class="profile-identity-line homepub verified" data-open-homepub><span>🏠</span><div><small>Home Pub</small><b>${escapeHtml(hp.brand)} ${escapeHtml(hp.branch)}</b></div><em>인증 ✓</em><i>›</i></button>`;
+    homePubLine=mine
+      ?`<button class="profile-identity-line homepub verified" data-open-homepub><span>🏠</span><div><small>Home Pub</small><b>${escapeHtml(hp.brand)} ${escapeHtml(hp.branch)}</b></div><em>인증 ✓</em><i>›</i></button>`
+      :`<div class="profile-identity-line homepub verified"><span>🏠</span><div><small>Home Pub</small><b>${escapeHtml(hp.brand)} ${escapeHtml(hp.branch)}</b></div><em>인증 ✓</em></div>`;
   }else if(pendingHp){
     homePubLine=`<button class="profile-identity-line homepub pending" data-open-homepub-verify><span>🏠</span><div><small>Home Pub</small><b>${escapeHtml(pendingHp.brand)} ${escapeHtml(pendingHp.branch)}</b></div><em>미인증</em><i>›</i></button>`;
   }else if(mine){
