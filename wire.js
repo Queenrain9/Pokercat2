@@ -282,16 +282,16 @@ function wire(){
   });
 
   document.querySelectorAll('[data-career-add]').forEach(b=>b.onclick=()=>{
-    if(!state.loggedIn){requireAuth('Career High를 등록하려면 로그인해 주세요.',{type:'view',view:'profile'});return}
+    if(!state.loggedIn){requireAuth('커리어를 등록하려면 로그인해 주세요.',{type:'view',view:'profile'});return}
     state.editingCareerId=null;state.modal='careerEdit';render()
   });
   document.querySelectorAll('[data-career-edit]').forEach(b=>b.onclick=()=>{
-    if(!state.loggedIn){requireAuth('Career High를 수정하려면 로그인해 주세요.',{type:'view',view:'profile'});return}
+    if(!state.loggedIn){requireAuth('커리어를 수정하려면 로그인해 주세요.',{type:'view',view:'profile'});return}
     state.editingCareerId=b.dataset.careerEdit;state.modal='careerEdit';render()
   });
   document.querySelectorAll('[data-career-delete]').forEach(b=>b.onclick=()=>{
-    if(!state.loggedIn){requireAuth('Career High를 수정하려면 로그인해 주세요.',{type:'view',view:'profile'});return}
-    state.careerHighs=state.careerHighs.filter(x=>x.id!==b.dataset.careerDelete);persistCareerHighs();render();toast('Career High 기록을 삭제했어요');
+    if(!state.loggedIn){requireAuth('커리어를 수정하려면 로그인해 주세요.',{type:'view',view:'profile'});return}
+    state.careerHighs=state.careerHighs.filter(x=>x.id!==b.dataset.careerDelete);persistCareerHighs();render();toast('커리어 기록을 삭제했어요');
   });
   const saveCareer=document.querySelector('[data-save-career]');if(saveCareer)saveCareer.onclick=()=>{
     const title=(document.querySelector('#careerTitle')?.value||'').trim();
@@ -310,7 +310,7 @@ function wire(){
       createdAt:old?.createdAt||now,updatedAt:now
     };
     if(old)state.careerHighs=state.careerHighs.map(x=>x.id===old.id?record:x);else state.careerHighs=[record,...state.careerHighs];
-    persistCareerHighs();state.modal=null;state.editingCareerId=null;state.profileTab='career';render();toast('Career High를 저장했어요');
+    persistCareerHighs();state.modal=null;state.editingCareerId=null;state.profileTab='career';render();toast('커리어를 저장했어요');
   };
 
   document.querySelectorAll('[data-toast]').forEach(b=>b.onclick=()=>toast(b.dataset.toast));
