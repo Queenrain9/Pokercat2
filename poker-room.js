@@ -331,7 +331,7 @@ function pokerRoomLobbyView(room){
     </div>
 
     <div class="lobby-actions">
-      ${mySeat<0?`<button class="btn full" data-join-room="${room.id}">빈자리에 앉기</button>`:`<button class="btn secondary full" data-leave-room="${room.id}">착석 중 · 나가기</button>`}
+      ${isHost?`<div class="host-seat-status">방장으로 착석 중</div>`:mySeat<0?`<button class="btn full" data-join-room="${room.id}">빈자리에 앉기</button>`:`<button class="btn secondary full" data-leave-room="${room.id}">착석 중 · 나가기</button>`}
       ${isHost?`<button class="btn secondary full" data-invite-room="${room.id}">팔로워 / 팔로잉 초대</button>`:''}
       ${isHost?`<button class="room-start-btn" data-start-room="${room.id}" ${seated<2?'disabled':''}>게임 시작${seated<2?' · 2명 이상 필요':''}</button>`:''}
     </div>
