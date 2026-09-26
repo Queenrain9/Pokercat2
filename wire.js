@@ -193,10 +193,18 @@ function wire(){
     toast('저장했어요')
   });
 
-  const followingToggle=document.querySelector('[data-toggle-following]');if(followingToggle)followingToggle.onclick=()=>{
-    if(!state.loggedIn){requireAuth('팔로잉 피드를 보려면 로그인해 주세요.',{type:'followingFeed'});return}
-    state.feedMode=state.feedMode==='following'?'algorithm':'following';render()
-  };
+  const feedSelector=document.querySelector('[data-open-feed-selector]');if(feedSelector)feedSelector.onclick=()=>{state.modal='feedSelector';render()};
+  document.querySelectorAll('[data-feed-mode]').forEach(b=>b.onclick=()=>{
+    const mode=b.dataset.feedMode;
+    if(mode!=='algorithm'&&!state.loggedIn){
+      requireAuth(mode==='homepub'?'Home Pub 피드를 보려면 로그인해 주세요.':'팔로잉 피드를 보려면 로그인해 주세요.',{type:'feedMode',mode});
+      return
+    }
+    if(mode==='homepub'&&!verifiedHomePub(myUser())){
+      state.modal=null;state.feedMode='homepub';render();return
+    }
+    state.feedMode=mode;state.modal=null;state.view='home';render()
+  });
   const openNotifications=document.querySelector('[data-open-notifications]');if(openNotifications)openNotifications.onclick=()=>{
     if(!state.loggedIn){requireAuth('알림을 확인하려면 로그인해 주세요.',{type:'view',view:'notifications'});return}
     state.view='notifications';render()
@@ -319,6 +327,9 @@ function applyPendingAuth(pending){
   }
   if(pending.type==='modal'){
     state.modal=pending.modal;render();return;
+  }
+  if(pending.type==='feedMode'){
+    state.feedMode=pending.mode||'algorithm';state.view='home';state.modal=null;render();return;
   }
   if(pending.type==='followingFeed'){
     state.feedMode='following';state.view='home';state.modal=null;render();return;
