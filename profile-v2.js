@@ -167,7 +167,7 @@ function careerHighView(mine,key){
   '</div>';
 }
 function careerCard(item,mine,index){
-  const month=item.date?String(item.date).slice(0,7).replace('-','.'):'';
+  const dateLabel=item.date?String(item.date).replace(/-/g,'.'):'';
   const verified=item.verification?.status==='verified';
   return '<article class="career-card activity-career-card">'+
     '<div class="career-rank">'+String(index+1).padStart(2,'0')+'</div>'+
@@ -175,7 +175,7 @@ function careerCard(item,mine,index){
       '<div class="career-category">'+escapeHtml(item.category||'Achievement')+(verified?'<span class="career-verified">✓ 인증</span>':'')+'</div>'+
       '<h3>'+escapeHtml(item.title||'커리어')+'</h3>'+
       (item.tournamentName&&item.tournamentName!==item.title?'<div class="career-tournament">'+escapeHtml(item.tournamentName)+'</div>':'')+
-      '<div class="career-meta">'+(month?'<span>'+escapeHtml(month)+'</span>':'')+(item.prize?'<strong>'+escapeHtml(item.prize)+'</strong>':'')+'</div>'+
+      '<div class="career-meta">'+(dateLabel?'<span>'+escapeHtml(dateLabel)+'</span>':'')+(item.prize?'<strong>'+escapeHtml(item.prize)+'</strong>':'')+'</div>'+
       (item.description?'<p>'+escapeHtml(item.description)+'</p>':'')+
     '</div>'+
     (mine?'<div class="career-actions"><button data-career-edit="'+item.id+'">수정</button><button data-career-delete="'+item.id+'">삭제</button></div>':'')+
