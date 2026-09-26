@@ -2,7 +2,7 @@ function userRow(key){
   const u=demoUsers[key];
   const isFollowing=state.following.has(key);
   return `<div class="user-row">
-    <button class="avatar" data-user="${key}" style="border:none">${u.cat}</button>
+    <button class="avatar" data-user="${key}" style="border:none">${catAvatar(u.cat,'avatar-cat-image')}</button>
     <div class="user-meta"><div class="user-name">${u.name}</div><div class="user-sub">${u.sub} · 18분</div></div>
     <button class="follow-btn ${isFollowing?'following':''}" data-follow="${key}">${isFollowing?'팔로잉':'팔로우'}</button>
   </div>`;
