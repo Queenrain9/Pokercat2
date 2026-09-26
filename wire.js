@@ -109,28 +109,50 @@ function wire(){
 
   document.querySelectorAll('[data-follow]').forEach(b=>b.onclick=()=>{
     const k=b.dataset.follow;
+    if(!state.loggedIn){requireAuth('플레이어를 팔로우하려면 로그인해 주세요.',{type:'follow',key:k});return}
     state.following.has(k)?state.following.delete(k):state.following.add(k);
     persistRelationships();render();
   });
-  document.querySelectorAll('[data-like]').forEach(b=>b.onclick=()=>{const k=b.dataset.like;state.liked.has(k)?state.liked.delete(k):state.liked.add(k);render()});
+  document.querySelectorAll('[data-like]').forEach(b=>b.onclick=()=>{
+    const k=b.dataset.like;
+    if(!state.loggedIn){requireAuth('게시물에 좋아요를 남기려면 로그인해 주세요.',{type:'like',key:k});return}
+    state.liked.has(k)?state.liked.delete(k):state.liked.add(k);render()
+  });
+  document.querySelectorAll('[data-save-post]').forEach(b=>b.onclick=()=>{
+    if(!state.loggedIn){requireAuth('게시물을 저장하려면 로그인해 주세요.',{type:'savePost'});return}
+    toast('저장했어요')
+  });
 
-  const followingToggle=document.querySelector('[data-toggle-following]');if(followingToggle)followingToggle.onclick=()=>{state.feedMode=state.feedMode==='following'?'algorithm':'following';render()};
-  const openNotifications=document.querySelector('[data-open-notifications]');if(openNotifications)openNotifications.onclick=()=>{state.view='notifications';render()};
+  const followingToggle=document.querySelector('[data-toggle-following]');if(followingToggle)followingToggle.onclick=()=>{
+    if(!state.loggedIn){requireAuth('팔로잉 피드를 보려면 로그인해 주세요.',{type:'followingFeed'});return}
+    state.feedMode=state.feedMode==='following'?'algorithm':'following';render()
+  };
+  const openNotifications=document.querySelector('[data-open-notifications]');if(openNotifications)openNotifications.onclick=()=>{
+    if(!state.loggedIn){requireAuth('알림을 확인하려면 로그인해 주세요.',{type:'view',view:'notifications'});return}
+    state.view='notifications';render()
+  };
   const notificationBack=document.querySelector('[data-notification-back]');if(notificationBack)notificationBack.onclick=()=>{state.view='home';render()};
   const markRead=document.querySelector('[data-mark-read]');if(markRead)markRead.onclick=()=>{state.notificationsRead=true;render();toast('알림을 모두 읽음 처리했어요')};
 
   const homePubBack=document.querySelector('[data-homepub-back]');if(homePubBack)homePubBack.onclick=()=>{state.view='profile';render()};
   document.querySelectorAll('[data-open-homepub]').forEach(b=>b.onclick=()=>{
+    if(!state.loggedIn){requireAuth('Home Pub 기능을 사용하려면 로그인해 주세요.',{type:'view',view:'profile'});return}
     if(verifiedHomePub(myUser())){state.view='homepub';state.modal=null;render()}
     else if(state.homePub){state.modal='homePubVerify';render()}
     else{state.modal='profileEdit';render()}
   });
-  document.querySelectorAll('[data-open-homepub-verify]').forEach(b=>b.onclick=()=>{if(state.homePub){state.modal='homePubVerify';render()}else{state.modal='profileEdit';render()}});
+  document.querySelectorAll('[data-open-homepub-verify]').forEach(b=>b.onclick=()=>{
+    if(!state.loggedIn){requireAuth('Home Pub 인증을 하려면 로그인해 주세요.',{type:'view',view:'profile'});return}
+    if(state.homePub){state.modal='homePubVerify';render()}else{state.modal='profileEdit';render()}
+  });
 
   document.querySelectorAll('[data-explore-tab]').forEach(b=>b.onclick=()=>{state.exploreTab=b.dataset.exploreTab;render()});
   document.querySelectorAll('[data-profile-tab]').forEach(b=>b.onclick=()=>{state.profileTab=b.dataset.profileTab;render()});
 
-  const editProfile=document.querySelector('[data-edit-profile]');if(editProfile)editProfile.onclick=()=>{state.modal='profileEdit';render()};
+  const editProfile=document.querySelector('[data-edit-profile]');if(editProfile)editProfile.onclick=()=>{
+    if(!state.loggedIn){requireAuth('프로필을 편집하려면 로그인해 주세요.',{type:'view',view:'profile'});return}
+    state.modal='profileEdit';render()
+  };
   const closeProfileEdit=document.querySelector('[data-close-profile-edit]');if(closeProfileEdit)closeProfileEdit.onclick=()=>{state.modal=null;render()};
   const saveProfile=document.querySelector('[data-save-profile]');if(saveProfile)saveProfile.onclick=()=>{
     const nextName=(document.querySelector('#editNickname')?.value||'').trim()||state.nickname;
@@ -159,11 +181,21 @@ function wire(){
     persistHomePub();state.modal=null;render();toast('Home Pub 인증이 완료됐어요');
   };
 
-  document.querySelectorAll('[data-relationship]').forEach(b=>b.onclick=()=>{state.relationshipMode=b.dataset.relationship;state.modal='relationships';render()});
+  document.querySelectorAll('[data-relationship]').forEach(b=>b.onclick=()=>{
+    if(!state.loggedIn){requireAuth('팔로워와 팔로잉 목록을 보려면 로그인해 주세요.',{type:'view',view:'profile'});return}
+    state.relationshipMode=b.dataset.relationship;state.modal='relationships';render()
+  });
 
-  document.querySelectorAll('[data-career-add]').forEach(b=>b.onclick=()=>{state.editingCareerId=null;state.modal='careerEdit';render()});
-  document.querySelectorAll('[data-career-edit]').forEach(b=>b.onclick=()=>{state.editingCareerId=b.dataset.careerEdit;state.modal='careerEdit';render()});
+  document.querySelectorAll('[data-career-add]').forEach(b=>b.onclick=()=>{
+    if(!state.loggedIn){requireAuth('Career High를 등록하려면 로그인해 주세요.',{type:'view',view:'profile'});return}
+    state.editingCareerId=null;state.modal='careerEdit';render()
+  });
+  document.querySelectorAll('[data-career-edit]').forEach(b=>b.onclick=()=>{
+    if(!state.loggedIn){requireAuth('Career High를 수정하려면 로그인해 주세요.',{type:'view',view:'profile'});return}
+    state.editingCareerId=b.dataset.careerEdit;state.modal='careerEdit';render()
+  });
   document.querySelectorAll('[data-career-delete]').forEach(b=>b.onclick=()=>{
+    if(!state.loggedIn){requireAuth('Career High를 수정하려면 로그인해 주세요.',{type:'view',view:'profile'});return}
     state.careerHighs=state.careerHighs.filter(x=>x.id!==b.dataset.careerDelete);persistCareerHighs();render();toast('Career High 기록을 삭제했어요');
   });
   const saveCareer=document.querySelector('[data-save-career]');if(saveCareer)saveCareer.onclick=()=>{
@@ -201,7 +233,10 @@ function wire(){
   const preview=document.querySelector('[data-preview-hand]');if(preview)preview.onclick=()=>{state.previewHand=handDraftToData();state.modal='handPreview';render()};
   const close=document.querySelector('[data-close-modal]');if(close)close.onclick=()=>{state.modal=null;state.editingCareerId=null;render()};
   const closePreview=document.querySelector('[data-close-preview]');if(closePreview)closePreview.onclick=()=>{state.modal=null;render()};
-  document.querySelectorAll('[data-post-demo]').forEach(b=>b.onclick=()=>{state.view='home';state.composeMode='post';state.modal=null;render();toast('게시했어요')});
+  document.querySelectorAll('[data-post-demo]').forEach(b=>b.onclick=()=>{
+    if(!state.loggedIn){requireAuth('게시하려면 로그인해 주세요.',{type:'view',view:'compose'});return}
+    state.view='home';state.composeMode='post';state.modal=null;render();toast('게시했어요')
+  });
 }
 function toast(msg){const old=document.querySelector('.toast');if(old)old.remove();const el=document.createElement('div');el.className='toast';el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),1700)}
 render();
