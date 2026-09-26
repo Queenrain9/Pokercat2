@@ -370,3 +370,28 @@
   position:absolute;inset:0;width:100%;height:100%;display:block;
   border-radius:13px;background-size:cover!important;background-position:center!important;
 }
+
+
+/* Poker Room functional state v39 */
+.lobby-seat-row.selectable{
+  width:100%;text-align:left;color:inherit;font:inherit;cursor:pointer;opacity:1;
+  border-color:#3a4654;background:#111922
+}
+.lobby-seat-row.selectable:active{transform:scale(.995);background:#151f2a}
+.lobby-seat-row.selectable .empty-avatar{color:#d9b47f;border:1px solid #55432d;background:#1d1812}
+.lobby-seat-row.mine{border-color:#7653a0;box-shadow:0 0 0 1px rgba(185,133,255,.14)}
+.seat-choice-helper{text-align:center;color:#6d7784;font-size:7px;margin-top:-2px}
+.lobby-invite-banner{
+  margin:11px 0 0;padding:8px 10px;border:1px solid #4c3b27;border-radius:9px;
+  background:#18130e;color:#caa877;font-size:8px;line-height:1.45
+}
+.room-invite-notice-actions{display:flex;gap:5px;align-items:center}
+.room-invite-notice-actions .notice-detail.secondary{background:#171d25;color:#8a95a2;border:1px solid #2a3440}
+.room-manage-summary{
+  margin:-2px 0 12px;padding:11px;border:1px solid #2b3440;background:#10161d;border-radius:11px
+}
+.room-manage-summary b{display:block;font-size:11px}
+.room-manage-summary span{display:block;margin-top:4px;color:#75808e;font-size:8px}
+.room-manage-sheet{display:grid;gap:8px}
+.danger-room-action{border-color:#60363b!important;color:#e89aa2!important;background:#1b1113!important}
+.room-missing p{color:#77818d;font-size:9px;line-height:1.5;margin:0 0 16px}
