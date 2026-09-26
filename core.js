@@ -187,6 +187,7 @@ gamePref:localStorage.getItem('pokercat_game')||'MTT',playPref:localStorage.getI
 homePub:storedHomePub,careerHighs:Array.isArray(storedCareer)?storedCareer:[],
 rooms:storedRooms,roomInvites:Array.isArray(storedRoomInvites)?storedRoomInvites:[],savedRoomSettings:Array.isArray(storedSavedRoomSettings)?storedSavedRoomSettings:[],roomDraft:null,roomOptionOpen:null,roomPresetTab:'pokerCat',editingSavedRoomSettingId:null,currentRoomId:null,roomReturnView:'home',
 feedMode:'algorithm',exploreTab:'popular',scheduleTab:'events',profileTab:'posts',notificationsRead:false,
+storeLocation:null,storeLocationStatus:'idle',storeLocationError:'',storeCity:'',
 modal:null,authGateMode:'login',authReason:'',pendingAuth:null,relationshipMode:'following',roomInviteMode:'followers',editingCareerId:null,handReturnView:'profile',liked:new Set(),
 following:new Set(Array.isArray(storedFollowing)?storedFollowing:['riverkim']),
 followers:new Set(Array.isArray(storedFollowers)?storedFollowers:['riverkim','chiplee']),
@@ -368,7 +369,7 @@ function resetRoomDraft(){
 initializeRoomSync();
 
 document.documentElement.dataset.theme='dark';
-function icon(name){const map={home:'⌂',search:'⌕',plus:'＋',calendar:'▦',profile:'♙'};return map[name]||'•'}
+function icon(name){const map={home:'⌂',search:'⌕',plus:'＋',calendar:'▦',tools:'⌘',profile:'♙'};return map[name]||'•'}
 
 function render(){
   const app=document.querySelector('#app');
@@ -405,7 +406,7 @@ if(state.view==='roomcreate')return `<header class="topbar utility-top"><button 
 if(state.view.startsWith('room:'))return `<header class="topbar utility-top"><button class="back-btn" data-room-back>‹</button><div class="page-title">Poker Room</div><button class="read-all" data-room-menu>•••</button></header>`;
 if(state.view.startsWith('hand:'))return `<header class="topbar utility-top"><button class="back-btn" data-hand-detail-back>‹</button><div class="page-title">핸드 상세</div><span class="topbar-spacer"></span></header>`;
 if(state.view==='compose')return '';
-if(state.view==='tools')return `<header class="topbar utility-top"><button class="back-btn" data-tools-back>‹</button><div class="page-title">Poker Tools</div><span class="topbar-spacer"></span></header>`;
+if(state.view==='tools')return `<header class="topbar"><div class="page-title">Poker Tools</div><button class="top-icon" data-toast="Poker Tools 설정은 준비 중이에요">•••</button></header>`;
 if(state.view.startsWith('tool:'))return `<header class="topbar utility-top"><button class="back-btn" data-tool-back>‹</button><div class="page-title">${pokerToolTitle(state.view.split(':')[1])}</div><span class="topbar-spacer"></span></header>`;
 const map={explore:'탐색',schedule:'일정',profile:'프로필'};
 if(state.view==='profile')return `<header class="topbar"><div class="page-title">프로필</div><button class="top-icon" data-open-profile-menu>•••</button></header>`;
