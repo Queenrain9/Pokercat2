@@ -345,3 +345,8 @@
 
 /* room card audience */
 .room-audience-badge{font-size:7px;padding:4px 6px;border-radius:999px;background:#1a2028;color:#8f99a7;white-space:nowrap}
+
+.host-seat-status{
+  height:42px;border:1px solid #2a3440;background:#10161d;color:#9ba5b2;
+  border-radius:11px;display:grid;place-items:center;font-size:8px;font-weight:800
+}
