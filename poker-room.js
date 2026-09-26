@@ -122,11 +122,11 @@ function pokerRoomFeedCard(room,context='feed'){
 
 function roomSeatPositions(max){
   const positions={
-    2:[[50,6],[50,84]],
-    4:[[50,4],[91,46],[50,86],[9,46]],
-    6:[[50,3],[88,23],[88,69],[50,88],[12,69],[12,23]],
-    8:[[50,2],[82,12],[94,45],[80,80],[50,91],[20,80],[6,45],[18,12]],
-    9:[[50,1],[79,9],[94,34],[91,68],[68,89],[32,89],[9,68],[6,34],[21,9]]
+    2:[[50,8],[50,92]],
+    4:[[50,7],[92,50],[50,93],[8,50]],
+    6:[[50,6],[88,28],[88,72],[50,94],[12,72],[12,28]],
+    8:[[50,5],[82,17],[94,41],[88,75],[50,95],[12,75],[6,41],[18,17]],
+    9:[[50,4],[78,12],[93,31],[93,64],[72,88],[28,88],[7,64],[7,31],[22,12]]
   };
   return positions[max]||positions[6];
 }
@@ -137,41 +137,57 @@ function pokerRoomView(id){
   const host=getUser(room.hostId),isHost=room.hostId==='queenbee';
   const seated=roomSeatCount(room),mySeat=room.seats.indexOf('queenbee');
   const positions=roomSeatPositions(room.maxPlayers);
-  return `<section class="room-screen">
-    <div class="room-detail-head">
-      <div class="room-detail-status"><span class="${room.status}">● ${roomStatusLabel(room)}</span><em>${room.visibility==='private'?'🔒 Private':'◎ Public'}</em></div>
-      <h1>${escapeHtml(room.name)}</h1>
-      <div class="room-host-line">${catAvatar(host.cat,'room-detail-host')}<div><small>HOST</small><b>${escapeHtml(host.name)}</b></div></div>
-      <div class="room-detail-specs">
-        <span>${roomGameLabel(room)}</span><span>${room.maxPlayers} Players</span><span>${room.startStack}BB</span><span>${room.sb}/${room.bb}</span>
-        ${room.ante.enabled?`<span>Ante ${room.ante.amount}</span>`:''}
-        ${room.blinds.increase?`<span>↑ ${room.blinds.intervalMinutes}m</span>`:''}
+  const playing=room.status==='playing';
+  return `<section class="room-screen poker-app-shell">
+    <div class="poker-room-hud">
+      <div>
+        <span class="hud-status ${room.status}">● ${roomStatusLabel(room)}</span>
+        <b>${escapeHtml(room.name)}</b>
+        <small>${roomGameLabel(room)} · ${room.sb}/${room.bb}${room.ante.enabled?` · Ante ${room.ante.amount}`:''}</small>
       </div>
+      <div class="hud-stack"><strong>${room.startStack}BB</strong><span>START STACK</span></div>
     </div>
 
-    <div class="poker-table-wrap">
-      <div class="poker-table">
-        <div class="table-logo">POKER<span>CAT</span><small>PLAY MONEY</small></div>
-        <div class="table-pot">POT <b>—</b></div>
+    <div class="portrait-table-stage">
+      <div class="portrait-felt-glow"></div>
+      <div class="poker-table portrait-table">
+        <div class="table-brand">POKER<span>CAT</span></div>
+        <div class="table-pot">POT <b>${playing?'12.5 BB':'—'}</b></div>
+        <div class="community-board ${playing?'live':''}">
+          <span>?</span><span>?</span><span>?</span><span>?</span><span>?</span>
+        </div>
         ${positions.map((p,i)=>roomSeatNode(room,i,p[0],p[1])).join('')}
+        <div class="dealer-chip">D</div>
       </div>
     </div>
 
-    <div class="room-table-summary">
-      <div><b>${seated}/${room.maxPlayers}</b><span>착석</span></div>
-      <div><b>${room.startStack}BB</b><span>시작 스택</span></div>
-      <div><b>${room.sb}/${room.bb}</b><span>블라인드</span></div>
-    </div>
+    <div class="poker-room-lower">
+      <div class="room-table-summary compact">
+        <div><b>${seated}/${room.maxPlayers}</b><span>SEATED</span></div>
+        <div><b>${room.startStack}BB</b><span>STACK</span></div>
+        <div><b>${room.sb}/${room.bb}</b><span>BLINDS</span></div>
+      </div>
 
-    <div class="room-actions">
-      ${mySeat<0?'<button class="btn full" data-join-room="'+room.id+'">테이블 입장</button>':'<button class="btn secondary full" data-leave-room="'+room.id+'">착석 중 · 나가기</button>'}
-      ${isHost?'<button class="btn secondary full" data-invite-room="'+room.id+'">PokerCat 친구 초대</button>':''}
-      ${isHost&&seated>=2&&room.status==='open'?'<button class="room-start-btn" data-start-room="'+room.id+'">플레이머니 게임 시작</button>':''}
-    </div>
+      ${mySeat>=0?`<div class="hero-hand-shell">
+        <div class="hero-hand-cards"><i>?</i><i>?</i></div>
+        <div><b>${escapeHtml(state.nickname)}</b><span>${room.startStack} BB</span></div>
+      </div>`:''}
 
-    <div class="room-engine-note">
-      <b>${room.status==='playing'?'테이블이 시작됐어요':'Single Table 준비 중'}</b>
-      <p>${room.status==='playing'?'좌석과 룸 상태는 동작합니다. 카드 배분·베팅 엔진은 다음 개발 단계에서 이 Room ID에 연결됩니다.':'친구를 초대하거나 자리에 앉을 수 있어요. 실제 카드 배분·베팅 엔진은 다음 우선순위에서 연결됩니다.'}</p>
+      ${playing&&mySeat>=0?`<div class="poker-action-dock disabled-engine">
+        <button disabled>FOLD</button><button disabled>CHECK</button><button disabled>BET</button>
+        <small>카드 배분·베팅 엔진은 다음 단계에서 연결됩니다.</small>
+      </div>`:''}
+
+      <div class="room-actions">
+        ${mySeat<0?'<button class="btn full" data-join-room="'+room.id+'">테이블 입장</button>':'<button class="btn secondary full" data-leave-room="'+room.id+'">착석 중 · 나가기</button>'}
+        ${isHost?'<button class="btn secondary full" data-invite-room="'+room.id+'">팔로워 / 팔로잉 초대</button>':''}
+        ${isHost&&seated>=2&&!playing?'<button class="room-start-btn" data-start-room="'+room.id+'">플레이머니 게임 시작</button>':''}
+      </div>
+
+      <div class="room-engine-note">
+        <b>${playing?'테이블 UI 프리뷰':'Single Table 대기 중'}</b>
+        <p>${playing?'실제 포커앱과 같은 세로 플레이 화면을 먼저 구성했습니다. 좌석과 룸 상태는 저장되며 실제 딜·베팅 엔진은 다음 단계에 연결됩니다.':'참가자를 초대하고 착석할 수 있습니다. 게임 시작 후에도 현재는 UI 셸과 상태 흐름까지만 동작합니다.'}</p>
+      </div>
     </div>
   </section>`;
 }
