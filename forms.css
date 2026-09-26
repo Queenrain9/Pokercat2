@@ -248,3 +248,100 @@
   width:100%;margin-top:13px;border:0;background:transparent;
   color:#76808e;font-size:9px;padding:8px
 }
+
+/* v21 Poker Room creator */
+.topbar-spacer{display:block;width:52px;height:1px}
+.room-create-screen.v2{padding-bottom:96px;background:#080b0f}
+.room-format-summary{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:16px 14px 13px;border-bottom:1px solid #1f2731
+}
+.room-format-summary>div:first-child{min-width:0}
+.room-format-kicker{display:block;font-size:7px;letter-spacing:.12em;color:#697483;font-weight:900;margin-bottom:4px}
+.room-format-summary b{display:block;font-size:17px}
+.room-format-summary small{display:block;font-size:9px;color:#77818f;margin-top:4px}
+.mtt-coming{flex:0 0 auto;text-align:right}.mtt-coming span{display:block;font-size:9px;color:#838d99}.mtt-coming em{display:inline-block;margin-top:4px;font-style:normal;font-size:7px;padding:4px 6px;border-radius:999px;background:#1a2028;color:#717b88}
+
+.load-settings-card{
+  width:calc(100% - 26px);margin:11px 13px 3px;min-height:58px;
+  border:1px solid #303846;background:linear-gradient(145deg,#121922,#0e141b);
+  border-radius:13px;color:#fff;display:grid;grid-template-columns:34px 1fr auto;
+  align-items:center;gap:9px;padding:10px;text-align:left
+}
+.load-settings-icon{width:31px;height:31px;border-radius:10px;background:#1d2631;color:#b6c1ce;display:grid;place-items:center;font-size:15px}
+.load-settings-card b{display:block;font-size:10px}.load-settings-card small{display:block;font-size:8px;color:#74808d;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.load-settings-card i{font-style:normal;color:#687483}
+
+.room-config-section{padding:15px 13px;border-bottom:1px solid #1f2630;display:grid;gap:10px}
+.room-section-title{font-size:10px;color:#aeb6c1;font-weight:900;letter-spacing:.01em}
+.room-field{display:block;position:relative;font-size:8px;color:#7f8997;font-weight:750}
+.room-field input,.room-field select{
+  width:100%;height:43px;margin-top:6px;border:1px solid #29323e;background:#10161d;
+  color:#f5f7f9;border-radius:10px;padding:0 10px;outline:0
+}
+.room-field select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,#66717e 50%),linear-gradient(135deg,#66717e 50%,transparent 50%);background-position:calc(100% - 14px) 18px,calc(100% - 10px) 18px;background-size:4px 4px,4px 4px;background-repeat:no-repeat}
+.field-helper{display:block;font-size:7px;color:#626d79;margin-top:5px}
+.chip-input{position:relative}.chip-input input{padding-right:58px}.chip-input span{position:absolute;right:10px;bottom:14px;font-size:7px;color:#67727f;font-weight:900}
+.room-config-section .room-form-row{gap:8px}
+
+.compact-options{gap:0}
+.room-option-summary{
+  width:100%;height:50px;border:0;border-top:1px solid #202832;background:transparent;color:#fff;
+  display:flex;align-items:center;justify-content:space-between;text-align:left;padding:0 3px
+}
+.compact-options .room-option-summary:first-of-type{border-top:0}
+.room-option-summary>div span{display:block;font-size:8px;color:#747f8d}.room-option-summary>div b{display:block;font-size:11px;margin-top:3px}.room-option-summary>i{font-style:normal;color:#65717e;font-size:14px}
+.room-option-editor{padding:2px 0 12px;display:grid;gap:9px}
+
+.audience-grid{display:grid;gap:7px}
+.audience-choice{
+  width:100%;min-height:52px;border:1px solid #27303b;background:#0f151c;color:#fff;border-radius:12px;
+  display:grid;grid-template-columns:28px 1fr 18px;gap:8px;align-items:center;padding:9px 10px;text-align:left
+}
+.audience-choice>span{font-size:15px;text-align:center}.audience-choice b{display:block;font-size:9px}.audience-choice small{display:block;font-size:7px;color:#6f7a88;line-height:1.35;margin-top:3px}.audience-choice>i{font-style:normal;color:#9b8cff;font-size:10px}
+.audience-choice.active{border-color:#7868da;background:#151425;box-shadow:inset 0 0 0 1px rgba(140,124,255,.18)}
+.audience-choice.disabled{opacity:.42}
+
+.save-setting-section{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.save-setting-copy{min-width:0}.save-setting-copy b{display:block;font-size:10px}.save-setting-copy span{display:block;font-size:7px;color:#6f7987;margin-top:4px;line-height:1.4}
+.save-setting-button{flex:0 0 auto;border:1px solid #303a47;background:#151c24;color:#e7ebf0;border-radius:9px;padding:8px 9px;font-size:8px;font-weight:850}
+
+.room-create-bottom{
+  position:sticky;bottom:0;z-index:25;padding:9px 13px calc(11px + env(safe-area-inset-bottom));
+  background:linear-gradient(180deg,rgba(8,11,15,.4),rgba(8,11,15,.98) 24%);
+  backdrop-filter:blur(18px)
+}
+.playmoney-caption{text-align:center;color:#616c79;font-size:7px;margin-bottom:7px}
+.room-create-cta{width:100%;height:49px;border:0;border-radius:13px;background:#f2f4f6;color:#0a0d12;font-size:11px;font-weight:900}
+
+/* preset loader */
+.preset-loader-sheet{padding-left:14px;padding-right:14px}
+.preset-group{margin-top:10px}.preset-group.saved{margin-top:18px}
+.preset-group-head{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin:0 2px 7px}.preset-group-head b{font-size:10px}.preset-group-head span{font-size:7px;color:#687381}
+.preset-list{display:grid;gap:7px}
+.preset-row{
+  width:100%;border:1px solid #29323e;background:#0e141b;color:#fff;border-radius:11px;
+  display:grid;grid-template-columns:1fr auto;gap:9px;align-items:center;padding:10px;text-align:left
+}
+.preset-row b{display:block;font-size:10px}.preset-row small{display:block;font-size:7px;color:#73808d;margin-top:3px}.preset-row em{display:block;font-style:normal;font-size:7px;color:#9ba5b1;margin-top:6px;line-height:1.35}.preset-row>i{font-style:normal;font-size:7px;color:#a99cff}
+.saved-setting-row{border:1px solid #29323e;background:#0e141b;border-radius:11px;overflow:hidden}
+.saved-setting-main{width:100%;border:0;background:transparent;color:#fff;padding:10px;text-align:left}.saved-setting-main b{display:block;font-size:10px}.saved-setting-main small{display:block;color:#788391;font-size:7px;line-height:1.4;margin-top:4px}
+.saved-setting-actions{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #252e39}.saved-setting-actions button{height:32px;border:0;border-right:1px solid #252e39;background:#121820;color:#7f8996;font-size:7px}.saved-setting-actions button:last-child{border-right:0}.saved-setting-actions .danger{color:#ad6e74}
+.saved-setting-empty{padding:24px 16px;text-align:center;border:1px dashed #2b3440;border-radius:11px;color:#74808d}.saved-setting-empty b{display:block;color:#cdd3dc;font-size:9px}.saved-setting-empty span{display:block;font-size:7px;line-height:1.5;margin-top:5px}
+.compact-sheet{padding-left:16px;padding-right:16px}.compact-sheet-copy{font-size:8px;color:#727d8a;line-height:1.45;margin:-3px 2px 13px}
+
+/* waiting room */
+.room-lobby-screen{padding-bottom:32px;background:#080b0f}
+.lobby-hero{padding:17px 14px 14px;background:radial-gradient(circle at 100% 0,rgba(128,98,175,.1),transparent 48%);border-bottom:1px solid #202833}
+.lobby-status{display:flex;align-items:center;justify-content:space-between;gap:10px}.lobby-status span{font-size:7px;color:#73d39a;font-weight:900;letter-spacing:.05em}.lobby-status em{font-style:normal;font-size:7px;color:#7a8593;border:1px solid #2b3440;border-radius:999px;padding:4px 6px}
+.lobby-hero h1{font-size:20px;margin:10px 0 10px}
+.lobby-host{display:flex;align-items:center;gap:8px}.lobby-host small{display:block;font-size:6px;color:#66717e}.lobby-host b{display:block;font-size:9px;margin-top:2px}
+.lobby-setting-card{margin:12px 13px;border:1px solid #29323e;background:#10161d;border-radius:14px;padding:12px}
+.lobby-setting-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px}.lobby-setting-title b{font-size:12px}.lobby-setting-title span{font-size:7px;color:#777f8d}
+.lobby-setting-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.lobby-setting-grid>div{padding:9px;background:#0c1117;border-radius:9px}.lobby-setting-grid .wide{grid-column:1/-1}.lobby-setting-grid small{display:block;font-size:6px;color:#616c79}.lobby-setting-grid b{display:block;font-size:9px;margin-top:4px}.lobby-setting-grid em{display:block;font-style:normal;font-size:7px;color:#9c8669;margin-top:2px}
+.lobby-section{padding:3px 13px 12px}.lobby-section-head{display:flex;align-items:center;justify-content:space-between;margin:8px 1px}.lobby-section-head b{font-size:10px}.lobby-section-head span{font-size:7px;color:#697482}
+.lobby-seat-list{display:grid;gap:6px}.lobby-seat-row{min-height:48px;border:1px solid #28313d;background:#0f151c;border-radius:11px;display:grid;grid-template-columns:22px 36px 1fr;align-items:center;gap:8px;padding:6px 9px}.lobby-seat-row.empty{opacity:.66;border-style:dashed}.seat-number{font-size:7px;color:#66717e;text-align:center}.lobby-seat-avatar,.empty-avatar{width:34px;height:34px;border-radius:50%}.empty-avatar{display:grid;place-items:center;background:#171d25;color:#65717e}.lobby-seat-row b{display:block;font-size:9px}.lobby-seat-row small{display:block;font-size:7px;color:#6e7986;margin-top:3px}
+.lobby-actions{display:grid;gap:8px;padding:4px 13px 0}.lobby-actions .room-start-btn:disabled{opacity:.36}
+.lobby-playmoney-note{text-align:center;font-size:7px;color:#5e6975;margin:12px 0 0}
+
+/* room card audience */
+.room-audience-badge{font-size:7px;padding:4px 6px;border-radius:999px;background:#1a2028;color:#8f99a7;white-space:nowrap}
