@@ -48,7 +48,7 @@ gamePref:localStorage.getItem('pokercat_game')||'MTT',playPref:localStorage.getI
 homePub:storedHomePub,careerHighs:Array.isArray(storedCareer)?storedCareer:[],
 rooms:Array.isArray(storedRooms)&&storedRooms.length?storedRooms:seededRooms,roomInvites:Array.isArray(storedRoomInvites)?storedRoomInvites:[],currentRoomId:null,roomReturnView:'home',
 feedMode:'algorithm',exploreTab:'popular',scheduleTab:'events',profileTab:'posts',notificationsRead:false,
-modal:null,relationshipMode:'friends',editingCareerId:null,liked:new Set(),
+modal:null,relationshipMode:'friends',roomInviteMode:'friends',editingCareerId:null,liked:new Set(),
 following:new Set(Array.isArray(storedFollowing)?storedFollowing:['riverkim']),
 followers:new Set(Array.isArray(storedFollowers)?storedFollowers:['riverkim','chiplee']),
 composeMode:'post',composeText:'',handDraft:{hero:['A♠','K♠'],flop:['Q♥','J♠','7♣'],turn:['2♦'],river:['9♣']},cardTarget:null,cardRank:null,
