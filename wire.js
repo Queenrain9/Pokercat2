@@ -72,12 +72,6 @@ function wire(){
     render();toast('베타 게시물로 등록했어요');
   });
   document.querySelectorAll('[data-toast]').forEach(b=>b.onclick=()=>toast(b.dataset.toast));
-  const theme=document.querySelector('[data-theme]'); if(theme) theme.onclick=()=>{
-    const next=document.documentElement.dataset.theme==='dark'?'light':'dark';
-    document.documentElement.dataset.theme=next;
-    localStorage.setItem('pokercat_theme',next);
-    render();
-  };
   const reset=document.querySelector('[data-reset]'); if(reset) reset.onclick=()=>{
     localStorage.removeItem('pokercat_onboarded');
     state.onboarding=false;state.onboardStep=0;state.authMode='login';render();
