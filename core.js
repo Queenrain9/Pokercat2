@@ -46,22 +46,22 @@ function defaultRoomSettings(){
   });
 }
 function normalizeGameSettings(input={}){
-  const legacyBb=Number(input.bb||input.blinds?.bigBlind||200)||200;
+  const hasChipBlinds=Number(input.blinds?.smallBlind)>0&&Number(input.blinds?.bigBlind)>0;
+  const legacyScale=!hasChipBlinds&&Number(input.bb)>0&&Number(input.bb)<50?100:1;
+  const smallBlind=hasChipBlinds?Number(input.blinds.smallBlind):Number(input.sb||1)*legacyScale;
+  const bigBlind=hasChipBlinds?Number(input.blinds.bigBlind):Number(input.bb||2)*legacyScale;
   const legacyStack=Number(input.startStack||0);
-  const startingChips=Number(input.startingChips||0)||(legacyStack?legacyStack*legacyBb:20000);
+  const startingChips=Number(input.startingChips||0)||(legacyStack?legacyStack*bigBlind:20000);
   const anteMode=input.ante?.mode||(input.ante?.enabled?'all-player':'none');
   const progressionMode=input.blindProgression?.mode||(input.blinds?.increase?'auto':'fixed');
   return {
     gameType:input.gameType||input.game||'NLH',
     maxPlayers:Number(input.maxPlayers||6),
     startingChips,
-    blinds:{
-      smallBlind:Number(input.blinds?.smallBlind||input.sb||100),
-      bigBlind:Number(input.blinds?.bigBlind||input.bb||200)
-    },
+    blinds:{smallBlind,bigBlind},
     ante:{
       mode:anteMode,
-      amount:anteMode==='none'?0:Number(input.ante?.amount||0)
+      amount:anteMode==='none'?0:Number(input.ante?.amount||0)*(input.ante?.mode?1:legacyScale)
     },
     blindProgression:{
       mode:progressionMode,
