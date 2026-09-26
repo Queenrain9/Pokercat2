@@ -439,6 +439,7 @@ if(state.modal==='careerEdit')return careerEditModal();
 if(state.modal==='relationships')return relationshipModal();
 if(state.modal==='createMenu')return createMenuModal();
 if(state.modal==='roomInvite')return roomInviteModal();
+if(state.modal==='roomManage')return roomManageModal();
 if(state.modal==='roomPresetLoader')return roomPresetLoaderModal();
 if(state.modal==='roomSaveSetting')return roomSaveSettingModal();
 if(state.modal==='roomRenameSetting')return roomRenameSettingModal();
