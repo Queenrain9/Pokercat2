@@ -209,3 +209,26 @@
 .explore-room-card{margin:0 0 10px}
 .explore-room-section{padding:11px 12px 88px}.explore-room-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}.explore-room-head b{display:block;font-size:12px}.explore-room-head span{display:block;font-size:8px;color:#76808d;margin-top:3px;line-height:1.4}.explore-room-head button{border:1px solid #313a47;background:#151a22;color:#fff;border-radius:9px;padding:7px 9px;font-size:8px;font-weight:800}.explore-room-list{display:grid}
 .room-invite-notice .notice-detail{white-space:nowrap}
+
+/* v19 room posts use the same feed post shell */
+.room-feed-post .room-social-card{
+  margin:0 12px 8px;
+  border-radius:11px;
+  box-shadow:none;
+  background:#121720;
+  border-color:#242c37
+}
+.room-feed-post .post-text{padding-bottom:10px}
+.room-post-caption{color:#7e8896;font-size:10px}
+.room-social-roomline{
+  min-height:36px;padding:9px 10px;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  border-bottom:1px solid #232b35
+}
+.room-social-roomline>b{
+  min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px
+}
+.room-feed-post .room-card-table-art{height:116px}
+.room-feed-post .room-social-specs{padding:8px 10px}
+.room-feed-post .room-view-btn{margin-bottom:9px}
+.explore-room-post{border:1px solid #252e39;border-radius:13px;overflow:hidden;margin-bottom:10px}
+.explore-room-post .room-social-card{margin:0 10px 10px}
