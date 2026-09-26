@@ -59,7 +59,7 @@ function roomStackLabel(room){
   const s=roomSettings(room);
   return `${roomBigBlindCount(s)}BB`;
 }
-function roomStatusLabel(room){return room?.status==='playing'?'PLAYING':'LOBBY'}
+function roomStatusLabel(room){return room?.status==='playing'?'PLAYING':room?.status==='closed'?'CLOSED':'LOBBY'}
 function roomTable(room){return getPrimaryTable(room)}
 function roomSeats(room){return roomTable(room)?.seats||[]}
 
@@ -241,10 +241,11 @@ function roomRenameSettingModal(){
 function roomVisibleToViewer(room,surface='feed'){
   const type=roomAudienceType(room);
   if(surface==='explore')return type==='public';
-  if(state.loggedIn&&room.hostId==='queenbee')return true;
+  const viewerId=currentUserId();
+  if(state.loggedIn&&room.hostId===viewerId)return true;
   if(type==='public')return true;
   if(!state.loggedIn)return false;
-  if(room.invitedUserIds.includes('queenbee'))return true;
+  if(room.invitedUserIds.includes(viewerId))return true;
   if(type==='invite')return false;
   if(type==='followers')return state.following.has(room.hostId);
   if(type==='friends')return state.following.has(room.hostId)&&state.followers.has(room.hostId);
@@ -297,24 +298,27 @@ function pokerRoomFeedCard(room,context='feed'){
 function pokerRoomView(id){
   const room=getRoom(id);
   if(!room)return `<section class="room-screen"><div class="room-missing"><b>게임을 찾을 수 없어요.</b><button class="btn" data-nav="home">홈으로</button></div></section>`;
+  if(room.status==='closed')return `<section class="room-screen"><div class="room-missing"><b>종료된 Poker Room입니다.</b><p>이 방의 마지막 좌석과 설정 기록은 Room 데이터에 보존되어 있어요.</p><button class="btn" data-room-back>돌아가기</button></div></section>`;
   if(room.status==='playing')return pokerTableView(room);
   return pokerRoomLobbyView(room);
 }
 
 function pokerRoomLobbyView(room){
-  const s=roomSettings(room),table=roomTable(room),seats=roomSeats(room);
-  const host=getUser(room.hostId),isHost=state.loggedIn&&room.hostId==='queenbee';
-  const mySeat=state.loggedIn?seats.indexOf('queenbee'):-1;
+  const s=roomSettings(room),seats=roomSeats(room),viewerId=currentUserId();
+  const host=getUser(room.hostId),isHost=state.loggedIn&&room.hostId===viewerId;
+  const mySeat=state.loggedIn?seats.indexOf(viewerId):-1;
   const seated=roomSeatCount(room);
+  const pendingInvite=state.loggedIn?pendingRoomInvite(room.id,viewerId):null;
   return `<section class="room-lobby-screen">
     <div class="lobby-hero">
       <div class="lobby-status"><span>● WAITING ROOM</span><em>${audienceMeta(roomAudienceType(room)).label}</em></div>
       <h1>${escapeHtml(room.name)}</h1>
       <div class="lobby-host">${catAvatar(host.cat,'room-detail-host')}<div><small>HOST</small><b>${escapeHtml(host.name)}</b></div></div>
+      ${pendingInvite?`<div class="lobby-invite-banner">초대받은 방이에요 · 좌석을 선택하면 참가가 확정됩니다.</div>`:''}
     </div>
 
     <div class="lobby-setting-card">
-      <div class="lobby-setting-title"><b>${roomGameLabel(room)}</b><span>Single Table</span></div>
+      <div class="lobby-setting-title"><b>${roomGameLabel(room)}</b><span>${room.mode==='single-table'?'Single Table':'Tournament'}</span></div>
       <div class="lobby-setting-grid">
         <div><small>PLAYERS</small><b>${s.maxPlayers}</b></div>
         <div><small>STARTING CHIPS</small><b>${formatChips(s.startingChips)}</b><em>${roomBigBlindCount(s)}BB</em></div>
@@ -332,7 +336,7 @@ function pokerRoomLobbyView(room){
     </div>
 
     <div class="lobby-actions">
-      ${isHost?`<div class="host-seat-status">방장으로 착석 중</div>`:mySeat<0?`<button class="btn full" data-join-room="${room.id}">빈자리에 앉기</button>`:`<button class="btn secondary full" data-leave-room="${room.id}">착석 중 · 나가기</button>`}
+      ${isHost?`<div class="host-seat-status">방장으로 SEAT 1 착석 중</div>`:mySeat<0?`<button class="btn full" data-join-room="${room.id}">빠른 착석</button><div class="seat-choice-helper">또는 위의 빈 좌석을 직접 선택하세요.</div>`:`<button class="btn secondary full" data-leave-room="${room.id}">SEAT ${mySeat+1} 착석 중 · 나가기</button>`}
       ${isHost?`<button class="btn secondary full" data-invite-room="${room.id}">팔로워 / 팔로잉 초대</button>`:''}
       ${isHost?`<button class="room-start-btn" data-start-room="${room.id}" ${seated<2?'disabled':''}>게임 시작${seated<2?' · 2명 이상 필요':''}</button>`:''}
     </div>
@@ -340,10 +344,15 @@ function pokerRoomLobbyView(room){
   </section>`;
 }
 function lobbySeatRow(room,index){
-  const s=roomSettings(room),key=roomSeats(room)[index];
-  if(!key)return `<div class="lobby-seat-row empty"><span class="seat-number">${index+1}</span><div class="empty-avatar">＋</div><div><b>빈자리</b><small>${formatChips(s.startingChips)} chips</small></div></div>`;
+  const s=roomSettings(room),seats=roomSeats(room),key=seats[index],viewerId=currentUserId();
+  if(!key){
+    const canChoose=state.loggedIn&&room.status==='lobby'&&!seats.includes(viewerId)&&canEnterRoom(room);
+    return canChoose
+      ?`<button class="lobby-seat-row empty selectable" type="button" data-take-room-seat="${index}" data-room-id="${room.id}"><span class="seat-number">${index+1}</span><div class="empty-avatar">＋</div><div><b>SEAT ${index+1} 선택</b><small>${formatChips(s.startingChips)} chips로 착석</small></div></button>`
+      :`<div class="lobby-seat-row empty"><span class="seat-number">${index+1}</span><div class="empty-avatar">＋</div><div><b>빈자리</b><small>${formatChips(s.startingChips)} chips</small></div></div>`;
+  }
   const u=getUser(key);
-  return `<div class="lobby-seat-row"><span class="seat-number">${index+1}</span>${catAvatar(u.cat,'lobby-seat-avatar')}<div><b>${escapeHtml(u.name)}</b><small>${key===room.hostId?'HOST · ':''}${formatChips(s.startingChips)} chips</small></div></div>`;
+  return `<div class="lobby-seat-row ${key===viewerId?'mine':''}"><span class="seat-number">${index+1}</span>${catAvatar(u.cat,'lobby-seat-avatar')}<div><b>${escapeHtml(u.name)}</b><small>${key===room.hostId?'HOST · ':''}${formatChips(s.startingChips)} chips</small></div></div>`;
 }
 
 function roomSeatPositions(max){
@@ -357,8 +366,8 @@ function roomSeatPositions(max){
 }
 function pokerTableView(room){
   const s=roomSettings(room),seats=roomSeats(room);
-  const isHost=state.loggedIn&&room.hostId==='queenbee';
-  const seated=roomSeatCount(room),mySeat=state.loggedIn?seats.indexOf('queenbee'):-1;
+  const viewerId=currentUserId(),isHost=state.loggedIn&&room.hostId===viewerId;
+  const seated=roomSeatCount(room),mySeat=state.loggedIn?seats.indexOf(viewerId):-1;
   const positions=roomSeatPositions(s.maxPlayers);
   return `<section class="room-screen poker-app-shell">
     <div class="poker-room-hud">
@@ -383,14 +392,15 @@ function roomSeatNode(room,index,x,y){
   const s=roomSettings(room),key=roomSeats(room)[index];
   if(!key)return `<button class="table-seat empty" style="--x:${x}%;--y:${y}%"><span>＋</span><small>SEAT ${index+1}</small></button>`;
   const u=getUser(key);
-  return `<button class="table-seat filled ${key==='queenbee'?'me':''}" style="--x:${x}%;--y:${y}%" data-user="${key}">${catAvatar(u.cat,'table-seat-avatar')}<b>${escapeHtml(u.name)}</b><small>${roomBigBlindCount(s)}BB</small></button>`;
+  return `<button class="table-seat filled ${key===currentUserId()?'me':''}" style="--x:${x}%;--y:${y}%" data-user="${key}">${catAvatar(u.cat,'table-seat-avatar')}<b>${escapeHtml(u.name)}</b><small>${roomBigBlindCount(s)}BB</small></button>`;
 }
 
 function roomInviteModal(){
   const room=getRoom(state.currentRoomId);
   if(!room)return '';
+  if(room.hostId!==currentUserId())return '';
   const followers=[...state.followers],following=[...state.following];
-  const candidates=(state.roomInviteMode==='followers'?followers:following).filter(k=>k!=='queenbee');
+  const candidates=(state.roomInviteMode==='followers'?followers:following).filter(k=>k!==currentUserId());
   return `<div class="modal-backdrop" data-close-modal><div class="sheet room-invite-sheet" onclick="event.stopPropagation()">
     <div class="grab"></div><div class="sheet-title">PokerCat 사용자 초대</div>
     <p class="room-invite-lead"><b>${escapeHtml(room.name)}</b> 대기방으로 초대할 사용자를 선택하세요.</p>
@@ -403,4 +413,19 @@ function roomInviteRow(room,key){
   const u=getUser(key),invited=room.invitedUserIds.includes(key);
   const relation=state.followers.has(key)&&state.following.has(key)?'Follower · Following':state.followers.has(key)?'Follower':'Following';
   return `<div class="room-invite-row">${catAvatar(u.cat,'relationship-avatar')}<div><b>${escapeHtml(u.name)}</b><span>${relation}</span></div><button class="${invited?'sent':''}" data-send-room-invite="${key}" ${invited?'disabled':''}>${invited?'초대됨':'초대'}</button></div>`;
+}
+
+
+function roomManageModal(){
+  const room=getRoom(state.currentRoomId);
+  if(!room)return '';
+  const isHost=state.loggedIn&&room.hostId===currentUserId();
+  return `<div class="modal-backdrop" data-close-modal><div class="sheet compact-sheet room-manage-sheet" onclick="event.stopPropagation()">
+    <div class="grab"></div>
+    <div class="sheet-title">Poker Room</div>
+    <div class="room-manage-summary"><b>${escapeHtml(room.name)}</b><span>${audienceMeta(roomAudienceType(room)).label} · ${roomStatusLabel(room)} · v${room.version||1}</span></div>
+    ${isHost&&room.status==='lobby'?`<button class="btn full" data-manage-room-invite="${room.id}">사용자 초대</button>`:''}
+    ${isHost?`<button class="btn secondary full danger-room-action" data-close-poker-room="${room.id}">방 종료</button>`:''}
+    ${!isHost?`<button class="btn secondary full" data-close-modal>닫기</button>`:''}
+  </div></div>`;
 }
