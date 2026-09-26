@@ -48,3 +48,36 @@
 .pub-edit-title span{display:block;font-size:9px;color:#778190;margin-top:3px}
 .pub-edit-helper{font-size:9px;line-height:1.5;color:#707a88}
 .pub-edit-helper b{color:#d8dee7}
+
+/* Home Pub verification */
+.verification-state{border-radius:9px;padding:8px 10px;font-size:9px}
+.verification-state.verified{background:#10261b;color:#74d89d;border:1px solid #244934}
+.verification-state.pending{background:#2c2316;color:#efba67;border:1px solid #554124}
+.verify-sheet{text-align:center;padding-left:18px;padding-right:18px}
+.verify-icon{width:62px;height:62px;border-radius:20px;background:#171d25;border:1px solid #2e3845;display:grid;place-items:center;font-size:26px;margin:2px auto 12px}
+.verify-lead{font-size:11px;line-height:1.55;color:#8e98a6;margin:0 auto 14px;max-width:290px}
+.verify-lead b{color:#fff}
+.mvp-verification-box{text-align:left;padding:12px;border-radius:12px;background:#0d1218;border:1px solid #29323e;margin-bottom:13px}
+.mvp-verification-box b{display:block;font-size:10px;color:#e7ebf1}
+.mvp-verification-box span{display:block;font-size:9px;color:#727c8a;line-height:1.5;margin:5px 0 9px}
+.mvp-verification-box code{display:inline-block;background:#1a2029;color:#d8b277;border-radius:7px;padding:6px 8px;font-size:10px}
+.verify-code-label{display:block;text-align:left;font-size:9px;color:#8d97a5;margin-bottom:12px}
+.verify-code-label input{width:100%;height:44px;margin-top:6px;border:1px solid #2c3542;background:#10161e;border-radius:10px;padding:0 11px;text-transform:uppercase}
+
+/* relationships */
+.relationship-summary{font-size:9px;color:#75808e;margin:-5px 4px 10px}
+.relationship-list{display:grid}
+.relationship-row{display:grid;grid-template-columns:42px 1fr auto;gap:9px;align-items:center;padding:10px 3px;border-bottom:1px solid #222a34}
+.relationship-avatar{width:40px;height:40px;border-radius:50%}
+.relationship-row b{display:block;font-size:11px}
+.relationship-row span{display:block;font-size:9px;color:#77818f;margin-top:3px}
+.relationship-row button{border:1px solid #303a47;background:#151a22;color:#dce1e8;border-radius:999px;padding:6px 9px;font-size:8px}
+.relationship-empty{padding:40px 10px;text-align:center;color:#707b89;font-size:10px}
+
+/* career editor */
+.career-form{display:grid;gap:11px}
+.career-form label{display:block;font-size:9px;color:#8d97a5;font-weight:750}
+.career-form input,.career-form select,.career-form textarea{width:100%;margin-top:6px;border:1px solid #2c3542;background:#10161e;color:#fff;border-radius:10px;padding:0 10px;outline:0}
+.career-form input,.career-form select{height:43px}
+.career-form textarea{min-height:82px;padding-top:10px;resize:none}
+.career-form-row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
