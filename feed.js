@@ -184,8 +184,8 @@ function pokerRoomExploreViewV1(){
 function exploreView(){return pokerRoomExploreViewV1()}
 
 function feedSelectorModal(){
-  const hp=verifiedHomePub(myUser());
-  const homePubLabel=hp?`${escapeHtml(hp.brand)} ${escapeHtml(hp.branch)}`:'Home Pub 미등록';
+  const hp=state.loggedIn?verifiedHomePub(myUser()):null;
+  const homePubLabel=state.loggedIn?(hp?`${escapeHtml(hp.brand)} ${escapeHtml(hp.branch)}`:'Home Pub 미등록'):'로그인 후 사용';
   return `<div class="modal-backdrop" data-close-modal>
     <div class="sheet feed-selector-sheet" onclick="event.stopPropagation()">
       <div class="grab"></div>
