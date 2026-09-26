@@ -406,3 +406,34 @@
   border-radius:999px;background:#f2f4f6;color:#0b0e13;border:2px solid #080b0f;
   display:grid;place-items:center;font-size:7px;font-weight:900
 }
+
+
+/* v40 Explore store finder + schedule */
+.store-finder{padding:14px 13px 92px}
+.store-finder-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:3px 0 12px}
+.store-finder-head>div{min-width:0}
+.store-finder-head b{display:block;font-size:14px;color:#f0f3f7}
+.store-finder-head span{display:block;margin-top:5px;font-size:9px;line-height:1.45;color:#7c8795}
+.store-location-btn{flex:0 0 auto;border:1px solid #303947;background:#131922;color:#e7ebf0;border-radius:999px;padding:8px 10px;font-size:8px;font-weight:800}
+.store-location-btn.loading{opacity:.65}
+.store-location-error{margin:0 0 10px;padding:9px 10px;border-radius:10px;background:#17141a;border:1px solid #382c3a;color:#bb9fac;font-size:8px;line-height:1.45}
+.store-city-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:12px;scrollbar-width:none}
+.store-city-row::-webkit-scrollbar{display:none}
+.store-city-row button{flex:0 0 auto;border:1px solid #29323d;background:#0f151c;color:#7f8997;border-radius:999px;padding:7px 10px;font-size:8px}
+.store-city-row button.active{background:#eceff3;color:#0b0e13;border-color:#eceff3;font-weight:900}
+.store-nearby-label{display:flex;align-items:center;justify-content:space-between;border-top:1px solid #1f2731;padding:13px 1px 9px}
+.store-nearby-label b{font-size:10px;color:#e4e8ed}
+.store-nearby-label span{font-size:7px;color:#697482}
+.store-card-list{display:grid;gap:8px}
+.store-card{display:grid;grid-template-columns:28px 1fr auto;gap:9px;align-items:center;min-height:74px;padding:10px;border:1px solid #29323e;background:#10161d;border-radius:14px}
+.store-rank{width:26px;height:26px;border-radius:9px;background:#171e27;color:#aab3bf;display:grid;place-items:center;font-size:9px;font-weight:900}
+.store-card-main{min-width:0}
+.store-card-title{display:flex;align-items:center;gap:7px}
+.store-card-title b{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.store-card-title em{font-style:normal;font-size:7px;color:#bda57f;border:1px solid #443a2c;border-radius:999px;padding:3px 5px;white-space:nowrap}
+.store-card-main>span{display:block;margin-top:5px;font-size:8px;color:#7b8593;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.store-card-main>small{display:block;margin-top:4px;font-size:7px;color:#5f6976}
+.store-card>button{border:1px solid #303a46;background:#151b23;color:#d9dfe7;border-radius:9px;padding:7px 8px;font-size:7px;font-weight:800}
+.store-finder-note{margin-top:11px;color:#5f6976;font-size:7px;line-height:1.5}
+.explore-schedule-wrap{padding-bottom:80px}
+.explore-schedule-wrap .schedule-screen{padding-top:4px}
