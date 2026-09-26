@@ -78,6 +78,9 @@ const storedCareer=normalizeCareerHighs(loadJSON(CAREER_STORAGE_KEY,[]));
 const storedFollowing=loadJSON('pokercat_following_v1',['riverkim']);
 const storedFollowers=loadJSON('pokercat_followers_v1',['riverkim','chiplee']);
 const storedSavedRoomSettings=loadJSON('pokercat_room_saved_settings_v1',[]);
+const ROOM_STORAGE_KEY='pokercat_rooms_v1';
+const ROOM_SCHEMA_VERSION=2;
+const ROOM_SYNC_CHANNEL='pokercat-room-sync-v1';
 
 function cloneData(value){return JSON.parse(JSON.stringify(value))}
 function defaultRoomSettings(){
@@ -116,28 +119,41 @@ function normalizeGameSettings(input={}){
     rules:{...(input.rules||{})}
   };
 }
-function normalizeRoom(room){
+function normalizeRoom(room={}){
   const settings=normalizeGameSettings(room.settings||room);
-  const oldSeats=room.seats||room.tables?.[0]?.seats||[];
+  const sourceTable=room.tables?.[0]||{};
+  const oldSeats=room.seats||sourceTable.seats||[];
   const seats=Array.from({length:settings.maxPlayers},(_,i)=>oldSeats[i]||null);
   const audienceType=room.audience?.type||(room.visibility==='private'?'invite':'public');
-  const status=room.status==='open'?'lobby':(room.status||'lobby');
+  const normalizedStatus=room.status==='open'?'lobby':(room.status||'lobby');
+  const status=['lobby','playing','closed'].includes(normalizedStatus)?normalizedStatus:'lobby';
+  const mode=room.mode||room.tournament?.mode||'single-table';
+  const createdAt=room.createdAt||new Date().toISOString();
   return {
-    id:room.id,mode:room.mode||'single-table',name:room.name||'PokerCat Table',
-    hostId:room.hostId||'queenbee',settings,
-    audience:{type:audienceType},
+    ...room,
+    schemaVersion:ROOM_SCHEMA_VERSION,
+    version:Math.max(1,Number(room.version||1)),
+    id:room.id,
+    mode,
+    name:room.name||'PokerCat Table',
+    hostId:room.hostId||'queenbee',
+    settings,
+    audience:{...(room.audience||{}),type:audienceType},
     status,
     tables:[{
-      ...(room.tables?.[0]||{}),
-      id:room.tables?.[0]?.id||room.id+'-table-1',
-      status:status==='playing'?'playing':'waiting',
+      ...sourceTable,
+      id:sourceTable.id||room.id+'-table-1',
+      status:status==='playing'?'playing':status==='closed'?'closed':'waiting',
       seats,
-      gameState:room.tables?.[0]?.gameState||null
-    }],
-    invitedUserIds:[...(room.invitedUserIds||[])],
-    createdAt:room.createdAt||new Date().toISOString(),
-    social:{externalShare:{enabled:false,token:null}},
-    tournament:{mode:room.mode||'single-table',mttConfig:room.tournament?.mttConfig||null}
+      gameState:sourceTable.gameState||null
+    },...(Array.isArray(room.tables)?room.tables.slice(1):[])],
+    invitedUserIds:[...new Set(room.invitedUserIds||[])],
+    createdAt,
+    updatedAt:room.updatedAt||createdAt,
+    startedAt:room.startedAt||null,
+    closedAt:room.closedAt||null,
+    social:{externalShare:{enabled:false,token:null},...(room.social||{}),externalShare:{enabled:false,token:null,...(room.social?.externalShare||{})}},
+    tournament:{...(room.tournament||{}),mode,mttConfig:room.tournament?.mttConfig||null}
   };
 }
 function createRoomDraft(){
@@ -158,7 +174,7 @@ const seededRooms=[
     ante:{mode:'all-player',amount:100},blindProgression:{mode:'fixed',levelMinutes:null,structureId:null},rules:{}
   },audience:{type:'public'},status:'lobby',seats:['minraise','ninehigh','riverkim',null,null,null],createdAt:'2026-09-26T13:00:00.000Z'})
 ];
-const storedRoomsRaw=loadJSON('pokercat_rooms_v1',null);
+const storedRoomsRaw=loadJSON(ROOM_STORAGE_KEY,null);
 const storedRooms=Array.isArray(storedRoomsRaw)&&storedRoomsRaw.length?storedRoomsRaw.map(normalizeRoom):seededRooms;
 const storedRoomInvites=loadJSON('pokercat_room_invites_v1',[
   {id:'invite-river-demo',roomId:'room-river-night',fromUserId:'riverkim',toUserId:'queenbee',status:'pending',createdAt:'2026-09-26T13:10:00.000Z'}
@@ -182,7 +198,45 @@ function getUser(key){return key==='queenbee'?(state.loggedIn?myUser():demoUsers
 function persistRelationships(){saveJSON('pokercat_following_v1',[...state.following]);saveJSON('pokercat_followers_v1',[...state.followers])}
 function persistHomePub(){saveJSON('pokercat_home_pub_v1',state.homePub)}
 function persistCareerHighs(){state.careerHighs=normalizeCareerHighs(state.careerHighs);saveJSON(CAREER_STORAGE_KEY,state.careerHighs)}
-function persistRooms(){saveJSON('pokercat_rooms_v1',state.rooms)}
+let roomSyncChannel=null;
+function currentUserId(){return 'queenbee'}
+function normalizeRoomCollection(value){
+  return Array.isArray(value)?value.map(normalizeRoom).filter(room=>room&&room.id):[];
+}
+function publishRoomSync(){
+  if(roomSyncChannel)roomSyncChannel.postMessage({type:'rooms-updated',at:Date.now()});
+}
+function persistRooms(options={}){
+  state.rooms=normalizeRoomCollection(state.rooms);
+  saveJSON(ROOM_STORAGE_KEY,state.rooms);
+  if(options.broadcast!==false)publishRoomSync();
+}
+function refreshRoomsFromStorage(options={}){
+  const latest=normalizeRoomCollection(loadJSON(ROOM_STORAGE_KEY,state.rooms));
+  if(!latest.length&&state.rooms.length)return false;
+  const before=JSON.stringify(state.rooms);
+  state.rooms=latest;
+  const changed=before!==JSON.stringify(latest);
+  if(changed&&options.render!==false&&document.querySelector('#app'))render();
+  return changed;
+}
+function initializeRoomSync(){
+  if(typeof window==='undefined'||window.__pokercatRoomSyncReady)return;
+  window.__pokercatRoomSyncReady=true;
+  window.addEventListener('storage',event=>{
+    if(event.key===ROOM_STORAGE_KEY)refreshRoomsFromStorage();
+    if(event.key==='pokercat_room_invites_v1'){
+      state.roomInvites=loadJSON('pokercat_room_invites_v1',state.roomInvites);
+      if(document.querySelector('#app'))render();
+    }
+  });
+  if('BroadcastChannel' in window){
+    roomSyncChannel=new BroadcastChannel(ROOM_SYNC_CHANNEL);
+    roomSyncChannel.onmessage=event=>{
+      if(event.data?.type==='rooms-updated')refreshRoomsFromStorage();
+    };
+  }
+}
 function persistRoomInvites(){saveJSON('pokercat_room_invites_v1',state.roomInvites)}
 function persistSavedRoomSettings(){saveJSON('pokercat_room_saved_settings_v1',state.savedRoomSettings)}
 function getRoom(id){return state.rooms.find(r=>r.id===id)||null}
@@ -190,6 +244,117 @@ function getPrimaryTable(room){return room?.tables?.[0]||null}
 function roomSeatCount(room){return (getPrimaryTable(room)?.seats||[]).filter(Boolean).length}
 function roomSettings(room){return room?.settings||defaultRoomSettings()}
 function roomAudienceType(room){return room?.audience?.type||'public'}
+function pendingRoomInvite(roomId,userId=currentUserId()){
+  return state.roomInvites.find(inv=>inv.roomId===roomId&&inv.toUserId===userId&&inv.status==='pending')||null;
+}
+function markRoomInvite(roomId,userId,status){
+  let changed=false;
+  state.roomInvites=state.roomInvites.map(inv=>{
+    if(inv.roomId!==roomId||inv.toUserId!==userId||inv.status!=='pending')return inv;
+    changed=true;
+    return {...inv,status,respondedAt:new Date().toISOString()};
+  });
+  if(changed)persistRoomInvites();
+  return changed;
+}
+function commitRoomMutation(roomId,mutator){
+  const stored=normalizeRoomCollection(loadJSON(ROOM_STORAGE_KEY,state.rooms));
+  if(stored.length)state.rooms=stored;
+  const index=state.rooms.findIndex(room=>room.id===roomId);
+  if(index<0)return {ok:false,code:'ROOM_NOT_FOUND'};
+  const room=cloneData(state.rooms[index]);
+  const result=mutator(room)||{ok:true};
+  if(result.ok===false)return result;
+  room.version=Math.max(1,Number(room.version||1))+1;
+  room.updatedAt=new Date().toISOString();
+  state.rooms[index]=normalizeRoom(room);
+  persistRooms();
+  return {ok:true,room:state.rooms[index],...result};
+}
+function createPokerRoom(draft,hostId=currentUserId()){
+  const settings=normalizeGameSettings(cloneData(draft.settings));
+  const id='room-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
+  const now=new Date().toISOString();
+  const room=normalizeRoom({
+    id,version:1,mode:draft.mode||'single-table',name:(draft.roomName||'').trim()||'PokerCat Table',
+    hostId,settings,audience:{type:draft.audience?.type||'public'},status:'lobby',
+    tables:[{id:id+'-table-1',status:'waiting',seats:Array.from({length:settings.maxPlayers},(_,i)=>i===0?hostId:null)}],
+    invitedUserIds:[],createdAt:now,updatedAt:now,
+    social:{externalShare:{enabled:false,token:null}},
+    tournament:{mode:draft.mode||'single-table',mttConfig:null}
+  });
+  state.rooms=[room,...normalizeRoomCollection(loadJSON(ROOM_STORAGE_KEY,state.rooms))];
+  const seen=new Set();
+  state.rooms=state.rooms.filter(item=>item?.id&&!seen.has(item.id)&&seen.add(item.id));
+  persistRooms();
+  return {ok:true,room};
+}
+function takeRoomSeat(roomId,userId=currentUserId(),seatIndex=null){
+  const result=commitRoomMutation(roomId,room=>{
+    if(room.status!=='lobby')return {ok:false,code:'ROOM_NOT_OPEN'};
+    const seats=getPrimaryTable(room)?.seats||[];
+    if(seats.includes(userId))return {ok:false,code:'ALREADY_SEATED',seatIndex:seats.indexOf(userId)};
+    let target=seatIndex===null||seatIndex===undefined?seats.findIndex(value=>!value):Number(seatIndex);
+    if(!Number.isInteger(target)||target<0||target>=seats.length)return {ok:false,code:'INVALID_SEAT'};
+    if(seats[target])return {ok:false,code:'SEAT_TAKEN'};
+    seats[target]=userId;
+    return {ok:true,seatIndex:target};
+  });
+  if(result.ok)markRoomInvite(roomId,userId,'accepted');
+  return result;
+}
+function leaveRoomSeat(roomId,userId=currentUserId()){
+  return commitRoomMutation(roomId,room=>{
+    if(room.status!=='lobby')return {ok:false,code:'ROOM_NOT_OPEN'};
+    if(room.hostId===userId)return {ok:false,code:'HOST_CANNOT_LEAVE'};
+    const seats=getPrimaryTable(room)?.seats||[];
+    const index=seats.indexOf(userId);
+    if(index<0)return {ok:false,code:'NOT_SEATED'};
+    seats[index]=null;
+    return {ok:true,seatIndex:index};
+  });
+}
+function inviteUserToRoom(roomId,fromUserId,toUserId){
+  const result=commitRoomMutation(roomId,room=>{
+    if(room.status!=='lobby')return {ok:false,code:'ROOM_NOT_OPEN'};
+    if(room.hostId!==fromUserId)return {ok:false,code:'HOST_ONLY'};
+    if(!room.invitedUserIds.includes(toUserId))room.invitedUserIds.push(toUserId);
+    return {ok:true};
+  });
+  if(!result.ok)return result;
+  const exists=state.roomInvites.some(inv=>inv.roomId===roomId&&inv.toUserId===toUserId&&inv.status==='pending');
+  if(!exists){
+    state.roomInvites.unshift({id:'invite-'+Date.now()+'-'+toUserId,roomId,fromUserId,toUserId,status:'pending',createdAt:new Date().toISOString()});
+    persistRoomInvites();
+  }
+  return result;
+}
+function declineRoomInvite(roomId,userId=currentUserId()){
+  return markRoomInvite(roomId,userId,'declined')?{ok:true}:{ok:false,code:'INVITE_NOT_FOUND'};
+}
+function startPokerRoom(roomId,actorId=currentUserId()){
+  return commitRoomMutation(roomId,room=>{
+    if(room.hostId!==actorId)return {ok:false,code:'HOST_ONLY'};
+    if(room.status!=='lobby')return {ok:false,code:'ROOM_NOT_OPEN'};
+    if(roomSeatCount(room)<2)return {ok:false,code:'NOT_ENOUGH_PLAYERS'};
+    const now=new Date().toISOString();
+    room.status='playing';
+    room.startedAt=now;
+    room.tables=(room.tables||[]).map((table,index)=>index===0?{...table,status:'playing',startedAt:table.startedAt||now}:table);
+    return {ok:true};
+  });
+}
+function closePokerRoom(roomId,actorId=currentUserId()){
+  return commitRoomMutation(roomId,room=>{
+    if(room.hostId!==actorId)return {ok:false,code:'HOST_ONLY'};
+    if(room.status==='closed')return {ok:false,code:'ALREADY_CLOSED'};
+    const now=new Date().toISOString();
+    room.status='closed';
+    room.closedAt=now;
+    room.tables=(room.tables||[]).map(table=>({...table,status:'closed',closedAt:table.closedAt||now}));
+    return {ok:true};
+  });
+}
 function resetRoomDraft(){
   state.roomDraft={
     roomName:(state.nickname||'QueenBee')+"'s Table",
@@ -200,6 +365,7 @@ function resetRoomDraft(){
   state.roomOptionOpen=null;
   state.editingSavedRoomSettingId=null;
 }
+initializeRoomSync();
 
 document.documentElement.dataset.theme='dark';
 function icon(name){const map={home:'⌂',search:'⌕',plus:'＋',calendar:'▦',profile:'♙'};return map[name]||'•'}
@@ -274,6 +440,7 @@ if(state.modal==='careerEdit')return careerEditModal();
 if(state.modal==='relationships')return relationshipModal();
 if(state.modal==='createMenu')return createMenuModal();
 if(state.modal==='roomInvite')return roomInviteModal();
+if(state.modal==='roomManage')return roomManageModal();
 if(state.modal==='roomPresetLoader')return roomPresetLoaderModal();
 if(state.modal==='roomSaveSetting')return roomSaveSettingModal();
 if(state.modal==='roomRenameSetting')return roomRenameSettingModal();
