@@ -50,12 +50,12 @@ function notificationView(){
     <div class="notification-filter"><button class="active">전체</button><button>활동</button><button>일정</button></div>
     <div class="notification-group">
       <h3>오늘</h3>
-      <article class="notification-row unread">
+      <article class="notification-row ${state.notificationsRead?'':'unread'}">
         ${catAvatar('shark','notice-avatar')}
         <div class="notice-copy"><b>riverkim</b>님이 회원님의 핸드에 댓글을 남겼어요.<span>“턴에서는 작은 사이즈도 좋아 보여요.” · 12분</span></div>
         <div class="notice-preview hand">A♠</div>
       </article>
-      <article class="notification-row unread">
+      <article class="notification-row ${state.notificationsRead?'':'unread'}">
         ${catAvatar('solver','notice-avatar')}
         <div class="notice-copy"><b>minraise</b>님이 회원님의 게시물을 좋아합니다.<span>34분</span></div>
         <div class="notice-heart">♥</div>
