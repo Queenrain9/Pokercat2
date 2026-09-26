@@ -155,3 +155,26 @@ function scheduleView(){
     <div class="event-list">${events.map(e=>`<article class="event-row"><div class="event-logo ${e[3]}">♠</div><div><b>${e[0]}</b><span>${e[1]}</span></div><em class="${e[3]}">${e[2]}</em></article>`).join('')}</div>
   </section>`;
 }
+
+function pokerRoomExploreViewV1(){
+  const tabs=[['popular','인기'],['rooms','포커룸'],['latest','최신'],['hands','핸드'],['events','대회'],['pubs','펍'],['users','유저']];
+  const roomList=state.rooms.filter(r=>r.status!=='closed'&&(r.visibility==='public'||r.hostId==='queenbee'||r.invitedUserIds.includes('queenbee')));
+  const body=state.exploreTab==='rooms'
+    ?`<div class="explore-room-section">
+        <div class="explore-room-head"><div><b>진행 중인 포커룸</b><span>호스트와 설정을 확인하고 같은 Poker Room으로 입장해요.</span></div><button data-create-game>＋ 만들기</button></div>
+        <div class="explore-room-list">${roomList.map(r=>pokerRoomFeedCard(r,'explore')).join('')||'<div class="homepub-empty"><b>열린 포커룸이 없어요.</b><span>직접 Single Table을 만들어 친구를 초대해 보세요.</span></div>'}</div>
+      </div>`
+    :`<div class="trend-list">
+      <article class="trend-card"><div class="trend-thumb chips"></div><div><b>오늘 이 핸드 어떻게 보세요?</b><span>🔥 120　◯ 62</span></div><em>›</em></article>
+      <article class="trend-card"><div class="trend-thumb arena"></div><div><b>대박에서 느낀 점</b><span>♡ 98　◯ 24</span></div><em>›</em></article>
+      <article class="trend-card"><div class="trend-thumb pub"></div><div><b>요즘 여기 펍 추천</b><span>서울 홍대 근처 괜찮은 펍 있을까요?</span></div><em>›</em></article>
+      <article class="trend-card"><div class="trend-thumb cats"></div><div><b>HPT 새틀 후기</b><span>핸드 몇개 공유합니다</span></div><em>›</em></article>
+      <article class="trend-card"><div class="trend-thumb night"></div><div><b>그라인더들의 새벽 세션</b><span>♡ 44　◯ 11</span></div><em>›</em></article>
+    </div>`;
+  return `<section class="explore-screen">
+    <div class="search-box"><span>⌕</span><input placeholder="플레이어, 핸드, 대회, 포커룸 검색"><button>⌘</button></div>
+    <div class="explore-tabs">${tabs.map(t=>`<button class="${state.exploreTab===t[0]?'active':''}" data-explore-tab="${t[0]}">${t[1]}</button>`).join('')}</div>
+    ${body}
+  </section>`;
+}
+function exploreView(){return pokerRoomExploreViewV1()}
