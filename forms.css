@@ -16,3 +16,35 @@
 .rank-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.rank-grid button,.suit-grid button{height:34px;border:1px solid #2b3441;border-radius:7px;background:#171d26;font-weight:800}.rank-grid .active{background:#fff;color:#111}
 .suit-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:7px}.suit-grid button{font-size:18px}.suit-grid .red{color:#f25763}.suit-grid button:disabled{opacity:.35}
 .modal-backdrop{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.62);display:flex;align-items:flex-end;justify-content:center}.sheet{width:min(100%,430px);max-height:88dvh;overflow:auto;background:#11161e;border-radius:24px 24px 0 0;padding:12px 12px calc(24px + env(safe-area-inset-bottom))}.grab{width:40px;height:4px;background:#39414e;border-radius:999px;margin:0 auto 13px}.sheet-title{font-size:16px;font-weight:900;margin:4px 4px 13px}
+
+/* profile editor */
+.profile-edit-sheet{padding-left:16px;padding-right:16px}
+.profile-edit-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.profile-edit-head .sheet-title{margin-bottom:3px}
+.profile-edit-head p{margin:0;color:#7d8795;font-size:10px;line-height:1.45}
+.profile-edit-head>button{border:0;background:none;color:#929ba8;font-size:10px;padding:7px 0}
+.profile-edit-preview{
+  display:flex;align-items:center;gap:11px;
+  margin:17px 0;padding:12px;border:1px solid #27303c;
+  background:#0e131a;border-radius:13px
+}
+.profile-edit-avatar{width:46px;height:46px;border-radius:50%;flex:0 0 auto}
+.edit-preview-name{font-size:13px;font-weight:900}
+.edit-preview-pub{font-size:9px;color:#8e98a6;margin-top:4px}
+.profile-edit-form{display:grid;gap:12px}
+.profile-edit-form>label,.pub-edit-block label{
+  display:block;color:#9da6b3;font-size:10px;font-weight:750
+}
+.profile-edit-form input,.pub-edit-block input{
+  width:100%;height:44px;margin-top:6px;border-radius:10px;
+  border:1px solid #2c3542;background:#111720;color:#fff;
+  padding:0 11px;outline:0
+}
+.pub-edit-block{
+  padding:13px;border:1px solid #27303c;background:#0d1218;border-radius:14px;
+  display:grid;gap:11px
+}
+.pub-edit-title b{display:block;font-size:11px;color:#eef2f7}
+.pub-edit-title span{display:block;font-size:9px;color:#778190;margin-top:3px}
+.pub-edit-helper{font-size:9px;line-height:1.5;color:#707a88}
+.pub-edit-helper b{color:#d8dee7}
