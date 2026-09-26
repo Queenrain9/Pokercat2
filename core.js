@@ -39,15 +39,11 @@ const state = {
   handActions:{pre:'',flop:'',turn:'',river:''}
 };
 
-function themeInit(){
-  const saved = localStorage.getItem('pokercat_theme');
-  const dark = saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
-  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-}
-themeInit();
+document.documentElement.dataset.theme = 'dark';
+localStorage.removeItem('pokercat_theme');
 
 function icon(name){
-  const map={home:'⌂',search:'⌕',plus:'＋',calendar:'▦',profile:'●',sun:'☀︎',moon:'☾'};
+  const map={home:'⌂',search:'⌕',plus:'＋',calendar:'▦',profile:'●'};
   return map[name]||'•';
 }
 
@@ -126,9 +122,7 @@ function topbar(){
   const titleMap={home:'Poker<span>Cat</span>',explore:'탐색',schedule:'대회 일정',profile:'프로필',compose:'새 게시물'};
   return `<header class="topbar">
     <div class="logo">${titleMap[state.view]||'Poker<span>Cat</span>'}</div>
-    <div class="theme-toggle">
-      <button class="icon-btn" data-theme aria-label="테마 변경">${document.documentElement.dataset.theme==='dark'?icon('sun'):icon('moon')}</button>
-    </div>
+    <div></div>
   </header>`;
 }
 
