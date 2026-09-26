@@ -160,26 +160,53 @@ function scheduleView(){
   </section>`;
 }
 
+function exploreMockContent(tab){
+  const data={
+    popular:[
+      ['chips','오늘 이 핸드 어떻게 보세요?','🔥 120　◯ 62'],
+      ['arena','APT 메인 이벤트 현장 분위기','♡ 98　◯ 24'],
+      ['pub','요즘 자주 가는 펍 이야기','◯ 31'],
+      ['cats','HPT 새틀 후기','핸드 몇 개 공유합니다']
+    ],
+    latest:[
+      ['night','방금 끝난 새벽 세션','1분 전 · riverkim'],
+      ['chips','20BB BTN vs BB 질문','4분 전 · minraise'],
+      ['pub','오늘 야자수 서울센터점 가는 분?','7분 전 · chiplee'],
+      ['arena','이번 주말 대회 참가합니다','11분 전 · ninehigh']
+    ],
+    hands:[
+      ['chips','AQs · BTN vs BB · 24BB','리버 콜 어떻게 보세요?'],
+      ['night','99 · CO vs BTN · 41BB','3Bet Pot 턴 스팟'],
+      ['arena','AKo · FT 7 left · 18BB','ICM 고려한 프리플랍'],
+      ['cats','76s · BB Defense · 55BB','플랍 체크레이즈 라인']
+    ],
+    events:[
+      ['arena','APT Main Event','10.03 · 참가 예정 38명'],
+      ['chips','HPT Satellite','09.29 · 참가 예정 21명'],
+      ['night','Weekend Deepstack','10.05 · 참가 예정 16명']
+    ],
+    pubs:[
+      ['pub','야자수 서울센터점','Home Pub 인증 플레이어 14명'],
+      ['night','KMGM 수원점','최근 게시물 23개'],
+      ['chips','KMGM 홍대점','최근 게시물 18개']
+    ],
+    users:[
+      ['cats','riverkim','MTT · 🏠 KMGM 수원점'],
+      ['chips','minraise','Cash · 🏠 KMGM 홍대점'],
+      ['night','chiplee','오프라인 · 🏠 야자수 서울센터점'],
+      ['arena','ninehigh','MTT · 오프라인']
+    ]
+  };
+  const rows=data[tab]||data.popular;
+  return '<div class="trend-list">'+rows.map(x=>'<article class="trend-card"><div class="trend-thumb '+x[0]+'"></div><div><b>'+escapeHtml(x[1])+'</b><span>'+escapeHtml(x[2])+'</span></div><em>›</em></article>').join('')+'</div>';
+}
 function pokerRoomExploreViewV1(){
   const tabs=[['popular','인기'],['rooms','포커룸'],['latest','최신'],['hands','핸드'],['events','대회'],['pubs','펍'],['users','유저']];
   const roomList=state.rooms.filter(r=>r.status!=='closed'&&roomVisibleToViewer(r,'explore'));
   const body=state.exploreTab==='rooms'
-    ?`<div class="explore-room-section">
-        <div class="explore-room-head"><div><b>진행 중인 포커룸</b><span>호스트와 설정을 확인하고 같은 Poker Room으로 입장해요.</span></div><button data-create-game>＋ 만들기</button></div>
-        <div class="explore-room-list">${roomList.map(r=>pokerRoomFeedCard(r,'explore')).join('')||'<div class="homepub-empty"><b>열린 포커룸이 없어요.</b><span>직접 Single Table을 만들어 친구를 초대해 보세요.</span></div>'}</div>
-      </div>`
-    :`<div class="trend-list">
-      <article class="trend-card"><div class="trend-thumb chips"></div><div><b>오늘 이 핸드 어떻게 보세요?</b><span>🔥 120　◯ 62</span></div><em>›</em></article>
-      <article class="trend-card"><div class="trend-thumb arena"></div><div><b>대박에서 느낀 점</b><span>♡ 98　◯ 24</span></div><em>›</em></article>
-      <article class="trend-card"><div class="trend-thumb pub"></div><div><b>요즘 여기 펍 추천</b><span>서울 홍대 근처 괜찮은 펍 있을까요?</span></div><em>›</em></article>
-      <article class="trend-card"><div class="trend-thumb cats"></div><div><b>HPT 새틀 후기</b><span>핸드 몇개 공유합니다</span></div><em>›</em></article>
-      <article class="trend-card"><div class="trend-thumb night"></div><div><b>그라인더들의 새벽 세션</b><span>♡ 44　◯ 11</span></div><em>›</em></article>
-    </div>`;
-  return `<section class="explore-screen">
-    <div class="search-box"><span>⌕</span><input placeholder="플레이어, 핸드, 대회, 포커룸 검색"><button>⌘</button></div>
-    <div class="explore-tabs">${tabs.map(t=>`<button class="${state.exploreTab===t[0]?'active':''}" data-explore-tab="${t[0]}">${t[1]}</button>`).join('')}</div>
-    ${body}
-  </section>`;
+    ?'<div class="explore-room-section"><div class="explore-room-head"><div><b>진행 중인 포커룸</b><span>호스트와 설정을 확인하고 같은 Poker Room으로 입장해요.</span></div><button data-create-game>＋ 만들기</button></div><div class="explore-room-list">'+(roomList.map(r=>pokerRoomFeedCard(r,'explore')).join('')||'<div class="homepub-empty"><b>열린 포커룸이 없어요.</b><span>직접 Single Table을 만들어 친구를 초대해 보세요.</span></div>')+'</div></div>'
+    :exploreMockContent(state.exploreTab);
+  return '<section class="explore-screen"><div class="search-box"><span>⌕</span><input placeholder="플레이어, 핸드, 대회, 포커룸 검색"><button>⌘</button></div><div class="explore-tabs">'+tabs.map(t=>'<button class="'+(state.exploreTab===t[0]?'active':'')+'" data-explore-tab="'+t[0]+'">'+t[1]+'</button>').join('')+'</div>'+body+'</section>';
 }
 function exploreView(){return pokerRoomExploreViewV1()}
 
