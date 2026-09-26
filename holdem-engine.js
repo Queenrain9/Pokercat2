@@ -296,7 +296,8 @@
     const live=livePlayers(game);
     const actors=live.filter(p=>!p.allIn);
     if(live.length<=1){finishIfSingle(game);return;}
-    if(actors.length<=1){
+    const loneActorOwes=actors.length===1&&Math.max(0,game.currentBet-actors[0].streetContribution)>0;
+    if(actors.length<=1&&!loneActorOwes){
       while(game.board.length<5){
         if(game.board.length===0)dealStreet(game,'flop');
         else if(game.board.length===3)dealStreet(game,'turn');
@@ -429,13 +430,6 @@
 
   function cardValue(card){
     return RANKS.indexOf(card[0])+2;
-  }
-  function compareScore(a,b){
-    for(let i=0;i<Math.max(a.length,b.length);i++){
-      const av=a[i]||0,bv=b[i]||0;
-      if(av!==bv)return av>b?1:-1;
-    }
-    return 0;
   }
   function compareScores(a,b){
     for(let i=0;i<Math.max(a.length,b.length);i++){
