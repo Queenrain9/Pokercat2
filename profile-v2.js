@@ -197,7 +197,7 @@ function avatarPickerModal(){
     '<div class="avatar-picker-grid">'+
       available.map(i=>{
         const cat=cats[i];
-        const selected=cat.pos===currentPos;
+        const selected=Number(state.selectedCat)===i;
         return '<button class="avatar-picker-option '+(selected?'selected':'')+'" data-select-avatar="'+i+'">'+
           catAvatar(i,'avatar-picker-image')+
           '<b>'+escapeHtml(cat.name)+'</b>'+
