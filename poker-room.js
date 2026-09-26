@@ -134,8 +134,8 @@ function roomSeatPositions(max){
 function pokerRoomView(id){
   const room=getRoom(id);
   if(!room)return `<section class="room-screen"><div class="room-missing"><b>게임을 찾을 수 없어요.</b><button class="btn" data-nav="home">홈으로</button></div></section>`;
-  const host=getUser(room.hostId),isHost=room.hostId==='queenbee';
-  const seated=roomSeatCount(room),mySeat=room.seats.indexOf('queenbee');
+  const host=getUser(room.hostId),isHost=state.loggedIn&&room.hostId==='queenbee';
+  const seated=roomSeatCount(room),mySeat=state.loggedIn?room.seats.indexOf('queenbee'):-1;
   const positions=roomSeatPositions(room.maxPlayers);
   const playing=room.status==='playing';
   return `<section class="room-screen poker-app-shell">
