@@ -244,7 +244,8 @@ function roomVisibleToViewer(room,surface='feed'){
   if(state.loggedIn&&room.hostId==='queenbee')return true;
   if(type==='public')return true;
   if(!state.loggedIn)return false;
-  if(type==='invite')return room.invitedUserIds.includes('queenbee');
+  if(room.invitedUserIds.includes('queenbee'))return true;
+  if(type==='invite')return false;
   if(type==='followers')return state.following.has(room.hostId);
   if(type==='friends')return state.following.has(room.hostId)&&state.followers.has(room.hostId);
   if(type==='homepub'){
