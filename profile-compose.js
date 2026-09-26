@@ -5,8 +5,7 @@ function profileView(key){
   const pendingHp=mine&&state.homePub&&state.homePub.status!=='verified'?state.homePub:null;
   const followersCount=mine?state.followers.size:24;
   const followingCount=mine?state.following.size:18;
-  const friendsCount=mine?pokerFriendKeys().length:6;
-  const followLabel=!mine?(state.following.has(key)?(state.followers.has(key)?'✓ Poker Friend':'팔로잉'):'팔로우'):'프로필 편집';
+  const followLabel=!mine?(state.following.has(key)?'팔로잉':'팔로우'):'프로필 편집';
 
   let homePubLine='';
   if(hp){
@@ -29,17 +28,15 @@ function profileView(key){
 
       <div class="profile-identity-stack">
         ${homePubLine}
-        <button class="profile-identity-line friends" ${mine?'data-relationship="friends"':'data-toast="Poker Friends는 서로 팔로우한 관계예요"'}><span>👥</span><div><small>Poker Friends</small><b>${friendsCount}</b></div><i>›</i></button>
       </div>
 
       <div class="bio">${mine?'홀덤 치고, 핸드 남기고, 좋은 사람들 만나는 중.':'포커 좋아하는 평범한 플레이어. 핸드 토론 환영.'}</div>
       <div class="poker-tags"><span>♠ ${mine?state.gamePref:'MTT'}</span><span>● ${mine?state.playPref:'Live'}</span><span>🇰🇷 Korea</span></div>
 
-      <div class="stats four">
+      <div class="stats">
         <div><b>24</b><span>게시물</span></div>
         <button ${mine?'data-relationship="followers"':''}><b>${followersCount}</b><span>팔로워</span></button>
         <button ${mine?'data-relationship="following"':''}><b>${followingCount}</b><span>팔로잉</span></button>
-        <button ${mine?'data-relationship="friends"':''}><b>${friendsCount}</b><span>Poker Friends</span></button>
       </div>
 
       <button class="profile-edit" ${mine?'data-edit-profile':`data-follow="${key}"`}>${followLabel}</button>
@@ -128,12 +125,12 @@ function homePubVerifyModal(){
 }
 
 function relationshipModal(){
-  const mode=state.relationshipMode;
-  const keys=mode==='followers'?[...state.followers]:mode==='following'?[...state.following]:pokerFriendKeys();
-  const title=mode==='followers'?'Followers':mode==='following'?'Following':'Poker Friends';
+  const mode=state.relationshipMode==='followers'?'followers':'following';
+  const keys=mode==='followers'?[...state.followers]:[...state.following];
+  const title=mode==='followers'?'Followers':'Following';
   return `<div class="modal-backdrop" data-close-modal><div class="sheet relationship-sheet" onclick="event.stopPropagation()">
     <div class="grab"></div><div class="sheet-title">${title}</div>
-    <div class="relationship-summary">${mode==='friends'?'서로 팔로우하는 포커 플레이어':'포커캣에서 연결된 플레이어'} · ${keys.length}</div>
+    <div class="relationship-summary">포커캣에서 연결된 플레이어 · ${keys.length}</div>
     <div class="relationship-list">${keys.length?keys.map(k=>relationshipRow(k)).join(''):'<div class="relationship-empty">아직 표시할 플레이어가 없어요.</div>'}</div>
   </div></div>`;
 }
