@@ -254,6 +254,57 @@ function wire(){
     });
     refreshOdds();
   }
+  if(state.view==='tool:range'){
+    const api=window.PREFLOP_RANGE_DATA;
+    const formatInput=document.querySelector('#rangeFormat');
+    const playersInput=document.querySelector('#rangePlayers');
+    const stackInput=document.querySelector('#rangeStack');
+    const positionInput=document.querySelector('#rangePosition');
+    const situationInput=document.querySelector('#rangeSituation');
+    const matrix=document.querySelector('#rangeMatrix');
+    const context=document.querySelector('#rangeContext');
+    const coverage=document.querySelector('#rangeCoverage');
+    const primaryLegend=document.querySelector('#rangeLegendPrimary');
+    const mixLegend=document.querySelector('#rangeLegendMix');
+    const foldLegend=document.querySelector('#rangeLegendFold');
+    const sourceNote=document.querySelector('#rangeSourceNote');
+
+    const refreshRange=()=>{
+      if(!api)return;
+      const requested={
+        format:formatInput?.value,
+        players:Number(playersInput?.value||8),
+        stack:Number(stackInput?.value||40),
+        position:positionInput?.value,
+        situation:situationInput?.value
+      };
+      const optionSet=api.getOptions(requested);
+      const chart=api.getChart(requested);
+      const f=chart.filters;
+
+      if(stackInput){
+        stackInput.innerHTML=rangeSelectOptions(optionSet.stacks,f.stack,x=>x+'BB');
+        stackInput.value=String(f.stack);
+      }
+      const positionOptions=api.getOptions(f).positions;
+      if(positionInput){
+        positionInput.innerHTML=rangeSelectOptions(positionOptions,f.position);
+        positionInput.value=f.position;
+      }
+      if(matrix)matrix.innerHTML=chart.cells.map(rangeCellMarkup).join('');
+      if(context)context.textContent=`${f.format} · ${f.players}-Max · ${f.stack}BB · ${f.position} · ${f.situation}`;
+      if(coverage)coverage.textContent=chart.stats.matrixCoverage+'%';
+      if(primaryLegend)primaryLegend.textContent=chart.labels.primary;
+      if(mixLegend)mixLegend.textContent=chart.labels.mix;
+      if(foldLegend)foldLegend.textContent=chart.labels.fold;
+      if(sourceNote)sourceNote.textContent=chart.source+' · '+chart.note;
+    };
+
+    [formatInput,playersInput,stackInput,positionInput,situationInput].filter(Boolean).forEach(input=>{
+      input.addEventListener('change',refreshRange);
+    });
+    refreshRange();
+  }
   document.querySelectorAll('[data-open-hand-detail]').forEach(b=>b.onclick=()=>{state.handReturnView=state.view;state.view='hand:'+b.dataset.openHandDetail;render()});
   document.querySelectorAll('[data-hand-detail-back]').forEach(b=>b.onclick=()=>{state.view=state.handReturnView||'profile';render()});
 
