@@ -20,32 +20,42 @@ function wire(){
     state.onboarding=true;render();
   };
 
-  document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{if(b.dataset.nav==='compose'){state.modal='compose'}else{state.view=b.dataset.nav}render()});
+  document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{state.view=b.dataset.nav;state.modal=null;render()});
   document.querySelectorAll('[data-user]').forEach(b=>b.onclick=()=>{state.view='user:'+b.dataset.user;render()});
   document.querySelectorAll('[data-follow]').forEach(b=>b.onclick=()=>{
     const k=b.dataset.follow; if(state.following.has(k))state.following.delete(k);else state.following.add(k);render();
   });
   document.querySelectorAll('[data-like]').forEach(b=>b.onclick=()=>{const k=b.dataset.like;state.liked.has(k)?state.liked.delete(k):state.liked.add(k);render()});
   document.querySelectorAll('[data-profile-tab]').forEach(b=>b.onclick=()=>{state.profileTab=b.dataset.profileTab;render()});
-  document.querySelectorAll('[data-compose-type]').forEach(b=>b.onclick=()=>{state.modal=b.dataset.composeType;render()});
   const close=document.querySelector('[data-close-modal]'); if(close) close.onclick=()=>{state.modal=null;render()};
+  const toggleHand=document.querySelector('[data-toggle-hand]'); if(toggleHand) toggleHand.onclick=()=>{state.composeMode=state.composeMode==='hand'?'post':'hand';state.cardTarget=null;state.cardRank=null;render()};
+  const removeHand=document.querySelector('[data-remove-hand]'); if(removeHand) removeHand.onclick=()=>{state.composeMode='post';state.cardTarget=null;state.cardRank=null;render()};
+  document.querySelectorAll('[data-card-slot]').forEach(b=>b.onclick=()=>{state.cardTarget=b.dataset.cardSlot;state.cardRank=null;render()});
+  document.querySelectorAll('[data-card-rank]').forEach(b=>b.onclick=()=>{state.cardRank=b.dataset.cardRank;render()});
+  document.querySelectorAll('[data-card-suit]').forEach(b=>b.onclick=()=>{
+    if(!state.cardTarget||!state.cardRank)return;
+    const [group,indexText]=state.cardTarget.split(':');
+    const index=Number(indexText);
+    state.handDraft[group][index]=state.cardRank+b.dataset.cardSuit;
+    state.cardRank=null;
+    const order=[['hero',0],['hero',1],['flop',0],['flop',1],['flop',2],['turn',0],['river',0]];
+    const current=order.findIndex(x=>x[0]===group&&x[1]===index);
+    const next=order.slice(current+1).find(x=>!state.handDraft[x[0]][x[1]]);
+    state.cardTarget=next?next[0]+':'+next[1]:null;
+    render();
+  });
+  const clearCard=document.querySelector('[data-clear-card]'); if(clearCard) clearCard.onclick=()=>{
+    if(!state.cardTarget)return;
+    const [group,indexText]=state.cardTarget.split(':');
+    state.handDraft[group][Number(indexText)]='';
+    state.cardRank=null;render();
+  };
   const preview=document.querySelector('[data-preview-hand]'); if(preview) preview.onclick=()=>{
-    state.previewHand={
-      title:document.querySelector('#hhPos').value+' Hand · '+document.querySelector('#hhGame').value,
-      blinds:document.querySelector('#hhBlind').value||'Blinds',
-      players:'table',
-      pos:document.querySelector('#hhPos').value,
-      stack:document.querySelector('#hhStack').value||'—',
-      hole:parseCards(document.querySelector('#hhHole').value),
-      board:parseCards(document.querySelector('#hhBoard').value),
-      pre:document.querySelector('#hhPre').value,
-      flop:document.querySelector('#hhFlop').value,
-      turn:document.querySelector('#hhTurn').value,
-      river:document.querySelector('#hhRiver').value
-    };
+    state.previewHand=handDraftToData();
     state.modal='handPreview';render();
   };
-  document.querySelectorAll('[data-post-demo]').forEach(b=>b.onclick=()=>{state.modal=null;render();toast('베타 게시물로 등록했어요')});
+  const closePreview=document.querySelector('[data-close-preview]'); if(closePreview) closePreview.onclick=()=>{state.modal=null;render()};
+  document.querySelectorAll('[data-post-demo]').forEach(b=>b.onclick=()=>{state.modal=null;state.view='home';state.composeMode='post';render();toast('베타 게시물로 등록했어요')});
   document.querySelectorAll('[data-toast]').forEach(b=>b.onclick=()=>toast(b.dataset.toast));
   const theme=document.querySelector('[data-theme]'); if(theme) theme.onclick=()=>{
     const next=document.documentElement.dataset.theme==='dark'?'light':'dark';
