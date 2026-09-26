@@ -3,7 +3,7 @@
 
   function engine(){return window.PokerCatHoldemEngine}
   function currentRoom(id){
-    return getRoom(id||state.currentRoomId||String(state.view||'').split(':')[1]);
+    return getRoom(id)||getRoom(state.currentRoomId)||getRoom(String(state.view||'').split(':')[1]);
   }
   function startGameForRoom(room){
     const table=getPrimaryTable(room),api=engine();
