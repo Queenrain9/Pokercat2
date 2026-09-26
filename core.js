@@ -12,11 +12,11 @@ const cats=[
 {id:'queen',name:'The Queen',pos:'0% 100%'},{id:'darling',name:'The Darling',pos:'50% 100%'},{id:'grinder',name:'The Grinder',pos:'100% 100%'}];
 
 const demoUsers={
-queenbee:{name:'QUEENBEE',handle:'@queenbee',cat:'darling',time:'4시간 전'},
+queenbee:{name:'QUEENBEE',handle:'@queenbee',cat:'darling',time:'4시간 전',homePub:{id:'야자수-서울센터점',brand:'야자수',branch:'서울센터점',status:'verified',verification:{provider:'profile-seed',partnerId:'yajasu-seoul-center',verifiedAt:'2026-09-26T00:00:00.000Z'}}},
 riverkim:{name:'riverkim',handle:'@riverkim',cat:'shark',time:'2시간 전',homePub:{id:'kmgm-수원점',brand:'KMGM',branch:'수원점',status:'verified',verification:{provider:'partner-demo',partnerId:'kmgm-suwon'}}},
 minraise:{name:'minraise',handle:'@minraise',cat:'solver',time:'3시간 전',homePub:{id:'kmgm-홍대점',brand:'KMGM',branch:'홍대점',status:'verified',verification:{provider:'partner-demo',partnerId:'kmgm-hongdae'}}},
-chiplee:{name:'chiplee',handle:'@chiplee',cat:'grinder',time:'5시간 전',homePub:{id:'kmgm-수원점',brand:'KMGM',branch:'수원점',status:'verified',verification:{provider:'partner-demo',partnerId:'kmgm-suwon'}}},
-ninehigh:{name:'ninehigh',handle:'@ninehigh',cat:'rock',time:'6시간 전',homePub:{id:'kmgm-인천점',brand:'KMGM',branch:'인천점',status:'verified',verification:{provider:'partner-demo',partnerId:'kmgm-incheon'}}}
+chiplee:{name:'chiplee',handle:'@chiplee',cat:'grinder',time:'5시간 전',homePub:{id:'야자수-서울센터점',brand:'야자수',branch:'서울센터점',status:'verified',verification:{provider:'partner-demo',partnerId:'yajasu-seoul-center'}}},
+ninehigh:{name:'ninehigh',handle:'@ninehigh',cat:'rock',time:'6시간 전',homePub:{id:'야자수-서울센터점',brand:'야자수',branch:'서울센터점',status:'verified',verification:{provider:'partner-demo',partnerId:'yajasu-seoul-center'}}}
 };
 
 function catByRef(ref){if(typeof ref==='number')return cats[ref]||cats[0];if(typeof ref==='string')return cats.find(c=>c.id===ref)||cats[0];return ref||cats[0]}
@@ -25,6 +25,15 @@ function catAvatar(ref,className='cat-avatar-image'){const cat=catByRef(ref);ret
 const legacyBrand=localStorage.getItem('pokercat_pub_brand')||'';
 const legacyBranch=localStorage.getItem('pokercat_pub_branch')||'';
 let storedHomePub=loadJSON('pokercat_home_pub_v1',null);
+const HOME_PUB_PROFILE_VERSION='yajasu-seoul-center-v1';
+if(localStorage.getItem('pokercat_home_pub_profile_version')!==HOME_PUB_PROFILE_VERSION){
+  storedHomePub={
+    id:'야자수-서울센터점',brand:'야자수',branch:'서울센터점',status:'verified',
+    verification:{provider:'profile-seed',partnerId:'yajasu-seoul-center',verifiedAt:new Date().toISOString()}
+  };
+  saveJSON('pokercat_home_pub_v1',storedHomePub);
+  localStorage.setItem('pokercat_home_pub_profile_version',HOME_PUB_PROFILE_VERSION);
+}
 if(!storedHomePub&&legacyBrand&&legacyBranch){
   storedHomePub={id:pubId(legacyBrand,legacyBranch),brand:legacyBrand,branch:legacyBranch,status:'unverified',verification:{provider:'legacy-import',partnerId:null,verifiedAt:null}};
   saveJSON('pokercat_home_pub_v1',storedHomePub);
@@ -182,7 +191,10 @@ if(state.onboardStep===1)return `<section class="onboard"><div class="onboard-to
 return `<section class="onboard"><div class="onboard-top"><b>프로필 설정</b><button data-skip-onboard>건너뛰기</button></div><h1>포커 프로필을 완성하세요</h1><p>간단하게 시작하고 나중에 더 채울 수 있어요.</p><div class="form onboard-form"><div class="selected-cat-preview">${catAvatar(state.selectedCat,'selected-cat')}</div><div class="field"><label>닉네임</label><input id="nick" value="${state.nickname}" maxlength="16"></div><div class="row2"><div class="field"><label>선호 게임</label><select id="gamePref"><option>MTT</option><option>Cash</option><option>Mixed</option></select></div><div class="field"><label>플레이</label><select id="playPref"><option>오프라인</option><option>온라인</option><option>둘 다</option></select></div></div><button class="onboard-next" data-finish-onboard>시작하기</button></div></section>`}
 
 function topbar(){
-if(state.view==='home')return `<header class="topbar home-top"><button class="feed-mode-toggle ${state.feedMode==='following'?'active':''}" data-toggle-following><span>✓</span> 팔로잉</button><div class="logo">POKER<span>CAT</span></div><button class="notification-btn" data-open-notifications aria-label="알림"><span>🔔</span><i></i></button></header>`;
+if(state.view==='home'){
+  const feedLabel=state.feedMode==='following'?'팔로잉':state.feedMode==='homepub'?'Home Pub':'추천';
+  return `<header class="topbar home-top"><button class="feed-mode-toggle active" data-open-feed-selector><span>${state.feedMode==='homepub'?'🏠':state.feedMode==='following'?'✓':'✦'}</span> ${feedLabel} <i>⌄</i></button><div class="logo">POKER<span>CAT</span></div><button class="notification-btn" data-open-notifications aria-label="알림"><span>🔔</span><i></i></button></header>`;
+}
 if(state.view==='notifications')return `<header class="topbar utility-top"><button class="back-btn" data-notification-back>‹</button><div class="page-title">알림</div><button class="read-all" data-mark-read>모두 읽음</button></header>`;
 if(state.view==='homepub')return `<header class="topbar utility-top"><button class="back-btn" data-homepub-back>‹</button><div class="page-title">Home Pub</div><button class="read-all" data-nav="profile">프로필</button></header>`;
 if(state.view==='roomcreate')return `<header class="topbar utility-top"><button class="back-btn" data-room-create-back>‹</button><div class="page-title">게임 만들기</div><span class="topbar-spacer"></span></header>`;
@@ -210,6 +222,7 @@ return homeView()
 
 function modalView(){
 if(state.modal==='authGate')return authGateModal();
+if(state.modal==='feedSelector')return feedSelectorModal();
 if(state.modal==='profileEdit')return profileEditModal();
 if(state.modal==='homePubVerify')return homePubVerifyModal();
 if(state.modal==='careerEdit')return careerEditModal();
