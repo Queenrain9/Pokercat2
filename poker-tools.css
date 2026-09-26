@@ -138,3 +138,37 @@
 .icm-row:last-child{border-bottom:0}.icm-row span{font-size:8px;color:#9aa4b1}.icm-row input{height:36px;border:1px solid #2b3440;background:#0c1218;color:#fff;border-radius:8px;padding:0 9px}
 .icm-payout-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 .icm-payout-grid input{height:38px;border:1px solid #2b3440;background:#0c1218;color:#fff;border-radius:8px;padding:0 9px;font-size:8px}
+
+/* Functional Bankroll Tracker */
+.bankroll-base-line{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:5px}
+.bankroll-base-line>span{font-size:7px;color:#6d7784}
+.bankroll-base-line button{border:0;background:transparent;color:#b79461;font-size:7px;font-weight:850;padding:4px 0}
+.bankroll-period-switch{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin:10px 12px 0;padding:3px;
+  border:1px solid #29323e;background:#0b1016;border-radius:10px
+}
+.bankroll-period-switch button{height:30px;border:0;background:transparent;color:#717c89;border-radius:7px;font-size:7px;font-weight:800}
+.bankroll-period-switch button.active{background:#1c242e;color:#fff}
+.tool-metric-grid b.positive{color:#75d19a}.tool-metric-grid b.negative{color:#d47c85}
+.session-row{
+  width:100%;background:transparent;color:#fff;border:0;border-bottom:1px solid #222a34;
+  text-align:left;font:inherit;cursor:pointer
+}
+.session-row>div:first-child{min-width:0}
+.session-row small{display:block;max-width:220px;margin-top:4px;color:#596573;font-size:6.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.session-result-wrap{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.session-result-wrap i{font-style:normal;color:#596573;font-size:13px}
+.bankroll-empty{padding:22px 10px;text-align:center}
+.bankroll-empty b{display:block;font-size:9px;color:#cdd3dc}
+.bankroll-empty span{display:block;margin-top:5px;font-size:7px;line-height:1.5;color:#65717e}
+.bankroll-add-session{margin-top:10px}
+.bankroll-sheet{padding-left:14px;padding-right:14px;padding-bottom:max(18px,env(safe-area-inset-bottom))}
+.bankroll-form{display:grid;gap:10px;margin-top:6px}
+.bankroll-modal-actions{display:flex;gap:8px;margin-top:14px}
+.bankroll-save-btn{margin:0;flex:1}
+.bankroll-delete-btn{
+  min-width:72px;border:1px solid #4a2d32;background:#1b1114;color:#d9858d;border-radius:10px;
+  font-size:8px;font-weight:850
+}
+.bankroll-sheet-copy{margin:0 0 12px;color:#727e8b;font-size:8px;line-height:1.5}
+.bankroll-base-sheet .bankroll-save-btn{margin-top:13px}
