@@ -45,7 +45,7 @@ function profileView(key){
     <div class="profile-tabs four-tabs">
       <button class="${state.profileTab==='posts'?'active':''}" data-profile-tab="posts">게시물</button>
       <button class="${state.profileTab==='hands'?'active':''}" data-profile-tab="hands">핸드</button>
-      <button class="${state.profileTab==='career'?'active':''}" data-profile-tab="career">Career High</button>
+      <button class="${state.profileTab==='career'?'active':''}" data-profile-tab="career">커리어</button>
       <button class="${state.profileTab==='saved'?'active':''}" data-profile-tab="saved">북마크</button>
     </div>
     ${profileBody(mine,key,u)}
@@ -66,9 +66,9 @@ function careerHighView(mine,key){
   ];
   const items=mine?state.careerHighs:demoCareer;
   return `<div class="career-section">
-    <div class="career-head"><div><b>Career High</b><span>기억하고 싶은 포커 성과를 전시해요.</span></div>${mine?'<button data-career-add>＋ 기록 추가</button>':''}</div>
+    <div class="career-head"><div><b>커리어</b><span>기억하고 싶은 포커 성과를 전시해요.</span></div>${mine?'<button data-career-add>＋ 기록 추가</button>':''}</div>
     <div class="career-list">
-      ${items.length?items.map((item,i)=>careerCard(item,mine,i)).join(''):`<div class="career-empty"><span>♠</span><b>아직 전시된 기록이 없어요</b><p>첫 우승, Day 2, Final Table 같은 순간을 남겨보세요.</p>${mine?'<button data-career-add>첫 Career High 등록</button>':''}</div>`}
+      ${items.length?items.map((item,i)=>careerCard(item,mine,i)).join(''):`<div class="career-empty"><span>♠</span><b>아직 전시된 기록이 없어요</b><p>첫 우승, Day 2, Final Table 같은 순간을 남겨보세요.</p>${mine?'<button data-career-add>첫 커리어 등록</button>':''}</div>`}
     </div>
   </div>`;
 }
@@ -77,7 +77,7 @@ function careerCard(item,mine,index){
     <div class="career-rank">${String(index+1).padStart(2,'0')}</div>
     <div class="career-main">
       <div class="career-category">${escapeHtml(item.category||'Achievement')}</div>
-      <h3>${escapeHtml(item.title||'Career High')}</h3>
+      <h3>${escapeHtml(item.title||'커리어')}</h3>
       ${item.tournamentName?`<div class="career-tournament">${escapeHtml(item.tournamentName)}</div>`:''}
       <div class="career-meta">${item.date?`<span>${escapeHtml(item.date)}</span>`:''}${item.prize?`<strong>${escapeHtml(item.prize)}</strong>`:''}</div>
       ${item.description?`<p>${escapeHtml(item.description)}</p>`:''}
@@ -142,7 +142,7 @@ function relationshipRow(key){
 function careerEditModal(){
   const item=state.careerHighs.find(x=>x.id===state.editingCareerId)||{id:'',title:'',category:'',tournamentName:'',date:'',prize:'',description:'',photoUrl:null};
   return `<div class="modal-backdrop" data-close-modal><div class="sheet career-edit-sheet" onclick="event.stopPropagation()">
-    <div class="grab"></div><div class="sheet-title">${item.id?'Career High 수정':'Career High 등록'}</div>
+    <div class="grab"></div><div class="sheet-title">${item.id?'커리어 수정':'커리어 기록 추가'}</div>
     <div class="career-form">
       <label>기록명 *<input id="careerTitle" value="${escapeHtml(item.title)}" placeholder="예: Main Event Day 2"></label>
       <label>분류<select id="careerCategory"><option ${item.category==='Day 2'?'selected':''}>Day 2</option><option ${item.category==='Final Table'?'selected':''}>Final Table</option><option ${item.category==='우승'?'selected':''}>우승</option><option ${item.category==='최고 상금'?'selected':''}>최고 상금</option><option ${item.category==='기타'?'selected':''}>기타</option></select></label>
