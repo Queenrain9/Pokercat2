@@ -14,14 +14,28 @@ function wire(){
     applyPendingAuth(pending);
   });
 
-  document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{state.view=b.dataset.nav;state.modal=null;if(state.view!=='compose')state.composeMode='post';render()});
-  document.querySelectorAll('[data-open-create-menu]').forEach(b=>b.onclick=()=>{state.modal='createMenu';render()});
-  document.querySelectorAll('[data-create-post]').forEach(b=>b.onclick=()=>{state.modal=null;state.view='compose';render()});
-  document.querySelectorAll('[data-create-game]').forEach(b=>b.onclick=()=>{state.modal=null;state.view='roomcreate';render()});
+  document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{
+    const target=b.dataset.nav;
+    if(target==='profile'&&!state.loggedIn){requireAuth('내 프로필을 보려면 로그인해 주세요.',{type:'view',view:'profile'});return}
+    state.view=target;state.modal=null;if(state.view!=='compose')state.composeMode='post';render()
+  });
+  document.querySelectorAll('[data-open-create-menu]').forEach(b=>b.onclick=()=>{
+    if(!state.loggedIn){requireAuth('게시물을 쓰거나 게임을 만들려면 로그인이 필요해요.',{type:'modal',modal:'createMenu'});return}
+    state.modal='createMenu';render()
+  });
+  document.querySelectorAll('[data-create-post]').forEach(b=>b.onclick=()=>{
+    if(!state.loggedIn){requireAuth('게시물을 작성하려면 로그인해 주세요.',{type:'view',view:'compose'});return}
+    state.modal=null;state.view='compose';render()
+  });
+  document.querySelectorAll('[data-create-game]').forEach(b=>b.onclick=()=>{
+    if(!state.loggedIn){requireAuth('Poker Room을 만들려면 로그인해 주세요.',{type:'view',view:'roomcreate'});return}
+    state.modal=null;state.view='roomcreate';render()
+  });
   const roomCreateBack=document.querySelector('[data-room-create-back]');if(roomCreateBack)roomCreateBack.onclick=()=>{state.view='home';render()};
   const roomBack=document.querySelector('[data-room-back]');if(roomBack)roomBack.onclick=()=>{state.view=state.roomReturnView||'home';render()};
 
   document.querySelectorAll('[data-create-room-submit]').forEach(b=>b.onclick=()=>{
+    if(!state.loggedIn){requireAuth('Poker Room을 만들려면 로그인해 주세요.',{type:'view',view:'roomcreate'});return}
     if(state.view!=='roomcreate')return;
     const name=(document.querySelector('#roomName')?.value||'').trim();
     const maxPlayers=Number(document.querySelector('#roomMaxPlayers')?.value||6);
@@ -48,23 +62,27 @@ function wire(){
   });
 
   document.querySelectorAll('[data-open-room]').forEach(b=>b.onclick=()=>{
-    state.currentRoomId=b.dataset.openRoom;state.roomReturnView=state.view;state.modal=null;state.view='room:'+state.currentRoomId;render();
+    const room=getRoom(b.dataset.openRoom);if(!room)return;
+    if(room.visibility==='private'&&!state.loggedIn){requireAuth('비공개 Poker Room을 보려면 로그인해 주세요.',{type:'openRoom',id:room.id});return}
+    state.currentRoomId=room.id;state.roomReturnView=state.view;state.modal=null;state.view='room:'+room.id;render();
   });
   document.querySelectorAll('[data-join-room]').forEach(b=>b.onclick=()=>{
-    const room=getRoom(b.dataset.joinRoom);if(!room)return;
-    if(room.visibility==='private'&&room.hostId!=='queenbee'&&!room.invitedUserIds.includes('queenbee')){toast('초대받은 사용자만 입장할 수 있어요');return}
-    if(room.seats.includes('queenbee')){toast('이미 착석 중이에요');return}
-    const idx=room.seats.findIndex(x=>!x);if(idx<0){toast('빈 좌석이 없어요');return}
-    room.seats[idx]='queenbee';persistRooms();render();toast('테이블에 입장했어요');
+    if(!state.loggedIn){requireAuth('테이블에 입장하려면 로그인해 주세요.',{type:'joinRoom',id:b.dataset.joinRoom});return}
+    joinRoomById(b.dataset.joinRoom);
   });
   document.querySelectorAll('[data-leave-room]').forEach(b=>b.onclick=()=>{
+    if(!state.loggedIn){requireAuth('테이블 기능을 사용하려면 로그인해 주세요.');return}
     const room=getRoom(b.dataset.leaveRoom);if(!room)return;
     if(room.hostId==='queenbee'){toast('호스트는 현재 버전에서 테이블을 나갈 수 없어요');return}
     const idx=room.seats.indexOf('queenbee');if(idx>=0)room.seats[idx]=null;persistRooms();render();toast('테이블에서 나왔어요');
   });
-  document.querySelectorAll('[data-invite-room]').forEach(b=>b.onclick=()=>{state.currentRoomId=b.dataset.inviteRoom;state.roomInviteMode='followers';state.modal='roomInvite';render()});
+  document.querySelectorAll('[data-invite-room]').forEach(b=>b.onclick=()=>{
+    if(!state.loggedIn){requireAuth('사용자를 초대하려면 로그인해 주세요.');return}
+    state.currentRoomId=b.dataset.inviteRoom;state.roomInviteMode='followers';state.modal='roomInvite';render()
+  });
   document.querySelectorAll('[data-invite-source]').forEach(b=>b.onclick=()=>{state.roomInviteMode=b.dataset.inviteSource;render()});
   document.querySelectorAll('[data-send-room-invite]').forEach(b=>b.onclick=()=>{
+    if(!state.loggedIn){requireAuth('사용자를 초대하려면 로그인해 주세요.');return}
     const room=getRoom(state.currentRoomId),toUserId=b.dataset.sendRoomInvite;if(!room||room.hostId!=='queenbee')return;
     if(!room.invitedUserIds.includes(toUserId))room.invitedUserIds.push(toUserId);
     const exists=state.roomInvites.some(i=>i.roomId===room.id&&i.toUserId===toUserId&&i.status==='pending');
@@ -72,11 +90,13 @@ function wire(){
     persistRooms();persistRoomInvites();render();toast(getUser(toUserId).name+'님을 초대했어요');
   });
   document.querySelectorAll('[data-start-room]').forEach(b=>b.onclick=()=>{
+    if(!state.loggedIn){requireAuth('게임을 시작하려면 로그인해 주세요.');return}
     const room=getRoom(b.dataset.startRoom);if(!room||room.hostId!=='queenbee')return;
     if(roomSeatCount(room)<2){toast('2명 이상 착석해야 시작할 수 있어요');return}
     room.status='playing';persistRooms();render();toast('플레이머니 테이블을 시작했어요');
   });
   const roomMenu=document.querySelector('[data-room-menu]');if(roomMenu)roomMenu.onclick=()=>{
+    if(!state.loggedIn){requireAuth('Poker Room 관리 기능을 사용하려면 로그인해 주세요.');return}
     const room=getRoom(state.currentRoomId);
     if(room?.hostId==='queenbee'){state.modal='roomInvite';render()}else toast('Room 메뉴는 다음 단계에서 확장해요');
   };
