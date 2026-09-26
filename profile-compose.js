@@ -185,6 +185,7 @@ function cardPicker(){const ranks=['A','K','Q','J','T','9','8','7','6','5','4','
 function handDraftToData(){return {title:state.handMeta.pos+' Hand',blinds:state.handMeta.blind,players:state.handMeta.players,pos:state.handMeta.pos,stack:state.handMeta.stack,hole:state.handDraft.hero.filter(Boolean),board:[...state.handDraft.flop,...state.handDraft.turn,...state.handDraft.river].filter(Boolean),pre:state.handActions.pre||'BTN 오픈 → BB 콜',flop:'플랍 체크-콜',turn:'턴 체크-레이즈',river:'리버 콜'}}
 
 function pokerRoomBottomNavV1(){
+  if(state.view==='roomcreate'||state.view.startsWith('room:'))return '';
   const nav=[['home','홈','home'],['search','탐색','explore'],['plus','작성','compose'],['calendar','일정','schedule'],['profile','프로필','profile']];
   return `<nav class="bottom-nav">${nav.map(n=>{
     const active=state.view===n[2]||(state.view==='homepub'&&n[2]==='profile');
