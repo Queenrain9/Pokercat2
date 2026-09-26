@@ -199,7 +199,7 @@ function avatarPickerModal(){
         const selected=Number(state.selectedCat)===i;
         return '<button class="avatar-picker-option '+(selected?'selected':'')+'" data-select-avatar="'+i+'" aria-label="프로필 이미지 '+(i+1)+'">'+
           catAvatar(i,'avatar-picker-image')+
-          (selected?'<span>✓</span>':'')+
+          (selected?'<span class="avatar-picker-check">✓</span>':'')+
         '</button>';
       }).join('')+
     '</div>'+
