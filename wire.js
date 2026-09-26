@@ -218,6 +218,8 @@ function wire(){
 
   document.querySelectorAll('[data-explore-tab]').forEach(b=>b.onclick=()=>{state.exploreTab=b.dataset.exploreTab;render()});
   document.querySelectorAll('[data-profile-tab]').forEach(b=>b.onclick=()=>{state.profileTab=b.dataset.profileTab;render()});
+  document.querySelectorAll('[data-open-hand-detail]').forEach(b=>b.onclick=()=>{state.handReturnView=state.view;state.view='hand:'+b.dataset.openHandDetail;render()});
+  document.querySelectorAll('[data-hand-detail-back]').forEach(b=>b.onclick=()=>{state.view=state.handReturnView||'profile';render()});
 
   const editProfile=document.querySelector('[data-edit-profile]');if(editProfile)editProfile.onclick=()=>{
     if(!state.loggedIn){requireAuth('프로필을 편집하려면 로그인해 주세요.',{type:'view',view:'profile'});return}
@@ -280,7 +282,9 @@ function wire(){
       date:document.querySelector('#careerDate')?.value||'',
       prize:(document.querySelector('#careerPrize')?.value||'').trim(),
       description:(document.querySelector('#careerDescription')?.value||'').trim(),
-      photoUrl:old?.photoUrl||null,createdAt:old?.createdAt||now,updatedAt:now
+      imageUrl:old?.imageUrl||old?.photoUrl||null,
+      verification:old?.verification||{status:'unverified',provider:null,verifiedAt:null},
+      createdAt:old?.createdAt||now,updatedAt:now
     };
     if(old)state.careerHighs=state.careerHighs.map(x=>x.id===old.id?record:x);else state.careerHighs=[record,...state.careerHighs];
     persistCareerHighs();state.modal=null;state.editingCareerId=null;state.profileTab='career';render();toast('Career High를 저장했어요');
