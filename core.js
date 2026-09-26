@@ -8,8 +8,8 @@ function verifiedHomePub(user){const hp=user?.homePub;return hp&&hp.status==='ve
 
 const cats=[
 {id:'rock',name:'The Rock',pos:'0% 0%'},{id:'shark',name:'The Shark',pos:'50% 0%'},{id:'maniac',name:'The Maniac',pos:'100% 0%'},
-{id:'solver',name:'The Solver',pos:'0% 50%'},{id:'trapper',name:'The Trapper',pos:'50% 50%'},{id:'hero-caller',name:'The Hero Caller',pos:'100% 50%'},
-{id:'queen',name:'The Queen',pos:'0% 100%'},{id:'darling',name:'The Darling',pos:'50% 100%'},{id:'grinder',name:'The Grinder',pos:'100% 100%'}];
+{id:'solver',name:'The Solver',pos:'0% 0%'},{id:'trapper',name:'The Trapper',pos:'50% 0%'},{id:'hero-caller',name:'The Hero Caller',pos:'100% 0%'},
+{id:'queen',name:'The Queen',pos:'0% 0%'},{id:'darling',name:'The Darling',pos:'50% 0%'},{id:'grinder',name:'The Grinder',pos:'100% 0%'}];
 
 const demoUsers={
 queenbee:{name:'QUEENBEE',handle:'@queenbee',cat:'darling',time:'4시간 전',homePub:{id:'야자수-서울센터점',brand:'야자수',branch:'서울센터점',status:'verified',verification:{provider:'profile-seed',partnerId:'yajasu-seoul-center',verifiedAt:'2026-09-26T00:00:00.000Z'}}},
