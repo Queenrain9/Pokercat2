@@ -118,3 +118,72 @@
 .feed-pub-affiliation i{font-style:normal;color:var(--gold2);font-size:8px}
 .feed-pub-affiliation b{font-size:8px;color:#e5eaf1;font-weight:850}
 .feed-pub-affiliation small{font-size:8px;color:#8e98a6;font-weight:700}
+
+/* profile relationship / Home Pub structure */
+.profile-identity-stack{display:grid;gap:7px;margin:15px 0 12px}
+.profile-identity-line{
+  width:100%;min-height:48px;border:1px solid #27303c;background:#10151c;color:#fff;
+  border-radius:13px;padding:8px 10px;display:grid;grid-template-columns:28px 1fr auto auto;
+  align-items:center;gap:8px;text-align:left
+}
+.profile-identity-line>span{font-size:16px}
+.profile-identity-line>div{min-width:0}
+.profile-identity-line small{display:block;font-size:8px;color:#727d8c;margin-bottom:2px;text-transform:uppercase;letter-spacing:.05em}
+.profile-identity-line b{display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.profile-identity-line em{font-style:normal;font-size:8px;padding:4px 6px;border-radius:999px;background:#193026;color:#7bd7a1}
+.profile-identity-line.pending em{background:#34291a;color:#f3bd69}
+.profile-identity-line>i{font-style:normal;color:#667181}
+.profile-identity-line.empty{color:#9aa4b2}
+.profile-identity-line.friends{grid-template-columns:28px 1fr auto;border-color:#2b3340}
+.stats.four{grid-template-columns:repeat(4,1fr)}
+.stats.four>div,.stats.four>button{border:0;background:none;color:#fff;padding:0;min-width:0}
+.stats.four button{cursor:pointer}
+.stats.four b{display:block;font-size:13px}
+.stats.four span{display:block;font-size:8px;color:#778191;margin-top:3px;white-space:nowrap}
+.four-tabs{grid-template-columns:repeat(4,1fr)}
+.four-tabs button{font-size:9px;padding:0 2px}
+
+/* Home Pub community */
+.homepub-screen{padding-bottom:86px}
+.homepub-community-head{padding:20px 16px 16px;border-bottom:1px solid var(--line);background:radial-gradient(circle at 0 0,rgba(242,181,93,.1),transparent 44%),#090d12}
+.homepub-community-label{font-size:8px;letter-spacing:.14em;color:#9a7b52;font-weight:900}
+.homepub-community-head h1{font-size:20px;margin:7px 0 5px}
+.homepub-community-head p{font-size:10px;color:#818b99;line-height:1.5;margin:0 0 14px}
+.homepub-member-strip{display:flex;align-items:center;min-height:36px}
+.homepub-member-strip button{width:34px;height:34px;border-radius:50%;overflow:hidden;border:2px solid #0b0e13;background:#161c24;margin-right:-7px;padding:0}
+.homepub-member-avatar{width:100%;height:100%;border-radius:50%}
+.homepub-member-strip>span{font-size:9px;color:#818b99;margin-left:16px}
+.homepub-member-strip>span b{color:#fff}
+.homepub-feed-label{height:38px;display:flex;align-items:center;justify-content:space-between;padding:0 13px;border-bottom:1px solid var(--line)}
+.homepub-feed-label span{font-size:10px;font-weight:850}
+.homepub-feed-label em{font-style:normal;font-size:8px;color:#6f7988}
+.homepub-gate{min-height:430px;padding:70px 28px 30px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.homepub-gate-icon{width:68px;height:68px;border-radius:22px;background:#151b23;border:1px solid #2b3542;display:grid;place-items:center;font-size:28px;margin-bottom:18px}
+.homepub-gate h2{font-size:18px;margin:0 0 8px}
+.homepub-gate p{font-size:11px;line-height:1.6;color:#7e8896;max-width:280px;margin:0 0 20px}
+.homepub-empty{padding:54px 24px;text-align:center;color:#7d8794}
+.homepub-empty b{display:block;color:#dce1e8;font-size:12px;margin-bottom:7px}
+.homepub-empty span{display:block;font-size:10px;line-height:1.55}
+
+/* Career High */
+.career-section{padding:13px 12px 90px}
+.career-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+.career-head b{display:block;font-size:13px}
+.career-head span{display:block;font-size:9px;color:#747e8d;margin-top:3px}
+.career-head button,.career-empty button{border:1px solid #313a47;background:#151a22;color:#e8ecf2;border-radius:9px;padding:7px 9px;font-size:9px;font-weight:800}
+.career-list{display:grid;gap:9px}
+.career-card{position:relative;display:grid;grid-template-columns:30px 1fr auto;gap:10px;padding:13px;border:1px solid #29323e;border-radius:14px;background:linear-gradient(145deg,#111720,#0d1117)}
+.career-rank{font-family:Georgia,serif;color:#c89453;font-size:11px;padding-top:3px}
+.career-category{font-size:8px;color:#b88d58;text-transform:uppercase;letter-spacing:.08em}
+.career-main h3{font-size:14px;margin:4px 0 4px}
+.career-tournament{font-size:10px;color:#9aa4b1}
+.career-meta{display:flex;gap:8px;align-items:center;margin-top:8px;font-size:9px;color:#6f7987}
+.career-meta strong{color:#e8edf4}
+.career-main p{font-size:10px;line-height:1.5;color:#8993a0;margin:8px 0 0}
+.career-actions{display:flex;flex-direction:column;gap:5px}
+.career-actions button{border:0;background:none;color:#6f7a89;font-size:8px;padding:2px}
+.career-actions button:last-child{color:#9b6268}
+.career-empty{padding:48px 20px;text-align:center;border:1px dashed #2b3440;border-radius:14px;color:#7f8997}
+.career-empty>span{display:block;font-size:25px;color:#c89453}
+.career-empty b{display:block;color:#e2e7ed;font-size:12px;margin:9px 0 5px}
+.career-empty p{font-size:10px;line-height:1.5;margin:0 0 13px}
