@@ -28,3 +28,63 @@
 .stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #222a35;border-bottom:1px solid #222a35;margin:16px 0 12px;padding:12px 0}.stats b{display:block;font-size:14px}.stats span{font-size:9px;color:#778191}.profile-edit{height:40px;width:100%;border:1px solid #303846;border-radius:12px;background:#171c24;color:#fff;font-weight:800;font-size:12px}
 .profile-tabs{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--line)}.profile-tabs button{height:46px;border:0;background:none;color:#7d8592;font-size:11px}.profile-tabs button.active{color:#fff;font-weight:800;border-bottom:2px solid #fff}.profile-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:2px 0 80px}.gallery-tile{aspect-ratio:1;background:linear-gradient(135deg,#23130e,#704025)}.gallery-tile.arena{background:linear-gradient(135deg,#21152a,#724222)}.gallery-tile.cards{background:linear-gradient(135deg,#112a28,#553025)}.gallery-tile.cat{background:radial-gradient(circle,#5f493b,#151618)}.gallery-tile.night{background:linear-gradient(135deg,#072a3b,#161019)}.gallery-tile.city{background:linear-gradient(135deg,#172336,#834328)}.gallery-tile.table{background:radial-gradient(circle,#184838,#0b1916)}.gallery-tile.orange{background:linear-gradient(135deg,#b04a1f,#23120c)}.gallery-tile.crowd{background:linear-gradient(135deg,#2a1830,#9b5e2f)}
 .profile-body{padding:9px 0 86px}.detail-post{border-bottom:1px solid var(--line)}.saved-state{min-height:260px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#747e8d;text-align:center;padding:30px}.saved-state b{color:#fff;margin:8px 0}.saved-state span{font-size:11px;max-width:240px}.saved-icon{font-size:32px}
+
+/* algorithm / following feed */
+.feed-context{
+  height:34px;display:flex;align-items:center;padding:0 13px;
+  color:#6f7988;font-size:9px;border-bottom:1px solid var(--line);
+  background:#080b0f
+}
+.following-end{
+  padding:28px 26px 34px;text-align:center;color:#727c8a
+}
+.following-end b{display:block;color:#d9dee6;font-size:12px;margin-bottom:6px}
+.following-end span{font-size:10px;line-height:1.5}
+
+/* notifications */
+.notification-screen{padding-bottom:88px}
+.notification-filter{
+  display:flex;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)
+}
+.notification-filter button{
+  border:1px solid #28313e;background:#11161e;color:#7e8896;
+  border-radius:999px;padding:6px 11px;font-size:9px
+}
+.notification-filter button.active{
+  background:#f3f4f6;color:#0b0e12;border-color:#f3f4f6;font-weight:850
+}
+.notification-group{padding-top:4px}
+.notification-group h3{
+  margin:10px 13px 5px;font-size:10px;color:#7b8594;font-weight:800
+}
+.notification-row{
+  min-height:68px;display:grid;grid-template-columns:42px 1fr auto;
+  align-items:center;gap:10px;padding:10px 13px;border-bottom:1px solid #1d242e;
+  position:relative;background:#080b0f
+}
+.notification-row.unread{background:#0d1219}
+.notification-row.unread:before{
+  content:"";position:absolute;left:4px;top:50%;transform:translateY(-50%);
+  width:4px;height:4px;border-radius:50%;background:#ff4f83
+}
+.notice-avatar{
+  width:40px;height:40px;border-radius:50%;box-shadow:0 0 0 1px #303947
+}
+.notice-copy{min-width:0;font-size:11px;line-height:1.45;color:#cfd5de}
+.notice-copy b{color:#fff}
+.notice-copy span{display:block;color:#6f7988;font-size:9px;margin-top:4px}
+.notice-preview{
+  width:34px;height:42px;border-radius:6px;background:#f2f3f5;color:#111;
+  display:grid;place-items:center;font-size:10px;font-weight:900
+}
+.notice-heart,.notice-save{width:34px;text-align:center;color:#ff5a8b;font-size:19px}
+.notice-save{color:#9ba5b3}
+.notice-follow,.notice-detail{
+  border:0;border-radius:999px;background:#f1f3f6;color:#0b0e12;
+  font-size:9px;font-weight:850;padding:7px 10px
+}
+.notice-detail{background:#171d26;color:#cdd3dc;border:1px solid #303947}
+.notice-event-icon{
+  width:40px;height:40px;border-radius:11px;display:grid;place-items:center;
+  background:linear-gradient(145deg,#6a351d,#25150f);color:#ffbf76;font-size:18px
+}
