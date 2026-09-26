@@ -232,3 +232,103 @@
 .room-feed-post .room-view-btn{margin-bottom:9px}
 .explore-room-post{border:1px solid #252e39;border-radius:13px;overflow:hidden;margin-bottom:10px}
 .explore-room-post .room-social-card{margin:0 10px 10px}
+
+/* v23 activity-first poker profile */
+.activity-profile{background:#080b0f}
+.compact-profile-hero{padding:19px 18px 14px;text-align:center}
+.compact-profile-hero .profile-avatar{
+  width:88px;height:88px;margin:0 auto 10px;
+  box-shadow:0 0 0 2px #252e3a,0 0 0 4px #b25c86
+}
+.compact-profile-hero .profile-name{font-size:20px;font-weight:900;margin-top:4px}
+.compact-profile-hero .profile-handle{font-size:10px;color:#737d8b;margin-top:4px}
+.compact-profile-hero .bio{
+  max-width:330px;margin:14px auto 11px;font-size:11px;line-height:1.55;color:#d8dde4
+}
+.identity-tags{margin-top:0;gap:6px}
+.identity-tags span{
+  display:inline-flex;align-items:center;min-height:25px;
+  padding:5px 8px;border-radius:999px;background:#151b23;
+  border:1px solid #29323e;color:#b8c0cb;font-size:8px
+}
+.identity-tags .homepub-tag{color:#c5b08d;border-color:#3a3329;background:#17140f}
+.compact-stats{
+  grid-template-columns:repeat(3,1fr);margin:15px 0 11px;padding:11px 0
+}
+.compact-stats>div,.compact-stats>button{border:0;background:none;color:#fff;padding:0}
+.compact-stats b{font-size:13px}.compact-stats span{display:block;font-size:8px;color:#76808e;margin-top:3px}
+.three-tabs{grid-template-columns:repeat(3,1fr)}
+.three-tabs button{font-size:10px}
+
+.profile-timeline{padding:0 0 86px}
+.profile-timeline-card{
+  background:#090d12;border-bottom:7px solid #06090d;
+  padding-top:1px
+}
+.profile-post-meta{
+  display:flex;align-items:center;gap:9px;padding:11px 13px 5px
+}
+.profile-post-avatar{width:32px;height:32px;border-radius:50%;flex:0 0 auto}
+.profile-post-meta b{font-size:10px}.profile-post-meta span{font-size:9px;color:#727c89;margin-left:4px}
+.profile-post-text{
+  padding:7px 13px 12px;font-size:12px;line-height:1.58;color:#e6e9ee
+}
+.profile-post-media{margin:0 12px 7px}
+.profile-post-media .poker-photo{margin:0;height:188px}
+.profile-timeline-card .post-actions{border-top:1px solid #202832}
+.profile-timeline-card.room-timeline-card .room-social-card{margin:0 12px 8px}
+
+.profile-timeline-empty{
+  min-height:260px;padding:55px 26px 90px;text-align:center;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;color:#727d8a
+}
+.profile-timeline-empty b{color:#dde2e9;font-size:12px;margin-bottom:6px}
+.profile-timeline-empty span{font-size:9px;line-height:1.5;max-width:270px}
+
+.profile-hand-summary{padding-top:1px}
+.hand-summary-body{
+  display:block;width:calc(100% - 24px);margin:0 12px 8px;padding:11px;
+  border:1px solid #29323d;background:#111720;color:#fff;border-radius:12px;text-align:left
+}
+.hand-summary-kicker{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.hand-summary-kicker span{
+  font-size:8px;font-weight:900;color:#e4bb78;background:#211a10;border:1px solid #493a24;
+  border-radius:999px;padding:4px 7px
+}
+.hand-summary-kicker b{font-size:8px;color:#8d97a4;font-weight:700}
+.hand-summary-cards{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
+.hand-summary-cards small{display:block;font-size:6px;color:#66717e;margin-bottom:5px}
+.hand-summary-cards .playing-card{width:27px;height:38px;font-size:11px}
+.hand-summary-cards .playing-card span{font-size:11px}
+.hand-board{min-width:0}.hand-board .cards-row{overflow:hidden}
+.hand-summary-action{
+  margin-top:10px;padding-top:8px;border-top:1px solid #252e39;
+  color:#9ba5b2;font-size:8px;line-height:1.45;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.hand-summary-more{
+  display:flex;justify-content:flex-end;align-items:center;gap:5px;
+  margin-top:9px;color:#a99cff;font-size:8px;font-weight:800
+}
+.hand-summary-more span{font-size:12px}
+
+.hand-detail-screen{min-height:calc(100dvh - 58px);background:#080b0f;padding-bottom:24px}
+.hand-detail-post{padding-top:3px}
+.hand-detail-post .hh-card{margin-top:4px}
+.hand-detail-breakdown{
+  margin:10px 12px 12px;border:1px solid #28313d;border-radius:12px;background:#0f151c;overflow:hidden
+}
+.hand-detail-breakdown>div{padding:10px 11px;border-bottom:1px solid #222a34}
+.hand-detail-breakdown>div:last-child{border-bottom:0}
+.hand-detail-breakdown small{display:block;color:#697482;font-size:6px;margin-bottom:4px}
+.hand-detail-breakdown b{display:block;color:#dce1e7;font-size:9px;line-height:1.45}
+
+.profile-career-section{padding-top:14px}
+.activity-career-card{
+  grid-template-columns:30px 1fr auto;background:linear-gradient(145deg,#111720,#0d1117)
+}
+.activity-career-card .career-category{display:flex;align-items:center;gap:6px}
+.career-verified{
+  font-size:6px;padding:3px 5px;border-radius:999px;background:#173022;color:#74d69b;
+  letter-spacing:0;text-transform:none
+}
+.activity-career-card .career-meta span{font-variant-numeric:tabular-nums}
