@@ -234,6 +234,16 @@ function wire(){
   document.querySelectorAll('[data-open-hand-detail]').forEach(b=>b.onclick=()=>{state.handReturnView=state.view;state.view='hand:'+b.dataset.openHandDetail;render()});
   document.querySelectorAll('[data-hand-detail-back]').forEach(b=>b.onclick=()=>{state.view=state.handReturnView||'profile';render()});
 
+  const editAvatar=document.querySelector('[data-edit-avatar]');if(editAvatar)editAvatar.onclick=()=>{
+    if(!state.loggedIn){requireAuth('프로필 이미지를 변경하려면 로그인해 주세요.',{type:'view',view:'profile'});return}
+    state.modal='avatarPicker';render()
+  };
+  document.querySelectorAll('[data-select-avatar]').forEach(b=>b.onclick=()=>{
+    state.selectedCat=Number(b.dataset.selectAvatar);
+    localStorage.setItem('pokercat_cat',String(state.selectedCat));
+    state.modal=null;render();toast('포커캣을 변경했어요')
+  });
+
   const editProfile=document.querySelector('[data-edit-profile]');if(editProfile)editProfile.onclick=()=>{
     if(!state.loggedIn){requireAuth('프로필을 편집하려면 로그인해 주세요.',{type:'view',view:'profile'});return}
     state.modal='profileEdit';render()
