@@ -1,5 +1,11 @@
 function wire(){
-  document.querySelectorAll('[data-auth]').forEach(b=>b.onclick=()=>{state.onboardStep=1;render()});
+  document.querySelectorAll('[data-auth]').forEach(b=>b.onclick=()=>{state.onboardStep=1;state.authMode='login';render()});
+  const signup=document.querySelector('[data-open-signup]'); if(signup) signup.onclick=()=>{state.authMode='signup';render()};
+  const authBack=document.querySelector('[data-auth-back]'); if(authBack) authBack.onclick=()=>{state.authMode='login';render()};
+  const login=document.querySelector('[data-login-demo]'); if(login) login.onclick=()=>{
+    localStorage.setItem('pokercat_onboarded','1');
+    state.onboarding=true;state.view='home';render();
+  };
   document.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{state.selectedCat=Number(b.dataset.cat);render()});
   const next=document.querySelector('[data-next-onboard]'); if(next) next.onclick=()=>{state.onboardStep=2;render()};
   const finish=document.querySelector('[data-finish-onboard]'); if(finish) finish.onclick=()=>{
@@ -49,7 +55,7 @@ function wire(){
   };
   const reset=document.querySelector('[data-reset]'); if(reset) reset.onclick=()=>{
     localStorage.removeItem('pokercat_onboarded');
-    state.onboarding=false;state.onboardStep=0;render();
+    state.onboarding=false;state.onboardStep=0;state.authMode='login';render();
   };
 }
 
