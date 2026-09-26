@@ -33,7 +33,10 @@ const state = {
   composeMode:'post',
   handDraft:{hero:['',''],flop:['','',''],turn:[''],river:['']},
   cardTarget:null,
-  cardRank:null
+  cardRank:null,
+  composeText:'',
+  handMeta:{game:'MTT',players:'8-max',pos:'BTN',stack:'38BB',blind:'1K / 2K / 2K'},
+  handActions:{pre:'',flop:'',turn:'',river:''}
 };
 
 function themeInit(){
