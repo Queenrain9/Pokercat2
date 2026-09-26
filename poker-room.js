@@ -83,17 +83,12 @@ function roomGameLabel(room){return room?.game==='NLH'?'NL Hold’em':room?.game
 function roomStackLabel(room){return (room?.startStack||40)+'BB'}
 function roomStatusLabel(room){return room?.status==='playing'?'PLAYING':'OPEN'}
 
-function pokerRoomFeedCard(room,context='feed'){
+function pokerRoomEmbed(room,context='feed'){
   if(!room)return '';
-  const host=getUser(room.hostId);
   const seated=roomSeatCount(room);
   const privateLabel=room.visibility==='private'?'<span class="room-private-badge">🔒 PRIVATE</span>':'<span class="room-open-badge">● OPEN</span>';
   return `<div class="room-social-card ${context==='explore'?'explore-room-card':''}">
-    <div class="room-social-top">
-      <div class="room-host-avatar">${catAvatar(host.cat,'room-card-avatar')}</div>
-      <div><small>${escapeHtml(host.name)} opened a table</small><b>${escapeHtml(room.name)}</b></div>
-      ${privateLabel}
-    </div>
+    <div class="room-social-roomline"><b>${escapeHtml(room.name)}</b>${privateLabel}</div>
     <div class="room-card-table-art">
       <div class="mini-table"><span>♠</span><b>${roomGameLabel(room)}</b></div>
       <div class="mini-seats">${Array.from({length:Math.min(room.maxPlayers,6)},(_,i)=>`<i class="${room.seats[i]?'filled':''}"></i>`).join('')}</div>
@@ -105,6 +100,24 @@ function pokerRoomFeedCard(room,context='feed'){
     </div>
     <button class="room-view-btn" data-open-room="${room.id}">게임 보기 <i>›</i></button>
   </div>`;
+}
+
+function pokerRoomFeedCard(room,context='feed'){
+  if(!room)return '';
+  const host=getUser(room.hostId);
+  if(context==='explore'){
+    return `<article class="feed-post room-feed-post explore-room-post">
+      ${userRow(room.hostId)}
+      <div class="post-text"><b>${escapeHtml(host.name)}</b>님이 포커 테이블을 열었어요.</div>
+      ${pokerRoomEmbed(room,'explore')}
+    </article>`;
+  }
+  return `<article class="feed-post room-feed-post">
+    ${userRow(room.hostId)}
+    <div class="post-text"><b>${escapeHtml(host.name)}</b>님이 포커 테이블을 열었어요.<br><span class="room-post-caption">지금 입장해서 같이 플레이할 수 있어요.</span></div>
+    ${pokerRoomEmbed(room,'feed')}
+    ${actions('room-'+room.id,12,3)}
+  </article>`;
 }
 
 function roomSeatPositions(max){
