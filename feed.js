@@ -6,14 +6,6 @@ function userRow(key){
     <button class="more-btn">•••</button>
   </div>`;
 }
-function storyRow(){
-  const users=['queenbee','riverkim','minraise','chiplee','ninehigh'];
-  return `<div class="story-strip">${users.map((k,i)=>`<button class="story" data-user="${k}"><span class="story-ring">${catAvatar(demoUsers[k].cat,'story-cat')}</span><small>${i===0?'내 스토리':demoUsers[k].name}</small></button>`).join('')}</div>`;
-}
-function feedTabs(){
-  const tabs=[['all','전체'],['following','팔로잉'],['hands','핸드'],['tournaments','대회'],['live','라이브'],['pubs','펍']];
-  return `<div class="feed-tabs">${tabs.map(t=>`<button class="${state.feedTab===t[0]?'active':''}" data-feed-tab="${t[0]}">${t[1]}</button>`).join('')}</div>`;
-}
 function cards(list){
   return (list||[]).map(c=>`<div class="playing-card ${/[♥♦]/.test(c)?'red':''}"><b>${c.slice(0,-1)}</b><span>${c.slice(-1)}</span></div>`).join('');
 }
@@ -38,15 +30,58 @@ function pokerPhoto(type='chips'){
   return `<div class="poker-photo ${type}"><div class="felt"></div><div class="chip-stack c1"></div><div class="chip-stack c2"></div><div class="chip-stack c3"></div><div class="table-card a">A♠</div><div class="table-card k">K♥</div><div class="photo-shine"></div></div>`;
 }
 function homeView(){
+  const algorithmPosts=`
+    <article class="feed-post">${userRow('riverkim')}<div class="post-text">오늘은 확실히 리드 잘 잡혔다<br>후반에 좀 아쉬운 스팟이 있었지만 전체적으로 굿<br>내일도 화이팅 🐱</div>${pokerPhoto('night')}${actions('p1',32,7)}</article>
+    <article class="feed-post">${userRow('queenbee')}<div class="post-text">핸드 히스토리 하나 공유해요<br>여러분은 턴에서 어떤 라인 가시나요?</div>${hhCard(handA)}${actions('p2',42,18)}</article>
+    <article class="feed-post">${userRow('minraise')}<div class="post-text">대회 끝나고 느낀 점. 오늘도 한 단계 배웠다.</div>${pokerPhoto('warm')}${actions('p3',76,31)}</article>
+  `;
+  const followingPosts=`
+    <article class="feed-post">${userRow('riverkim')}<div class="post-text">오늘은 확실히 리드 잘 잡혔다<br>후반에 좀 아쉬운 스팟이 있었지만 전체적으로 굿<br>내일도 화이팅 🐱</div>${pokerPhoto('night')}${actions('fp1',32,7)}</article>
+    <div class="following-end"><b>팔로잉 피드의 끝이에요</b><span>지금 팔로우한 플레이어의 최신 게시물만 보여주고 있어요.</span></div>
+  `;
   return `<section class="home-screen">
-    ${storyRow()}${feedTabs()}
-    <div class="feed-list">
-      <article class="feed-post">${userRow('riverkim')}<div class="post-text">오늘은 확실히 리드 잘 잡혔다<br>후반에 좀 아쉬운 스팟이 있었지만 전체적으로 굿<br>내일도 화이팅 🐱</div>${pokerPhoto('night')}${actions('p1',32,7)}</article>
-      <article class="feed-post">${userRow('queenbee')}<div class="post-text">핸드 히스토리 하나 공유해요<br>여러분은 턴에서 어떤 라인 가시나요?</div>${hhCard(handA)}${actions('p2',42,18)}</article>
-      <article class="feed-post">${userRow('minraise')}<div class="post-text">대회 끝나고 느낀 점. 오늘도 한 단계 배웠다.</div>${pokerPhoto('warm')}${actions('p3',76,31)}</article>
+    <div class="feed-context">${state.feedMode==='following'?'팔로잉 중인 플레이어':'추천 피드'}</div>
+    <div class="feed-list">${state.feedMode==='following'?followingPosts:algorithmPosts}</div>
+  </section>`;
+}
+
+function notificationView(){
+  return `<section class="notification-screen">
+    <div class="notification-filter"><button class="active">전체</button><button>활동</button><button>일정</button></div>
+    <div class="notification-group">
+      <h3>오늘</h3>
+      <article class="notification-row unread">
+        ${catAvatar('shark','notice-avatar')}
+        <div class="notice-copy"><b>riverkim</b>님이 회원님의 핸드에 댓글을 남겼어요.<span>“턴에서는 작은 사이즈도 좋아 보여요.” · 12분</span></div>
+        <div class="notice-preview hand">A♠</div>
+      </article>
+      <article class="notification-row unread">
+        ${catAvatar('solver','notice-avatar')}
+        <div class="notice-copy"><b>minraise</b>님이 회원님의 게시물을 좋아합니다.<span>34분</span></div>
+        <div class="notice-heart">♥</div>
+      </article>
+      <article class="notification-row">
+        ${catAvatar('grinder','notice-avatar')}
+        <div class="notice-copy"><b>chiplee</b>님이 회원님을 팔로우하기 시작했어요.<span>1시간</span></div>
+        <button class="notice-follow" data-follow="chiplee">팔로우</button>
+      </article>
+    </div>
+    <div class="notification-group">
+      <h3>이번 주</h3>
+      <article class="notification-row event-notice">
+        <div class="notice-event-icon">♠</div>
+        <div class="notice-copy"><b>HPT Premium Day1A</b>가 곧 시작돼요.<span>09.12 (토) 12:00 · 5일 전 알림</span></div>
+        <button class="notice-detail" data-nav="schedule">보기</button>
+      </article>
+      <article class="notification-row">
+        ${catAvatar('rock','notice-avatar')}
+        <div class="notice-copy"><b>ninehigh</b>님이 회원님의 핸드를 저장했어요.<span>2일</span></div>
+        <div class="notice-save">⌑</div>
+      </article>
     </div>
   </section>`;
 }
+
 function exploreView(){
   const tabs=[['popular','인기'],['latest','최신'],['hands','핸드'],['events','대회'],['pubs','펍'],['users','유저']];
   return `<section class="explore-screen">
