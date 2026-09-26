@@ -45,7 +45,36 @@ if(!storedHomePub&&legacyBrand&&legacyBranch){
   storedHomePub={id:pubId(legacyBrand,legacyBranch),brand:legacyBrand,branch:legacyBranch,status:'unverified',verification:{provider:'legacy-import',partnerId:null,verifiedAt:null}};
   saveJSON('pokercat_home_pub_v1',storedHomePub);
 }
-const storedCareer=loadJSON('pokercat_career_highs_v1',[]);
+const CAREER_STORAGE_KEY='pokercat_career_highs_v1';
+function normalizeCareerRecord(item,index=0){
+  if(!item||typeof item!=='object')return null;
+  const source={...item};
+  const title=String(source.title??'').trim();
+  const fallbackTitle=String(source.tournamentName||source.category||source.prize||'').trim();
+  if(!title&&!fallbackTitle&&!String(source.description||'').trim())return null;
+  const verification=source.verification&&typeof source.verification==='object'
+    ?{status:'unverified',provider:null,verifiedAt:null,...source.verification}
+    :{status:'unverified',provider:null,verifiedAt:null};
+  return {
+    ...source,
+    id:String(source.id||('career-legacy-'+(index+1))),
+    title:title||fallbackTitle||'커리어',
+    category:String(source.category||'기타').trim()||'기타',
+    tournamentName:String(source.tournamentName||'').trim(),
+    date:String(source.date||'').trim(),
+    prize:String(source.prize||'').trim(),
+    description:String(source.description||'').trim(),
+    imageUrl:source.imageUrl||source.photoUrl||null,
+    verification,
+    createdAt:source.createdAt||null,
+    updatedAt:source.updatedAt||source.createdAt||null
+  };
+}
+function normalizeCareerHighs(value){
+  if(!Array.isArray(value))return [];
+  return value.map((item,index)=>normalizeCareerRecord(item,index)).filter(Boolean);
+}
+const storedCareer=normalizeCareerHighs(loadJSON(CAREER_STORAGE_KEY,[]));
 const storedFollowing=loadJSON('pokercat_following_v1',['riverkim']);
 const storedFollowers=loadJSON('pokercat_followers_v1',['riverkim','chiplee']);
 const storedSavedRoomSettings=loadJSON('pokercat_room_saved_settings_v1',[]);
@@ -150,7 +179,7 @@ function myUser(){return {name:state.nickname,handle:'@queenbee',cat:state.selec
 function getUser(key){return key==='queenbee'?(state.loggedIn?myUser():demoUsers.queenbee):(demoUsers[key]||demoUsers.riverkim)}
 function persistRelationships(){saveJSON('pokercat_following_v1',[...state.following]);saveJSON('pokercat_followers_v1',[...state.followers])}
 function persistHomePub(){saveJSON('pokercat_home_pub_v1',state.homePub)}
-function persistCareerHighs(){saveJSON('pokercat_career_highs_v1',state.careerHighs)}
+function persistCareerHighs(){state.careerHighs=normalizeCareerHighs(state.careerHighs);saveJSON(CAREER_STORAGE_KEY,state.careerHighs)}
 function persistRooms(){saveJSON('pokercat_rooms_v1',state.rooms)}
 function persistRoomInvites(){saveJSON('pokercat_room_invites_v1',state.roomInvites)}
 function persistSavedRoomSettings(){saveJSON('pokercat_room_saved_settings_v1',state.savedRoomSettings)}
