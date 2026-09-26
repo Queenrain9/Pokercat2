@@ -25,7 +25,7 @@ function actions(id,likes,comments){
   return `<div class="post-actions">
     <button class="${liked?'liked':''}" data-like="${id}">${liked?'♥':'♡'} ${likes+(liked?1:0)}</button>
     <button>◯ ${comments}</button><span class="post-spacer"></span>
-    <button data-toast="저장했어요">⌑</button><button data-toast="공유 링크를 준비했어요">↗</button>
+    <button data-save-post="${id}">⌑</button><button data-toast="공유 링크를 준비했어요">↗</button>
   </div>`;
 }
 function pokerPhoto(type='chips'){
@@ -35,7 +35,7 @@ function visibleRoomCards(filter='all'){
   return state.rooms
     .filter(r=>r.status!=='closed')
     .filter(r=>filter==='following'?state.following.has(r.hostId):true)
-    .filter(r=>r.visibility==='public'||r.hostId==='queenbee'||r.invitedUserIds.includes('queenbee'))
+    .filter(r=>r.visibility==='public'||(state.loggedIn&&(r.hostId==='queenbee'||r.invitedUserIds.includes('queenbee'))))
     .filter(r=>r.feedPublished||filter==='explore')
     .map(r=>pokerRoomFeedCard(r,filter==='explore'?'explore':'feed')).join('');
 }
@@ -158,7 +158,7 @@ function scheduleView(){
 
 function pokerRoomExploreViewV1(){
   const tabs=[['popular','인기'],['rooms','포커룸'],['latest','최신'],['hands','핸드'],['events','대회'],['pubs','펍'],['users','유저']];
-  const roomList=state.rooms.filter(r=>r.status!=='closed'&&(r.visibility==='public'||r.hostId==='queenbee'||r.invitedUserIds.includes('queenbee')));
+  const roomList=state.rooms.filter(r=>r.status!=='closed'&&(r.visibility==='public'||(state.loggedIn&&(r.hostId==='queenbee'||r.invitedUserIds.includes('queenbee')))));
   const body=state.exploreTab==='rooms'
     ?`<div class="explore-room-section">
         <div class="explore-room-head"><div><b>진행 중인 포커룸</b><span>호스트와 설정을 확인하고 같은 Poker Room으로 입장해요.</span></div><button data-create-game>＋ 만들기</button></div>
