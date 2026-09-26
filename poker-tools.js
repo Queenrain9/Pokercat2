@@ -50,7 +50,7 @@ function pokerToolsHubView(){
         </button>
       `).join('')}
     </div>
-    <div class="tools-note">현재는 UI 구조와 입력/결과 영역 중심의 베타 셸입니다.</div>
+    <div class="tools-note">Poker Tools는 도구별로 실제 계산 기능을 단계적으로 연결하고 있어요.</div>
   </section>`;
 }
 
@@ -126,32 +126,65 @@ function bankrollToolView(){
   </section>`;
 }
 
+function calculatePokerOdds(potSize,callAmount,outs){
+  const potRaw=String(potSize??'').trim();
+  const callRaw=String(callAmount??'').trim();
+  const outsRaw=String(outs??'').trim();
+  const pot=Number(potRaw),call=Number(callRaw),outCount=Number(outsRaw);
+
+  const potValid=potRaw!==''&&callRaw!==''&&Number.isFinite(pot)&&Number.isFinite(call)&&pot>=0&&call>=0&&(pot+call)>0;
+  const outsValid=outsRaw!==''&&Number.isFinite(outCount)&&Number.isInteger(outCount)&&outCount>=0&&outCount<=47;
+
+  const potResult=potValid?{
+    ratio:call===0?Infinity:pot/call,
+    requiredEquity:(call/(pot+call))*100
+  }:null;
+
+  let outsResult=null;
+  if(outsValid){
+    const turn=(outCount/47)*100;
+    const missTurn=(47-outCount)/47;
+    const missRiver=Math.max(0,46-outCount)/46;
+    const river=(1-(missTurn*missRiver))*100;
+    outsResult={
+      turn:Math.min(100,Math.max(0,turn)),
+      river:Math.min(100,Math.max(0,river))
+    };
+  }
+
+  return {pot:potResult,outs:outsResult};
+}
+
+function formatPotOddsRatio(value){
+  return Number.isFinite(value)?value.toFixed(2)+' : 1':'∞ : 1';
+}
+
 function oddsToolView(){
   return `<section class="tools-screen tool-detail">
     <div class="tool-intro"><span>%</span><div><b>Poker Odds Calculator</b><small>Pot Odds · Required Equity · Outs</small></div></div>
     <div class="tool-panel">
       ${toolSectionTitle('Pot Odds')}
       <div class="tool-form-row">
-        <label class="tool-input-label">Pot Size<input type="number" placeholder="예: 12000"></label>
-        <label class="tool-input-label">Call Amount<input type="number" placeholder="예: 4000"></label>
+        <label class="tool-input-label">Pot Size<input id="oddsPotSize" type="number" inputmode="decimal" min="0" step="any" placeholder="예: 12000"></label>
+        <label class="tool-input-label">Call Amount<input id="oddsCallAmount" type="number" inputmode="decimal" min="0" step="any" placeholder="예: 4000"></label>
       </div>
       <div class="tool-result-grid">
-        <div><small>Pot Odds</small><b>--%</b></div>
-        <div><small>Required Equity</small><b>--%</b></div>
+        <div><small>Pot Odds</small><b id="oddsPotOdds">--</b></div>
+        <div><small>Required Equity</small><b id="oddsRequiredEquity">--%</b></div>
       </div>
+      <div class="range-placeholder-note">Pot Size는 콜하기 직전 현재 팟 기준</div>
     </div>
     <div class="tool-panel">
       ${toolSectionTitle('Outs')}
-      <label class="tool-input-label">Outs<input type="number" placeholder="예: 9"></label>
+      <label class="tool-input-label">Outs<input id="oddsOuts" type="number" inputmode="numeric" min="0" max="47" step="1" placeholder="예: 9"></label>
       <div class="tool-result-grid">
-        <div><small>Turn 완성</small><b>--%</b></div>
-        <div><small>River까지</small><b>--%</b></div>
+        <div><small>Turn 완성</small><b id="oddsTurnChance">--%</b></div>
+        <div><small>River까지</small><b id="oddsRiverChance">--%</b></div>
       </div>
-      ${placeholderCard('Odds 결과')}
+      <div class="range-placeholder-note">플랍 기준 정확 확률 · Turn 47장, River 46장 미지 카드 기준</div>
     </div>
   </section>`;
 }
-
 function rangeToolView(){
   const ranks=['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
   const cells=[];
