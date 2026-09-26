@@ -61,7 +61,7 @@ function wire(){
     if(room.hostId==='queenbee'){toast('호스트는 현재 버전에서 테이블을 나갈 수 없어요');return}
     const idx=room.seats.indexOf('queenbee');if(idx>=0)room.seats[idx]=null;persistRooms();render();toast('테이블에서 나왔어요');
   });
-  document.querySelectorAll('[data-invite-room]').forEach(b=>b.onclick=()=>{state.currentRoomId=b.dataset.inviteRoom;state.roomInviteMode='friends';state.modal='roomInvite';render()});
+  document.querySelectorAll('[data-invite-room]').forEach(b=>b.onclick=()=>{state.currentRoomId=b.dataset.inviteRoom;state.roomInviteMode='followers';state.modal='roomInvite';render()});
   document.querySelectorAll('[data-invite-source]').forEach(b=>b.onclick=()=>{state.roomInviteMode=b.dataset.inviteSource;render()});
   document.querySelectorAll('[data-send-room-invite]').forEach(b=>b.onclick=()=>{
     const room=getRoom(state.currentRoomId),toUserId=b.dataset.sendRoomInvite;if(!room||room.hostId!=='queenbee')return;
