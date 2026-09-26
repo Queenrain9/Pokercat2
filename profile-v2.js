@@ -183,6 +183,6 @@ function careerCard(item,mine,index){
 }
 
 function bottomNav(){
-  if(state.view.startsWith('hand:'))return '';
+  if(state.view.startsWith('hand:')||state.view==='tools'||state.view.startsWith('tool:'))return '';
   return pokerRoomBottomNavV1();
 }
