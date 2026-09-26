@@ -182,3 +182,86 @@ function pokerRoomExploreViewV1(){
   </section>`;
 }
 function exploreView(){return pokerRoomExploreViewV1()}
+
+function feedSelectorModal(){
+  const hp=verifiedHomePub(myUser());
+  const homePubLabel=hp?`${escapeHtml(hp.brand)} ${escapeHtml(hp.branch)}`:'Home Pub 미등록';
+  return `<div class="modal-backdrop" data-close-modal>
+    <div class="sheet feed-selector-sheet" onclick="event.stopPropagation()">
+      <div class="grab"></div>
+      <div class="sheet-title">피드 선택</div>
+      <button class="feed-selector-option ${state.feedMode==='algorithm'?'active':''}" data-feed-mode="algorithm">
+        <span>✦</span><div><b>추천</b><small>내 활동을 기반으로 추천되는 전체 PokerCat 피드</small></div><i>✓</i>
+      </button>
+      <button class="feed-selector-option ${state.feedMode==='following'?'active':''}" data-feed-mode="following">
+        <span>✓</span><div><b>팔로잉</b><small>내가 팔로우한 플레이어의 게시물만 보기</small></div><i>✓</i>
+      </button>
+      <button class="feed-selector-option ${state.feedMode==='homepub'?'active':''}" data-feed-mode="homepub">
+        <span>🏠</span><div><b>Home Pub</b><small>${homePubLabel}</small></div><i>✓</i>
+      </button>
+    </div>
+  </div>`;
+}
+
+function homePubFeedBundle(){
+  const hp=verifiedHomePub(myUser());
+  if(!hp)return {hp:null,members:[],posts:''};
+  const memberKeys=['queenbee',...Object.keys(demoUsers).filter(k=>verifiedHomePub(demoUsers[k])?.id===hp.id)];
+  const members=[...new Set(memberKeys)];
+  const otherKeys=members.filter(k=>k!=='queenbee');
+  const roomPosts=state.rooms
+    .filter(r=>r.status!=='closed'&&roomAudienceType(r)==='homepub'&&roomVisibleToViewer(r,'homepub'))
+    .map(r=>pokerRoomFeedCard(r,'feed')).join('');
+  const regularPosts=otherKeys.map((k,i)=>`<article class="feed-post">
+    ${userRow(k)}
+    <div class="post-text">${i===0?'오늘 저녁 야자수 서울센터점에서 세션 들어갑니다. 같은 지점 분들 테이블에서 봬요 🐱':'어제 세션에서 재밌는 핸드가 하나 있었어요. 지점 분들 의견 궁금합니다.'}</div>
+    ${i===0?pokerPhoto('warm'):hhCard(handB)}
+    ${actions('homepub-'+k,21+i*8,5+i)}
+  </article>`).join('');
+  return {hp,members,posts:roomPosts+regularPosts};
+}
+
+function homePubInlineFeed(){
+  const bundle=homePubFeedBundle();
+  if(!bundle.hp){
+    return `<div class="homepub-inline-empty">
+      <span>🏠</span><b>Home Pub 피드를 사용하려면 Home Pub이 필요해요.</b>
+      <small>프로필 편집에서 대표 지점을 등록하고 인증해 주세요.</small>
+      <button data-edit-profile>Home Pub 설정</button>
+    </div>`;
+  }
+  return `<div class="homepub-inline">
+    <div class="homepub-inline-head">
+      <div><small>HOME PUB FEED</small><b>🏠 ${escapeHtml(bundle.hp.brand)} ${escapeHtml(bundle.hp.branch)}</b></div>
+      <span>${bundle.members.length}명</span>
+    </div>
+    <div class="homepub-inline-members">
+      ${bundle.members.slice(0,6).map(k=>`<button data-user="${k}">${catAvatar(getUser(k).cat,'homepub-member-avatar')}</button>`).join('')}
+      <em>같은 Home Pub 인증 사용자</em>
+    </div>
+    <div class="feed-list">${bundle.posts||'<div class="homepub-empty"><b>아직 이 지점의 게시물이 없어요.</b><span>같은 Home Pub 플레이어의 게시물이 여기에 모입니다.</span></div>'}</div>
+  </div>`;
+}
+
+function homeView(){
+  const roomCards=visibleRoomCards('all');
+  const followedRoomCards=visibleRoomCards('following');
+  const algorithmPosts=`
+    <article class="feed-post">${userRow('riverkim')}<div class="post-text">오늘은 확실히 리드 잘 잡혔다<br>후반에 좀 아쉬운 스팟이 있었지만 전체적으로 굿<br>내일도 화이팅 🐱</div>${pokerPhoto('night')}${actions('p1',32,7)}</article>
+    ${roomCards}
+    <article class="feed-post">${userRow('queenbee')}<div class="post-text">핸드 히스토리 하나 공유해요<br>여러분은 턴에서 어떤 라인 가시나요?</div>${hhCard(handA)}${actions('p2',42,18)}</article>
+    <article class="feed-post">${userRow('minraise')}<div class="post-text">대회 끝나고 느낀 점. 오늘도 한 단계 배웠다.</div>${pokerPhoto('warm')}${actions('p3',76,31)}</article>
+  `;
+  const followingPosts=`
+    <article class="feed-post">${userRow('riverkim')}<div class="post-text">오늘은 확실히 리드 잘 잡혔다<br>후반에 좀 아쉬운 스팟이 있었지만 전체적으로 굿<br>내일도 화이팅 🐱</div>${pokerPhoto('night')}${actions('fp1',32,7)}</article>
+    ${followedRoomCards}
+    <div class="following-end"><b>팔로잉 피드의 끝이에요</b><span>지금 팔로우한 플레이어의 최신 게시물만 보여주고 있어요.</span></div>
+  `;
+  if(state.feedMode==='homepub'){
+    return `<section class="home-screen"><div class="feed-context">Home Pub · ${escapeHtml(verifiedHomePub(myUser())?.brand||'')} ${escapeHtml(verifiedHomePub(myUser())?.branch||'')}</div>${homePubInlineFeed()}</section>`;
+  }
+  return `<section class="home-screen">
+    <div class="feed-context">${state.feedMode==='following'?'팔로잉 중인 플레이어':'추천 피드'}</div>
+    <div class="feed-list">${state.feedMode==='following'?followingPosts:algorithmPosts}</div>
+  </section>`;
+}
