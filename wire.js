@@ -120,16 +120,10 @@ function wire(){
     if(settings.blinds.smallBlind<=0||settings.blinds.bigBlind<=settings.blinds.smallBlind){toast('Big Blind는 Small Blind보다 커야 해요');return}
     if(settings.ante.mode!=='none'&&settings.ante.amount<=0){toast('Ante 칩을 설정해 주세요');return}
     if(draft.audience.type==='homepub'&&!verifiedHomePub(myUser())){toast('Home Pub 인증 후 선택할 수 있어요');return}
-    const id='room-'+Date.now(),tableId=id+'-table-1';
-    const room={
-      id,mode:'single-table',name,hostId:'queenbee',settings,audience:{type:draft.audience.type},
-      status:'lobby',
-      tables:[{id:tableId,status:'waiting',seats:Array.from({length:settings.maxPlayers},(_,i)=>i===0?'queenbee':null)}],
-      invitedUserIds:[],createdAt:new Date().toISOString(),
-      social:{externalShare:{enabled:false,token:null}},
-      tournament:{mode:'single-table',mttConfig:null}
-    };
-    state.rooms=[room,...state.rooms];persistRooms();state.currentRoomId=id;state.roomReturnView='home';state.roomDraft=null;state.view='room:'+id;render();toast('게임방을 만들었어요')
+    draft.roomName=name;draft.settings=settings;
+    const result=createPokerRoom(draft,currentUserId());
+    if(!result.ok){toast('게임방을 만들지 못했어요');return}
+    state.currentRoomId=result.room.id;state.roomReturnView='home';state.roomDraft=null;state.view='room:'+result.room.id;render();toast('게임방을 만들었어요')
   });
 
   document.querySelectorAll('[data-open-room]').forEach(b=>b.onclick=()=>{
@@ -142,12 +136,19 @@ function wire(){
     if(!state.loggedIn){requireAuth('대기방에서 자리에 앉으려면 로그인해 주세요.',{type:'joinRoom',id:b.dataset.joinRoom});return}
     joinRoomById(b.dataset.joinRoom)
   });
+  document.querySelectorAll('[data-take-room-seat]').forEach(b=>b.onclick=()=>{
+    if(!state.loggedIn){requireAuth('대기방에서 자리에 앉으려면 로그인해 주세요.',{type:'joinRoom',id:b.dataset.roomId});return}
+    joinRoomById(b.dataset.roomId,Number(b.dataset.takeRoomSeat))
+  });
   document.querySelectorAll('[data-leave-room]').forEach(b=>b.onclick=()=>{
     if(!state.loggedIn){requireAuth('게임방 기능을 사용하려면 로그인해 주세요.');return}
-    const room=getRoom(b.dataset.leaveRoom);if(!room)return;
-    if(room.hostId==='queenbee'){toast('방장은 대기방을 나가기 전에 방 종료 기능이 필요해요');return}
-    const seats=roomSeats(room),idx=seats.indexOf('queenbee');if(idx>=0)seats[idx]=null;
-    persistRooms();render();toast('자리에서 나왔어요')
+    const result=leaveRoomSeat(b.dataset.leaveRoom,currentUserId());
+    if(!result.ok){
+      if(result.code==='HOST_CANNOT_LEAVE')toast('방장은 방을 종료한 뒤 나갈 수 있어요');
+      else toast('지금은 자리에서 나갈 수 없어요');
+      return;
+    }
+    render();toast('자리에서 나왔어요')
   });
   document.querySelectorAll('[data-invite-room]').forEach(b=>b.onclick=()=>{
     if(!state.loggedIn){requireAuth('사용자를 초대하려면 로그인해 주세요.');return}
@@ -156,24 +157,45 @@ function wire(){
   document.querySelectorAll('[data-invite-source]').forEach(b=>b.onclick=()=>{state.roomInviteMode=b.dataset.inviteSource;render()});
   document.querySelectorAll('[data-send-room-invite]').forEach(b=>b.onclick=()=>{
     if(!state.loggedIn){requireAuth('사용자를 초대하려면 로그인해 주세요.');return}
-    const room=getRoom(state.currentRoomId),toUserId=b.dataset.sendRoomInvite;if(!room||room.hostId!=='queenbee')return;
-    if(!room.invitedUserIds.includes(toUserId))room.invitedUserIds.push(toUserId);
-    const exists=state.roomInvites.some(i=>i.roomId===room.id&&i.toUserId===toUserId&&i.status==='pending');
-    if(!exists)state.roomInvites.unshift({id:'invite-'+Date.now()+'-'+toUserId,roomId:room.id,fromUserId:'queenbee',toUserId,status:'pending',createdAt:new Date().toISOString()});
-    persistRooms();persistRoomInvites();render();toast(getUser(toUserId).name+'님을 초대했어요')
+    const room=getRoom(state.currentRoomId),toUserId=b.dataset.sendRoomInvite;if(!room)return;
+    const result=inviteUserToRoom(room.id,currentUserId(),toUserId);
+    if(!result.ok){toast(result.code==='ROOM_NOT_OPEN'?'대기 중인 방에서만 초대할 수 있어요':'초대할 수 없어요');return}
+    render();toast(getUser(toUserId).name+'님을 초대했어요')
   });
   document.querySelectorAll('[data-start-room]').forEach(b=>b.onclick=()=>{
     if(!state.loggedIn){requireAuth('게임을 시작하려면 로그인해 주세요.');return}
-    const room=getRoom(b.dataset.startRoom);if(!room||room.hostId!=='queenbee')return;
-    if(roomSeatCount(room)<2){toast('2명 이상 착석해야 시작할 수 있어요');return}
-    room.status='playing';const table=roomTable(room);if(table)table.status='playing';
-    persistRooms();render();toast('플레이머니 테이블을 시작했어요')
+    const result=startPokerRoom(b.dataset.startRoom,currentUserId());
+    if(!result.ok){
+      if(result.code==='NOT_ENOUGH_PLAYERS')toast('2명 이상 착석해야 시작할 수 있어요');
+      else if(result.code==='HOST_ONLY')toast('방장만 게임을 시작할 수 있어요');
+      else toast('지금은 게임을 시작할 수 없어요');
+      return;
+    }
+    render();toast('플레이머니 테이블을 시작했어요')
   });
   const roomMenu=document.querySelector('[data-room-menu]');if(roomMenu)roomMenu.onclick=()=>{
     if(!state.loggedIn){requireAuth('Poker Room 관리 기능을 사용하려면 로그인해 주세요.');return}
-    const room=getRoom(state.currentRoomId);
-    if(room?.hostId==='queenbee'){state.modal='roomInvite';render()}else toast('Room 메뉴는 다음 단계에서 확장해요')
+    if(!getRoom(state.currentRoomId)){toast('게임방을 찾을 수 없어요');return}
+    state.modal='roomManage';render()
   };
+  document.querySelectorAll('[data-manage-room-invite]').forEach(b=>b.onclick=()=>{
+    state.currentRoomId=b.dataset.manageRoomInvite;state.roomInviteMode='followers';state.modal='roomInvite';render()
+  });
+  document.querySelectorAll('[data-close-poker-room]').forEach(b=>b.onclick=()=>{
+    if(!window.confirm('이 Poker Room을 종료할까요? 참가자 좌석 기록은 유지됩니다.'))return;
+    const result=closePokerRoom(b.dataset.closePokerRoom,currentUserId());
+    if(!result.ok){toast('방을 종료할 수 없어요');return}
+    state.modal=null;render();toast('Poker Room을 종료했어요')
+  });
+  document.querySelectorAll('[data-accept-room-invite]').forEach(b=>b.onclick=()=>{
+    const roomId=b.dataset.acceptRoomInvite;
+    state.currentRoomId=roomId;state.roomReturnView=state.view;state.modal=null;state.view='room:'+roomId;
+    joinRoomById(roomId)
+  });
+  document.querySelectorAll('[data-decline-room-invite]').forEach(b=>b.onclick=()=>{
+    const result=declineRoomInvite(b.dataset.declineRoomInvite,currentUserId());
+    if(result.ok){render();toast('초대를 거절했어요')}else toast('처리할 초대를 찾을 수 없어요')
+  });
 
   document.querySelectorAll('[data-user]').forEach(b=>b.onclick=()=>{state.modal=null;state.view='user:'+b.dataset.user;render()});
 
@@ -597,14 +619,21 @@ function applyPendingAuth(pending){
   render();
 }
 
-function joinRoomById(id){
+function joinRoomById(id,seatIndex=null){
   const room=getRoom(id);if(!room)return;
   if(!canEnterRoom(room)){state.view='room:'+id;render();toast('이 게임방의 공개 대상이 아니에요');return}
   if(room.status==='playing'){state.view='room:'+id;render();toast('이미 시작된 게임은 현재 관전만 가능해요');return}
-  const seats=roomSeats(room);
-  if(seats.includes('queenbee')){state.view='room:'+id;render();toast('이미 착석 중이에요');return}
-  const idx=seats.findIndex(x=>!x);if(idx<0){state.view='room:'+id;render();toast('빈 좌석이 없어요');return}
-  seats[idx]='queenbee';persistRooms();state.view='room:'+id;render();toast('대기방에 착석했어요');
+  if(room.status==='closed'){state.view='room:'+id;render();toast('종료된 게임방이에요');return}
+  const result=takeRoomSeat(id,currentUserId(),seatIndex);
+  state.view='room:'+id;
+  if(!result.ok){
+    if(result.code==='ALREADY_SEATED')toast('이미 착석 중이에요');
+    else if(result.code==='SEAT_TAKEN')toast('방금 다른 참가자가 이 좌석에 앉았어요');
+    else if(result.code==='INVALID_SEAT')toast('선택할 수 없는 좌석이에요');
+    else toast('빈 좌석이 없어요');
+    render();return;
+  }
+  render();toast('SEAT '+(result.seatIndex+1)+'에 착석했어요');
 }
 
 function toast(msg){const old=document.querySelector('.toast');if(old)old.remove();const el=document.createElement('div');el.className='toast';el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),1700)}
