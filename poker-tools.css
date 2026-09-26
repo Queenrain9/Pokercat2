@@ -1,0 +1,137 @@
+/* Poker Tools product family */
+.profile-utility-sheet{padding-left:14px;padding-right:14px}
+.utility-menu-row{
+  width:100%;min-height:62px;border:1px solid #29323e;background:#0f151c;color:#fff;
+  border-radius:13px;display:grid;grid-template-columns:36px 1fr 16px;align-items:center;
+  gap:10px;padding:10px 11px;margin-top:7px;text-align:left
+}
+.utility-menu-icon{
+  width:34px;height:34px;border-radius:10px;background:#19212a;color:#d6b375;
+  display:grid;place-items:center;font-size:14px;font-weight:900
+}
+.utility-menu-row b{display:block;font-size:10px}
+.utility-menu-row small{display:block;font-size:8px;line-height:1.4;color:#747f8d;margin-top:3px}
+.utility-menu-row i{font-style:normal;color:#687482}
+
+.tools-screen{min-height:calc(100dvh - 58px);background:#080b0f;padding-bottom:28px}
+.tools-hero{
+  padding:22px 16px 15px;border-bottom:1px solid #202832;
+  background:radial-gradient(circle at 100% 0,rgba(173,130,69,.09),transparent 42%)
+}
+.tools-kicker{font-size:7px;letter-spacing:.14em;color:#9a7d56;font-weight:900}
+.tools-hero h1{font-size:24px;margin:7px 0 4px}
+.tools-hero p{font-size:10px;line-height:1.5;color:#788391;margin:0}
+.tools-list{display:grid;gap:8px;padding:13px}
+.tool-hub-card{
+  width:100%;min-height:72px;border:1px solid #29323e;background:linear-gradient(145deg,#111820,#0d1218);
+  color:#fff;border-radius:14px;display:grid;grid-template-columns:44px 1fr 16px;
+  gap:10px;align-items:center;padding:11px;text-align:left
+}
+.tool-hub-icon{
+  width:42px;height:42px;border-radius:12px;background:#191f28;display:grid;place-items:center;
+  color:#e3bb79;font-size:12px;font-weight:900
+}
+.tool-hub-card b{display:block;font-size:11px}
+.tool-hub-card small{display:block;font-size:8px;line-height:1.45;color:#747f8c;margin-top:4px}
+.tool-hub-card i{font-style:normal;color:#697482}
+.tools-note{text-align:center;color:#626d79;font-size:7px;padding:3px 20px 0}
+
+.tool-detail{padding-bottom:34px}
+.tool-intro{
+  display:flex;align-items:center;gap:11px;padding:15px 14px;border-bottom:1px solid #202832;
+  background:linear-gradient(180deg,#0e141b,#090d12)
+}
+.tool-intro>span{
+  width:42px;height:42px;border-radius:12px;background:#191f28;color:#dcb273;
+  display:grid;place-items:center;font-size:13px;font-weight:900;flex:0 0 auto
+}
+.tool-intro b{display:block;font-size:13px}
+.tool-intro small{display:block;font-size:8px;color:#737e8b;margin-top:3px}
+.tool-panel{
+  margin:11px 12px 0;padding:12px;border:1px solid #29323e;background:#0f151c;border-radius:14px
+}
+.tool-section-title{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:10px}
+.tool-section-title b{font-size:10px}
+.tool-section-title span{font-size:7px;color:#707b88}
+.tool-card-slots{display:flex;gap:6px}
+.tool-card-slots button{
+  width:49px;height:64px;border:1px solid #39434f;background:linear-gradient(145deg,#f1f3f5,#cfd4da);
+  color:#11151a;border-radius:8px;font-size:13px;font-weight:900
+}
+.tool-card-slots.board button{width:43px;height:58px}
+.segmented-mini{
+  display:grid;grid-template-columns:1fr 1fr;background:#0b1016;border:1px solid #27303b;
+  border-radius:9px;padding:3px;margin-bottom:10px
+}
+.segmented-mini button{height:30px;border:0;background:transparent;color:#737e8b;border-radius:7px;font-size:8px}
+.segmented-mini button.active{background:#1d242e;color:#fff}
+.tool-input-label{display:block;font-size:8px;color:#828c99;font-weight:750}
+.tool-input-label input,.tool-input-label select,.tool-input-label textarea{
+  width:100%;margin-top:6px;border:1px solid #2b3440;background:#0c1218;color:#fff;border-radius:9px;
+  padding:0 10px;outline:0
+}
+.tool-input-label input,.tool-input-label select{height:41px}
+.tool-input-label textarea{min-height:82px;padding-top:9px;resize:none}
+.tool-form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tool-result-placeholder{
+  margin-top:10px;min-height:86px;border:1px dashed #303947;border-radius:11px;background:#0b1016;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:12px
+}
+.tool-result-placeholder>span{font-size:6px;letter-spacing:.12em;color:#8a704e;font-weight:900}
+.tool-result-placeholder b{font-size:10px;margin:5px 0 3px;color:#d9dee5}
+.tool-result-placeholder small{font-size:7px;color:#687381}
+.equity-result-shell{
+  display:grid;grid-template-columns:1fr 32px 1fr;align-items:center;background:#0b1016;
+  border:1px solid #28313d;border-radius:11px;padding:12px
+}
+.equity-result-shell>div:not(.equity-vs){text-align:center}
+.equity-result-shell small{display:block;font-size:6px;color:#697481}
+.equity-result-shell b{display:block;font-size:22px;margin:4px 0;color:#e8edf3}
+.equity-result-shell span{font-size:7px;color:#7a8491}
+.equity-vs{text-align:center;color:#626d79;font-size:8px;font-weight:900}
+
+.bankroll-hero-card{
+  margin:12px 12px 0;padding:17px;border:1px solid #3a3224;background:linear-gradient(145deg,#1a160f,#10161a);
+  border-radius:15px
+}
+.bankroll-hero-card small{display:block;font-size:7px;letter-spacing:.11em;color:#9b8159}
+.bankroll-hero-card b{display:block;font-size:24px;margin:7px 0 3px}
+.bankroll-hero-card span{font-size:7px;color:#6d7784}
+.tool-metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 12px 0}
+.tool-metric-grid>div,.tool-result-grid>div{
+  border:1px solid #28313d;background:#0e141b;border-radius:11px;padding:11px
+}
+.tool-metric-grid small,.tool-result-grid small{display:block;font-size:7px;color:#6f7a87}
+.tool-metric-grid b,.tool-result-grid b{display:block;font-size:13px;margin-top:5px}
+.session-list{display:grid}
+.session-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #222a34}
+.session-row:last-child{border-bottom:0}
+.session-row b{display:block;font-size:9px}.session-row span{display:block;font-size:7px;color:#6f7a87;margin-top:3px}
+.session-row strong{font-size:10px}.session-row strong.positive{color:#75d19a}.session-row strong.negative{color:#d47c85}
+.tool-secondary-cta{
+  width:100%;height:40px;margin-top:9px;border:1px solid #303947;background:#151b23;color:#e3e7ed;
+  border-radius:10px;font-size:8px;font-weight:850
+}
+.tool-result-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+
+.range-filter-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.range-matrix-panel{padding:9px}
+.range-legend{display:flex;gap:10px;justify-content:flex-end;margin:0 2px 7px}
+.range-legend span{font-size:6px;padding-left:8px;position:relative;color:#707b88}
+.range-legend span:before{content:"";position:absolute;left:0;top:2px;width:5px;height:5px;border-radius:1px}
+.range-legend .strong:before{background:#7c63cc}.range-legend .mix:before{background:#4b6d86}.range-legend .fold:before{background:#252c35}
+.range-matrix{
+  display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:1px;width:100%;aspect-ratio:1
+}
+.range-cell{
+  min-width:0;border:0;border-radius:2px;padding:0;color:#cdd3dc;font-size:5.6px;font-weight:800;
+  background:#242b34;overflow:hidden
+}
+.range-cell.strong{background:#59458e;color:#fff}.range-cell.mix{background:#334e61}.range-cell.fold{background:#20262e;color:#6f7885}
+.range-placeholder-note{text-align:center;font-size:6px;color:#626d79;margin-top:8px}
+
+.icm-stack-list{display:grid;margin-top:10px}
+.icm-row{display:grid;grid-template-columns:74px 1fr;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #222a34}
+.icm-row:last-child{border-bottom:0}.icm-row span{font-size:8px;color:#9aa4b1}.icm-row input{height:36px;border:1px solid #2b3440;background:#0c1218;color:#fff;border-radius:8px;padding:0 9px}
+.icm-payout-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.icm-payout-grid input{height:38px;border:1px solid #2b3440;background:#0c1218;color:#fff;border-radius:8px;padding:0 9px;font-size:8px}
