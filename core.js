@@ -5,17 +5,34 @@ if(localStorage.getItem('pokercat_auth_version') !== AUTH_FLOW_VERSION){
 }
 
 const cats = [
-  ['🐱','Aggro Cat'],['🐈','Grinder Cat'],['😼','Bluff Cat'],
-  ['😺','Social Cat'],['😸','Lucky Cat'],['🙀','Tilt Cat'],
-  ['🐈‍⬛','Night Cat'],['😽','Live Cat'],['😹','Online Cat']
+  {id:'rock',name:'The Rock',pos:'0% 0%'},
+  {id:'shark',name:'The Shark',pos:'50% 0%'},
+  {id:'maniac',name:'The Maniac',pos:'100% 0%'},
+  {id:'solver',name:'The Solver',pos:'0% 50%'},
+  {id:'trapper',name:'The Trapper',pos:'50% 50%'},
+  {id:'hero-caller',name:'The Hero Caller',pos:'100% 50%'},
+  {id:'queen',name:'The Queen',pos:'0% 100%'},
+  {id:'darling',name:'The Darling',pos:'50% 100%'},
+  {id:'grinder',name:'The Grinder',pos:'100% 100%'}
 ];
 
 const demoUsers = {
-  queenbee:{name:'QUEENBEE',handle:'@queenbee',cat:'🐈‍⬛',sub:'MTT · Live'},
-  riverkim:{name:'RIVERKIM',handle:'@riverkim',cat:'😼',sub:'Cash · Online'},
-  ninehigh:{name:'NINEHIGH',handle:'@ninehigh',cat:'🐱',sub:'MTT · Live'},
-  minraise:{name:'MINRAISE',handle:'@minraise',cat:'😺',sub:'Mixed · Live'}
+  queenbee:{name:'QUEENBEE',handle:'@queenbee',cat:'queen',sub:'MTT · Live'},
+  riverkim:{name:'RIVERKIM',handle:'@riverkim',cat:'shark',sub:'Cash · Online'},
+  ninehigh:{name:'NINEHIGH',handle:'@ninehigh',cat:'rock',sub:'MTT · Live'},
+  minraise:{name:'MINRAISE',handle:'@minraise',cat:'solver',sub:'Mixed · Live'}
 };
+
+function catByRef(ref){
+  if(typeof ref==='number') return cats[ref] || cats[0];
+  if(typeof ref==='string') return cats.find(c=>c.id===ref) || cats[0];
+  return ref || cats[0];
+}
+
+function catAvatar(ref,className='cat-avatar-image'){
+  const cat=catByRef(ref);
+  return `<span class="poker-cat-avatar ${className}" style="--cat-pos:${cat.pos}" role="img" aria-label="${cat.name}"></span>`;
+}
 
 const state = {
   view:'home',
@@ -98,8 +115,8 @@ function onboardView(){
     return `<section class="onboard">
       <div class="step">PROFILE · 1/2</div>
       <h1>너의 첫 PokerCat을 골라봐.</h1>
-      <p>지금은 임시 캐릭터야. 추후 홀덤 플레이어 유형을 담은 9종 고양이 디자인으로 교체될 예정이야.</p>
-      <div class="cat-grid">${cats.map((c,i)=>`<button class="cat-choice ${state.selectedCat===i?'selected':''}" data-cat="${i}"><div class="cat">${c[0]}</div><b>${c[1]}</b></button>`).join('')}</div>
+      <p>9종 PokerCat 중 하나를 기본 프로필로 골라봐. 나중에 프로필에서 다시 바꿀 수 있어.</p>
+      <div class="cat-grid">${cats.map((cat,i)=>`<button class="cat-choice ${state.selectedCat===i?'selected':''}" data-cat="${i}">${catAvatar(i,'cat-choice-image')}<b>${cat.name}</b></button>`).join('')}</div>
       <button class="btn full" data-next-onboard>다음</button>
     </section>`;
   }
