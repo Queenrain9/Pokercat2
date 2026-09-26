@@ -28,39 +28,118 @@ function bottomNav(){
   return `<nav class="bottom-nav">${nav.map(n=>`<button class="nav-item ${n[2]==='compose'?'compose':''} ${state.view===n[2]?'active':''}" data-nav="${n[2]}"><span class="nav-icon">${icon(n[0])}</span><span>${n[1]}</span></button>`).join('')}</nav>`;
 }
 
+
+function composeView(){
+  const handMode=state.composeMode==='hand';
+  return `<section class="compose-page">
+    <div class="compose-author">
+      <div class="avatar">${cats[state.selectedCat][0]}</div>
+      <div class="user-meta"><div class="user-name">${state.nickname}</div><div class="user-sub">새 게시물 작성</div></div>
+      <button class="btn compose-submit" data-post-demo>게시</button>
+    </div>
+
+    <textarea class="compose-text" id="composeText" placeholder="무슨 생각을 하고 있어?"></textarea>
+
+    <div class="compose-tools">
+      <button class="compose-tool" data-toast="사진 업로드는 실제 저장소 연결 단계에서 붙일게요">▧ 사진</button>
+      <button class="compose-tool ${handMode?'active':''}" data-toggle-hand>♠ 핸드 히스토리</button>
+    </div>
+
+    ${handMode?handComposer():''}
+  </section>`;
+}
+
+function handComposer(){
+  return `<section class="hand-composer">
+    <div class="hand-compose-head">
+      <div><strong>핸드 히스토리</strong><span>카드를 눌러 빠르게 입력</span></div>
+      <button class="text-link danger-link" data-remove-hand>제거</button>
+    </div>
+
+    <div class="hand-basic-grid">
+      <label>게임<select id="hhGame"><option>MTT</option><option>Cash</option></select></label>
+      <label>테이블<select id="hhPlayers"><option>9-max</option><option selected>8-max</option><option>6-max</option></select></label>
+      <label>Hero<select id="hhPos"><option>UTG</option><option>UTG+1</option><option>HJ</option><option>CO</option><option selected>BTN</option><option>SB</option><option>BB</option></select></label>
+      <label>Eff. Stack<input id="hhStack" value="38BB" inputmode="decimal"></label>
+    </div>
+
+    <label class="inline-label">블라인드<input id="hhBlind" value="1K / 2K / 2K" placeholder="SB / BB / Ante"></label>
+
+    <div class="card-section">
+      <div class="card-section-title"><b>내 핸드</b><span>2장</span></div>
+      <div class="card-slots">${cardSlots('hero',2)}</div>
+    </div>
+
+    <div class="board-builder">
+      <div class="card-section">
+        <div class="card-section-title"><b>FLOP</b><span>3장</span></div>
+        <div class="card-slots">${cardSlots('flop',3)}</div>
+      </div>
+      <div class="card-section">
+        <div class="card-section-title"><b>TURN</b><span>1장</span></div>
+        <div class="card-slots">${cardSlots('turn',1)}</div>
+      </div>
+      <div class="card-section">
+        <div class="card-section-title"><b>RIVER</b><span>1장</span></div>
+        <div class="card-slots">${cardSlots('river',1)}</div>
+      </div>
+    </div>
+
+    ${state.cardTarget?cardPicker():''}
+
+    <div class="street-actions">
+      <label><b>PREFLOP</b><textarea id="hhPre" placeholder="예: CO 2.2BB → BTN 7BB → CO Call"></textarea></label>
+      <label><b>FLOP</b><textarea id="hhFlop" placeholder="예: CO Check → BTN 33% → Call"></textarea></label>
+      <label><b>TURN</b><textarea id="hhTurn" placeholder="예: CO Check → Hero ?"></textarea></label>
+      <label><b>RIVER</b><textarea id="hhRiver" placeholder="아직 안 나왔으면 비워둬"></textarea></label>
+    </div>
+
+    <button class="btn secondary full" data-preview-hand>핸드 카드 미리보기</button>
+  </section>`;
+}
+
+function cardSlots(group,count){
+  return Array.from({length:count},(_,i)=>{
+    const value=state.handDraft[group][i]||'';
+    const active=state.cardTarget===group+':'+i;
+    const red=/[♥♦]/.test(value);
+    return `<button class="card-slot ${active?'active':''} ${red?'red':''}" data-card-slot="${group}:${i}">${value||'<span>＋</span>'}</button>`;
+  }).join('');
+}
+
+function cardPicker(){
+  const ranks=['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
+  const suits=['♠','♥','♦','♣'];
+  return `<div class="card-picker">
+    <div class="picker-top"><b>카드 선택</b><button class="text-link" data-clear-card>선택 카드 지우기</button></div>
+    <div class="rank-grid">${ranks.map(r=>`<button class="rank-btn ${state.cardRank===r?'active':''}" data-card-rank="${r}">${r}</button>`).join('')}</div>
+    <div class="suit-grid">
+      ${suits.map(s=>`<button class="suit-btn ${/[♥♦]/.test(s)?'red':''}" data-card-suit="${s}" ${state.cardRank?'':'disabled'}>${s}</button>`).join('')}
+    </div>
+    <div class="helper">${state.cardRank?'이제 무늬를 골라줘.':'먼저 숫자/문자를 골라줘.'}</div>
+  </div>`;
+}
+
+function handDraftToData(){
+  return {
+    title:(document.querySelector('#hhPos')?.value||'BTN')+' Hand · '+(document.querySelector('#hhGame')?.value||'MTT'),
+    blinds:document.querySelector('#hhBlind')?.value||'Blinds',
+    players:document.querySelector('#hhPlayers')?.value||'table',
+    pos:document.querySelector('#hhPos')?.value||'BTN',
+    stack:document.querySelector('#hhStack')?.value||'—',
+    hole:state.handDraft.hero.filter(Boolean),
+    board:[...state.handDraft.flop,...state.handDraft.turn,...state.handDraft.river].filter(Boolean),
+    pre:document.querySelector('#hhPre')?.value||'',
+    flop:document.querySelector('#hhFlop')?.value||'',
+    turn:document.querySelector('#hhTurn')?.value||'',
+    river:document.querySelector('#hhRiver')?.value||''
+  };
+}
+
 function modalView(){
-  if(!state.modal) return '';
-  if(state.modal==='compose'){
-    return sheet(`<div class="sheet-title">새 글 만들기</div>
-      <div class="choice-grid">
-        <button class="choice" data-compose-type="normal"><div style="font-size:28px">✎</div><b>일반 글</b><span>텍스트와 사진을 올려요.</span></button>
-        <button class="choice" data-compose-type="hand"><div style="font-size:28px">♠</div><b>핸드 히스토리</b><span>포커 상황을 깔끔하게 정리해요.</span></button>
-      </div>`);
-  }
-  if(state.modal==='normal'){
-    return sheet(`<div class="sheet-title">일반 글</div><div class="form">
-      <div class="field"><textarea placeholder="무슨 생각을 하고 있어?"></textarea></div>
-      <button class="btn full" data-post-demo>게시하기</button>
-    </div>`);
-  }
-  if(state.modal==='hand'){
-    return sheet(`<div class="sheet-title">핸드 히스토리 작성</div>
-      <div class="form">
-        <div class="row2"><div class="field"><label>게임</label><select id="hhGame"><option>MTT</option><option>Cash</option></select></div><div class="field"><label>테이블</label><select><option>9-max</option><option>8-max</option><option>6-max</option></select></div></div>
-        <div class="row2"><div class="field"><label>블라인드</label><input id="hhBlind" placeholder="1K / 2K / 2K" value="1K / 2K / 2K"></div><div class="field"><label>Effective Stack</label><input id="hhStack" placeholder="38BB" value="38BB"></div></div>
-        <div class="row2"><div class="field"><label>Hero Position</label><select id="hhPos"><option>UTG</option><option>HJ</option><option>CO</option><option selected>BTN</option><option>SB</option><option>BB</option></select></div><div class="field"><label>내 카드</label><input id="hhHole" placeholder="Ah Qh" value="Ah Qh"></div></div>
-        <div class="field"><label>보드</label><input id="hhBoard" placeholder="Qc 8h 4h / 6s / 2d" value="Qc 8h 4h / 6s"></div>
-        <div class="street-editor"><strong>Preflop</strong><textarea id="hhPre">CO 2.2BB → BTN 7BB → CO Call</textarea></div>
-        <div class="street-editor"><strong>Flop</strong><textarea id="hhFlop">CO Check → BTN 33% → Call</textarea></div>
-        <div class="street-editor"><strong>Turn</strong><textarea id="hhTurn">CO Check → Hero ?</textarea></div>
-        <div class="street-editor"><strong>River</strong><textarea id="hhRiver" placeholder="아직 안 나왔으면 비워두기"></textarea></div>
-        <div class="helper">지금은 입력 구조를 잡는 베타 UI야. 카드 자동완성, 플레이어별 액션 빌더, 팟 계산은 다음 단계에서 다듬을 수 있어.</div>
-        <button class="btn full" data-preview-hand>미리보기 & 게시</button>
-      </div>`);
-  }
   if(state.modal==='handPreview'){
     const d=state.previewHand||handA;
-    return sheet(`<div class="sheet-title">피드에서 이렇게 보여</div>${hhCard(d)}<button class="btn full" data-post-demo>이 형식으로 게시하기</button>`);
+    return sheet(`<div class="sheet-title">피드에서 이렇게 보여</div>${hhCard(d)}<button class="btn full" data-close-preview>계속 작성하기</button></div>`);
   }
   return '';
 }
