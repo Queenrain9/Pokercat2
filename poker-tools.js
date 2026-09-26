@@ -99,31 +99,180 @@ function equityToolView(){
   </section>`;
 }
 
+const BANKROLL_STORAGE_KEY='pokercat_bankroll_v1';
+
+function normalizeBankrollData(raw){
+  const source=raw&&typeof raw==='object'?raw:{};
+  const sessions=Array.isArray(source.sessions)?source.sessions:[];
+  return {
+    startingBankroll:Number.isFinite(Number(source.startingBankroll))?Math.max(0,Number(source.startingBankroll)):0,
+    sessions:sessions.map((session,index)=>({
+      id:String(session.id||('session-'+index)),
+      date:String(session.date||''),
+      gameType:String(session.gameType||'MTT'),
+      venueType:String(session.venueType||'Live'),
+      result:Number.isFinite(Number(session.result))?Number(session.result):0,
+      durationHours:Number.isFinite(Number(session.durationHours))&&Number(session.durationHours)>=0?Number(session.durationHours):null,
+      note:String(session.note||''),
+      createdAt:session.createdAt||new Date().toISOString(),
+      updatedAt:session.updatedAt||session.createdAt||new Date().toISOString()
+    })).filter(session=>/^\d{4}-\d{2}-\d{2}$/.test(session.date))
+  };
+}
+
+function loadBankrollData(){
+  return normalizeBankrollData(loadJSON(BANKROLL_STORAGE_KEY,{startingBankroll:0,sessions:[]}));
+}
+
+function persistBankrollData(data){
+  saveJSON(BANKROLL_STORAGE_KEY,normalizeBankrollData(data));
+}
+
+function bankrollToday(){
+  const now=new Date();
+  const pad=value=>String(value).padStart(2,'0');
+  return now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
+}
+
+function bankrollPeriodInfo(period){
+  if(period==='30d')return {label:'최근 30일',short:'30일'};
+  if(period==='all')return {label:'전체 기간',short:'전체'};
+  return {label:'이번 달',short:'이번 달'};
+}
+
+function bankrollSessionsForPeriod(sessions,period){
+  if(period==='all')return sessions.slice();
+  const now=new Date();
+  if(period==='30d'){
+    const cutoff=new Date(now.getFullYear(),now.getMonth(),now.getDate()-29);
+    return sessions.filter(session=>{
+      const date=new Date(session.date+'T00:00:00');
+      return Number.isFinite(date.getTime())&&date>=cutoff&&date<=now;
+    });
+  }
+  const prefix=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-';
+  return sessions.filter(session=>session.date.startsWith(prefix));
+}
+
+function formatBankrollWon(value,{signed=false}={}){
+  const number=Number(value)||0;
+  const abs=Math.abs(Math.round(number)).toLocaleString('ko-KR');
+  if(signed){
+    if(number>0)return '+₩'+abs;
+    if(number<0)return '-₩'+abs;
+  }
+  return (number<0?'-':'')+'₩'+abs;
+}
+
+function formatBankrollDate(date){
+  const parts=String(date||'').split('-');
+  if(parts.length!==3)return date||'';
+  return Number(parts[0])===new Date().getFullYear()?parts[1]+'.'+parts[2]:parts[0].slice(2)+'.'+parts[1]+'.'+parts[2];
+}
+
 function bankrollToolView(){
-  const sessions=[
-    {date:'09.24',game:'MTT · Live',result:'+₩320,000',positive:true},
-    {date:'09.21',game:'Cash · Live',result:'-₩85,000',positive:false},
-    {date:'09.18',game:'MTT · Online',result:'+₩140,000',positive:true}
-  ];
+  const data=loadBankrollData();
+  const period=state.bankrollPeriod||'month';
+  const periodInfo=bankrollPeriodInfo(period);
+  const sorted=data.sessions.slice().sort((a,b)=>b.date.localeCompare(a.date)||String(b.updatedAt).localeCompare(String(a.updatedAt)));
+  const selected=bankrollSessionsForPeriod(sorted,period);
+  const allProfit=sorted.reduce((sum,session)=>sum+Number(session.result||0),0);
+  const periodProfit=selected.reduce((sum,session)=>sum+Number(session.result||0),0);
+  const wins=selected.filter(session=>session.result>0).length;
+  const winRate=selected.length?(wins/selected.length)*100:null;
+  const durationSessions=selected.filter(session=>Number.isFinite(session.durationHours)&&session.durationHours>=0);
+  const avgDuration=durationSessions.length?durationSessions.reduce((sum,session)=>sum+session.durationHours,0)/durationSessions.length:null;
+  const currentBankroll=data.startingBankroll+allProfit;
+  const recent=sorted.slice(0,10);
+
   return `<section class="tools-screen tool-detail">
     <div class="tool-intro"><span>₩</span><div><b>Bankroll Tracker</b><small>Session based bankroll overview</small></div></div>
     <div class="bankroll-hero-card">
-      <small>CURRENT BANKROLL</small><b>₩3,420,000</b><span>예시 데이터</span>
+      <small>CURRENT BANKROLL</small>
+      <b>${formatBankrollWon(currentBankroll)}</b>
+      <div class="bankroll-base-line">
+        <span>시작 Bankroll ${formatBankrollWon(data.startingBankroll)}</span>
+        <button data-edit-bankroll-base>변경</button>
+      </div>
+    </div>
+    <div class="bankroll-period-switch" role="group" aria-label="기간 선택">
+      ${[['month','이번 달'],['30d','30일'],['all','전체']].map(([key,label])=>`<button class="${period===key?'active':''}" data-bankroll-period="${key}">${label}</button>`).join('')}
     </div>
     <div class="tool-metric-grid">
-      <div><small>이번 달 손익</small><b>+₩375,000</b></div>
-      <div><small>Session</small><b>12</b></div>
-      <div><small>Win Rate</small><b>58%</b></div>
-      <div><small>Avg. Session</small><b>4.2h</b></div>
+      <div><small>${periodInfo.label} 손익</small><b class="${periodProfit>0?'positive':periodProfit<0?'negative':''}">${formatBankrollWon(periodProfit,{signed:true})}</b></div>
+      <div><small>Session</small><b>${selected.length}</b></div>
+      <div><small>Win Rate</small><b>${winRate===null?'--':winRate.toFixed(0)+'%'}</b></div>
+      <div><small>Avg. Session</small><b>${avgDuration===null?'--':avgDuration.toFixed(1)+'h'}</b></div>
     </div>
     <div class="tool-panel">
-      ${toolSectionTitle('최근 Session')}
+      ${toolSectionTitle('최근 Session',sorted.length?sorted.length+'개 기록':'기록 없음')}
       <div class="session-list">
-        ${sessions.map(s=>`<div class="session-row"><div><b>${s.date}</b><span>${s.game}</span></div><strong class="${s.positive?'positive':'negative'}">${s.result}</strong></div>`).join('')}
+        ${recent.length?recent.map(session=>`<button class="session-row" data-edit-bankroll-session="${escapeHtml(session.id)}">
+          <div>
+            <b>${formatBankrollDate(session.date)}</b>
+            <span>${escapeHtml(session.gameType)} · ${escapeHtml(session.venueType)}${session.durationHours!==null?' · '+session.durationHours+'h':''}</span>
+            ${session.note?`<small>${escapeHtml(session.note)}</small>`:''}
+          </div>
+          <div class="session-result-wrap">
+            <strong class="${session.result>0?'positive':session.result<0?'negative':''}">${formatBankrollWon(session.result,{signed:true})}</strong>
+            <i>›</i>
+          </div>
+        </button>`).join(''):`<div class="bankroll-empty"><b>아직 기록된 세션이 없어요.</b><span>첫 세션을 추가하면 Bankroll과 통계가 자동으로 계산됩니다.</span></div>`}
       </div>
-      <button class="tool-secondary-cta" data-toast="세션 저장 기능은 다음 단계에서 연결됩니다">＋ Session 기록 추가</button>
+      <button class="tool-secondary-cta bankroll-add-session" data-add-bankroll-session>＋ Session 기록 추가</button>
     </div>
-  </section>`;
+  </section>
+  ${state.modal==='bankrollSession'?bankrollSessionModal():''}
+  ${state.modal==='bankrollBase'?bankrollBaseModal():''}`;
+}
+
+function bankrollSessionModal(){
+  const data=loadBankrollData();
+  const existing=data.sessions.find(session=>session.id===state.bankrollEditingId)||null;
+  const date=existing?.date||bankrollToday();
+  const result=existing?String(existing.result):'';
+  const duration=existing?.durationHours===null||existing?.durationHours===undefined?'':String(existing.durationHours);
+  return `<div class="modal-backdrop" data-close-modal>
+    <div class="sheet bankroll-sheet" onclick="event.stopPropagation()">
+      <div class="grab"></div>
+      <div class="sheet-title">${existing?'Session 수정':'Session 추가'}</div>
+      <div class="bankroll-form">
+        <label class="tool-input-label">날짜<input id="bankrollDate" type="date" value="${escapeHtml(date)}"></label>
+        <div class="tool-form-row">
+          <label class="tool-input-label">게임
+            <select id="bankrollGameType">
+              ${['MTT','Cash','SNG','Mixed'].map(value=>`<option ${existing?.gameType===value?'selected':''}>${value}</option>`).join('')}
+            </select>
+          </label>
+          <label class="tool-input-label">플레이
+            <select id="bankrollVenueType">
+              ${['Live','Online'].map(value=>`<option ${existing?.venueType===value?'selected':''}>${value}</option>`).join('')}
+            </select>
+          </label>
+        </div>
+        <label class="tool-input-label">손익 (₩)<input id="bankrollResult" type="number" inputmode="numeric" step="1000" value="${escapeHtml(result)}" placeholder="예: 320000 또는 -85000"></label>
+        <label class="tool-input-label">플레이 시간 (선택)<input id="bankrollDuration" type="number" inputmode="decimal" min="0" step="0.5" value="${escapeHtml(duration)}" placeholder="예: 4.5"></label>
+        <label class="tool-input-label">메모 (선택)<input id="bankrollNote" maxlength="80" value="${escapeHtml(existing?.note||'')}" placeholder="예: HPT Day 1, 강남 캐시"></label>
+      </div>
+      <div class="bankroll-modal-actions">
+        ${existing?'<button class="bankroll-delete-btn" data-delete-bankroll-session>삭제</button>':''}
+        <button class="btn full bankroll-save-btn" data-save-bankroll-session>${existing?'수정 저장':'세션 저장'}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function bankrollBaseModal(){
+  const data=loadBankrollData();
+  return `<div class="modal-backdrop" data-close-modal>
+    <div class="sheet bankroll-sheet bankroll-base-sheet" onclick="event.stopPropagation()">
+      <div class="grab"></div>
+      <div class="sheet-title">시작 Bankroll</div>
+      <p class="bankroll-sheet-copy">현재 Bankroll은 시작 금액에 모든 세션 손익을 더해 계산합니다.</p>
+      <label class="tool-input-label">시작 금액 (₩)<input id="bankrollStartingAmount" type="number" inputmode="numeric" min="0" step="1000" value="${escapeHtml(data.startingBankroll)}" placeholder="예: 3000000"></label>
+      <button class="btn full bankroll-save-btn" data-save-bankroll-base>저장</button>
+    </div>
+  </div>`;
 }
 
 function calculatePokerOdds(potSize,callAmount,outs){
