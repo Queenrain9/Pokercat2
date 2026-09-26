@@ -13,7 +13,7 @@ const state={
 view:'home',onboarding:localStorage.getItem('pokercat_onboarded')==='1',onboardStep:0,authMode:'landing',
 selectedCat:Number(localStorage.getItem('pokercat_cat')||7),nickname:localStorage.getItem('pokercat_name')||'QUEENBEE',
 gamePref:localStorage.getItem('pokercat_game')||'MTT',playPref:localStorage.getItem('pokercat_play')||'오프라인',
-feedMode:'algorithm',exploreTab:'popular',scheduleTab:'events',profileTab:'posts',modal:null,liked:new Set(),following:new Set(['riverkim']),
+feedMode:'algorithm',exploreTab:'popular',scheduleTab:'events',profileTab:'posts',notificationsRead:false,modal:null,liked:new Set(),following:new Set(['riverkim']),
 composeMode:'post',composeText:'',handDraft:{hero:['A♠','K♠'],flop:['Q♥','J♠','7♣'],turn:['2♦'],river:['9♣']},cardTarget:null,cardRank:null,
 handMeta:{game:'MTT',players:'8-max',pos:'BTN',stack:'38BB',blind:'1K / 2K (Ante 2K)'},handActions:{pre:'BTN 오픈에 BB에서 콜',flop:'플랍 체크-콜',turn:'턴 체크-레이즈',river:'리버 콜'}};
 document.documentElement.dataset.theme='dark';
@@ -29,7 +29,7 @@ function topbar(){
 if(state.view==='home')return `<header class="topbar home-top">
   <button class="feed-mode-toggle ${state.feedMode==='following'?'active':''}" data-toggle-following><span>✓</span> 팔로잉</button>
   <div class="logo">POKER<span>CAT</span></div>
-  <button class="notification-btn" data-open-notifications aria-label="알림"><span>♡</span><i></i></button>
+  <button class="notification-btn" data-open-notifications aria-label="알림"><span>🔔</span><i></i></button>
 </header>`;
 if(state.view==='notifications')return `<header class="topbar utility-top"><button class="back-btn" data-notification-back>‹</button><div class="page-title">알림</div><button class="read-all" data-mark-read>모두 읽음</button></header>`;
 if(state.view==='compose')return '';
