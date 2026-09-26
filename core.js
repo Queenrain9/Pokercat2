@@ -124,7 +124,7 @@ gamePref:localStorage.getItem('pokercat_game')||'MTT',playPref:localStorage.getI
 homePub:storedHomePub,careerHighs:Array.isArray(storedCareer)?storedCareer:[],
 rooms:storedRooms,roomInvites:Array.isArray(storedRoomInvites)?storedRoomInvites:[],savedRoomSettings:Array.isArray(storedSavedRoomSettings)?storedSavedRoomSettings:[],roomDraft:null,roomOptionOpen:null,roomPresetTab:'pokerCat',editingSavedRoomSettingId:null,currentRoomId:null,roomReturnView:'home',
 feedMode:'algorithm',exploreTab:'popular',scheduleTab:'events',profileTab:'posts',notificationsRead:false,
-modal:null,authGateMode:'login',authReason:'',pendingAuth:null,relationshipMode:'following',roomInviteMode:'followers',editingCareerId:null,liked:new Set(),
+modal:null,authGateMode:'login',authReason:'',pendingAuth:null,relationshipMode:'following',roomInviteMode:'followers',editingCareerId:null,handReturnView:'profile',liked:new Set(),
 following:new Set(Array.isArray(storedFollowing)?storedFollowing:['riverkim']),
 followers:new Set(Array.isArray(storedFollowers)?storedFollowers:['riverkim','chiplee']),
 composeMode:'post',composeText:'',handDraft:{hero:['A♠','K♠'],flop:['Q♥','J♠','7♣'],turn:['2♦'],river:['9♣']},cardTarget:null,cardRank:null,
@@ -187,6 +187,7 @@ if(state.view==='notifications')return `<header class="topbar utility-top"><butt
 if(state.view==='homepub')return `<header class="topbar utility-top"><button class="back-btn" data-homepub-back>‹</button><div class="page-title">Home Pub</div><button class="read-all" data-nav="profile">프로필</button></header>`;
 if(state.view==='roomcreate')return `<header class="topbar utility-top"><button class="back-btn" data-room-create-back>‹</button><div class="page-title">게임 만들기</div><span class="topbar-spacer"></span></header>`;
 if(state.view.startsWith('room:'))return `<header class="topbar utility-top"><button class="back-btn" data-room-back>‹</button><div class="page-title">Poker Room</div><button class="read-all" data-room-menu>•••</button></header>`;
+if(state.view.startsWith('hand:'))return `<header class="topbar utility-top"><button class="back-btn" data-hand-detail-back>‹</button><div class="page-title">핸드 상세</div><span class="topbar-spacer"></span></header>`;
 if(state.view==='compose')return '';
 const map={explore:'탐색',schedule:'일정',profile:'프로필'};
 return `<header class="topbar"><div class="page-title">${map[state.view]||'PokerCat'}</div><button class="top-icon" data-toast="설정은 준비 중이에요">⚙</button></header>`
@@ -198,6 +199,7 @@ if(state.view==='notifications')return notificationView();
 if(state.view==='homepub')return homePubCommunityView();
 if(state.view==='roomcreate')return pokerRoomCreateView();
 if(state.view.startsWith('room:'))return pokerRoomView(state.view.split(':')[1]);
+if(state.view.startsWith('hand:'))return handDetailView(state.view.split(':')[1]);
 if(state.view==='explore')return exploreView();
 if(state.view==='schedule')return scheduleView();
 if(state.view==='profile')return profileView('me');
