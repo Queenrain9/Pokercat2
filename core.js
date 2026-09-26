@@ -16,6 +16,7 @@ const state = {
   profileTab:'posts',
   onboarding: localStorage.getItem('pokercat_onboarded') === '1',
   onboardStep:0,
+  authMode:'login',
   selectedCat: Number(localStorage.getItem('pokercat_cat') || 6),
   nickname: localStorage.getItem('pokercat_name') || 'QUEENBEE',
   gamePref: localStorage.getItem('pokercat_game') || 'MTT',
@@ -48,18 +49,38 @@ function render(){
 }
 
 function authView(){
+  if(state.authMode==='signup'){
+    return `<section class="auth-wrap">
+      <button class="auth-back" data-auth-back>‹ 로그인으로</button>
+      <div class="brand-lockup compact">
+        <div class="cat-mark">🐈‍⬛</div>
+        <div class="brand-title">Poker<span style="color:var(--brand-strong)">Cat</span></div>
+        <div class="brand-sub">새 계정을 만들 방법을 선택해.</div>
+      </div>
+      <div class="provider-list">
+        <button class="provider google" data-auth>G&nbsp; Google로 가입하기</button>
+        <button class="provider kakao" data-auth>●&nbsp; 카카오로 가입하기</button>
+        <button class="provider apple" data-auth>&nbsp; Apple로 가입하기</button>
+      </div>
+      <div class="auth-foot">가입을 계속하면 PokerCat 이용약관 및 개인정보처리방침에 동의하게 됩니다.<br>현재는 베타 UI라 실제 계정 연동 전입니다.</div>
+    </section>`;
+  }
+
   return `<section class="auth-wrap">
     <div class="brand-lockup">
       <div class="cat-mark">🐈‍⬛</div>
       <div class="brand-title">Poker<span style="color:var(--brand-strong)">Cat</span></div>
       <div class="brand-sub">홀덤 플레이어들의 피드, 핸드,<br>그리고 포커 친구들.</div>
     </div>
-    <div class="provider-list">
-      <button class="provider google" data-auth>G&nbsp; Google로 계속하기</button>
-      <button class="provider kakao" data-auth>●&nbsp; 카카오로 계속하기</button>
-      <button class="provider apple" data-auth>&nbsp; Apple로 계속하기</button>
+    <div class="auth-form">
+      <div class="field"><label>아이디 또는 이메일</label><input id="loginId" autocomplete="username" placeholder="아이디 또는 이메일"></div>
+      <div class="field"><label>비밀번호</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="비밀번호"></div>
+      <div class="auth-row"><button class="text-link" data-toast="비밀번호 찾기는 실제 계정 연동 단계에서 연결할게요">비밀번호를 잊었어?</button></div>
+      <button class="btn full" data-login-demo>로그인</button>
     </div>
-    <div class="auth-foot">계속하면 PokerCat 이용약관 및 개인정보처리방침에 동의하게 됩니다.<br>현재 화면은 베타 UI이며 실제 소셜 로그인은 연결 전입니다.</div>
+    <div class="auth-divider"><span>또는</span></div>
+    <button class="btn secondary full" data-open-signup>회원가입</button>
+    <div class="auth-foot">현재는 베타 UI라 로그인 버튼을 누르면 데모 계정으로 들어갑니다.</div>
   </section>`;
 }
 
