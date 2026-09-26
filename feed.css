@@ -103,3 +103,18 @@
 .profile-pub-badge i{font-style:normal;color:var(--gold2);font-size:9px}
 .profile-pub-badge b{font-size:9px;color:#e6ebf2;font-weight:800}
 .profile-pub-badge small{font-size:8px;color:#8e98a6;font-weight:700}
+
+/* feed identity: nickname + representative holdem pub */
+.user-name-line{
+  display:flex;align-items:center;gap:6px;min-width:0;flex-wrap:wrap
+}
+.user-name-line .user-name{min-width:0}
+.feed-pub-affiliation{
+  display:inline-flex;align-items:center;gap:3px;
+  max-width:180px;padding:3px 6px;border-radius:999px;
+  background:#151b23;border:1px solid #2a3340;
+  color:#aeb7c3;white-space:nowrap;line-height:1
+}
+.feed-pub-affiliation i{font-style:normal;color:var(--gold2);font-size:8px}
+.feed-pub-affiliation b{font-size:8px;color:#e5eaf1;font-weight:850}
+.feed-pub-affiliation small{font-size:8px;color:#8e98a6;font-weight:700}
