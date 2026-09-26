@@ -186,3 +186,13 @@ function handComposer(){
 function cardSlots(group,count){return Array.from({length:count},(_,i)=>{const v=state.handDraft[group][i]||'',active=state.cardTarget===group+':'+i,red=/[♥♦]/.test(v);return `<button class="card-slot ${active?'active':''} ${red?'red':''}" data-card-slot="${group}:${i}">${v?`<b>${v.slice(0,-1)}</b><span>${v.slice(-1)}</span>`:'＋'}</button>`}).join('')}
 function cardPicker(){const ranks=['A','K','Q','J','T','9','8','7','6','5','4','3','2'],suits=['♠','♥','♦','♣'];return `<div class="card-picker"><div class="picker-top"><b>카드 선택</b><button data-clear-card>지우기</button></div><div class="rank-grid">${ranks.map(r=>`<button class="${state.cardRank===r?'active':''}" data-card-rank="${r}">${r}</button>`).join('')}</div><div class="suit-grid">${suits.map(s=>`<button class="${/[♥♦]/.test(s)?'red':''}" data-card-suit="${s}" ${state.cardRank?'':'disabled'}>${s}</button>`).join('')}</div></div>`}
 function handDraftToData(){return {title:state.handMeta.pos+' Hand',blinds:state.handMeta.blind,players:state.handMeta.players,pos:state.handMeta.pos,stack:state.handMeta.stack,hole:state.handDraft.hero.filter(Boolean),board:[...state.handDraft.flop,...state.handDraft.turn,...state.handDraft.river].filter(Boolean),pre:state.handActions.pre||'BTN 오픈 → BB 콜',flop:'플랍 체크-콜',turn:'턴 체크-레이즈',river:'리버 콜'}}
+
+function pokerRoomBottomNavV1(){
+  const nav=[['home','홈','home'],['search','탐색','explore'],['plus','작성','compose'],['calendar','일정','schedule'],['profile','프로필','profile']];
+  return `<nav class="bottom-nav">${nav.map(n=>{
+    const active=state.view===n[2]||(state.view==='homepub'&&n[2]==='profile');
+    if(n[2]==='compose')return `<button class="nav-item compose ${state.view==='compose'||state.view==='roomcreate'?'active':''}" data-open-create-menu><span class="nav-icon">${icon(n[0])}</span><span>작성</span></button>`;
+    return `<button class="nav-item ${active?'active':''}" data-nav="${n[2]}"><span class="nav-icon">${icon(n[0])}</span><span>${n[1]}</span></button>`;
+  }).join('')}</nav>`;
+}
+function bottomNav(){return pokerRoomBottomNavV1()}
