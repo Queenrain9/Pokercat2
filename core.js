@@ -229,6 +229,7 @@ function modalView(){
 if(state.modal==='authGate')return authGateModal();
 if(state.modal==='feedSelector')return feedSelectorModal();
 if(state.modal==='profileUtility')return profileUtilityMenuModal();
+if(state.modal==='avatarPicker')return avatarPickerModal();
 if(state.modal==='profileEdit')return profileEditModal();
 if(state.modal==='homePubVerify')return homePubVerifyModal();
 if(state.modal==='careerEdit')return careerEditModal();
