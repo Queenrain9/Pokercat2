@@ -14,6 +14,75 @@ function wire(){
   };
 
   document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{state.view=b.dataset.nav;state.modal=null;if(state.view!=='compose')state.composeMode='post';render()});
+  document.querySelectorAll('[data-open-create-menu]').forEach(b=>b.onclick=()=>{state.modal='createMenu';render()});
+  document.querySelectorAll('[data-create-post]').forEach(b=>b.onclick=()=>{state.modal=null;state.view='compose';render()});
+  document.querySelectorAll('[data-create-game]').forEach(b=>b.onclick=()=>{state.modal=null;state.view='roomcreate';render()});
+  const roomCreateBack=document.querySelector('[data-room-create-back]');if(roomCreateBack)roomCreateBack.onclick=()=>{state.view='home';render()};
+  const roomBack=document.querySelector('[data-room-back]');if(roomBack)roomBack.onclick=()=>{state.view=state.roomReturnView||'home';render()};
+
+  document.querySelectorAll('[data-create-room-submit]').forEach(b=>b.onclick=()=>{
+    if(state.view!=='roomcreate')return;
+    const name=(document.querySelector('#roomName')?.value||'').trim();
+    const maxPlayers=Number(document.querySelector('#roomMaxPlayers')?.value||6);
+    const startStack=Number(document.querySelector('#roomStartStack')?.value||40);
+    const sb=Number(document.querySelector('#roomSb')?.value||1);
+    const bb=Number(document.querySelector('#roomBb')?.value||2);
+    const anteEnabled=Boolean(document.querySelector('#roomAnteEnabled')?.checked);
+    const anteAmount=Number(document.querySelector('#roomAnteAmount')?.value||0);
+    const blindIncrease=Boolean(document.querySelector('#roomBlindIncrease')?.checked);
+    const intervalMinutes=Number(document.querySelector('#roomBlindInterval')?.value||0);
+    const visibility=document.querySelector('input[name="roomVisibility"]:checked')?.value||'public';
+    const feedPublished=Boolean(document.querySelector('#roomFeedPublished')?.checked);
+    if(!name){toast('방 이름을 입력해 주세요');return}
+    if(sb<=0||bb<=sb){toast('Big Blind는 Small Blind보다 커야 해요');return}
+    if(startStack<10){toast('시작 스택은 10BB 이상으로 설정해 주세요');return}
+    const id='room-'+Date.now();
+    const room={id,mode:'single-table',game:'NLH',name,hostId:'queenbee',maxPlayers,startStack,sb,bb,
+      ante:{enabled:anteEnabled,amount:anteEnabled?anteAmount:0},
+      blinds:{increase:blindIncrease,intervalMinutes:blindIncrease?intervalMinutes:0},
+      visibility,status:'open',seats:Array.from({length:maxPlayers},(_,i)=>i===0?'queenbee':null),
+      invitedUserIds:[],feedPublished,createdAt:new Date().toISOString(),
+      externalShare:{enabled:false,token:null},tournament:{mode:'single-table',mttConfig:null}};
+    state.rooms=[room,...state.rooms];persistRooms();state.currentRoomId=id;state.roomReturnView='home';state.view='room:'+id;render();toast('Poker Room을 만들었어요');
+  });
+
+  document.querySelectorAll('[data-open-room]').forEach(b=>b.onclick=()=>{
+    state.currentRoomId=b.dataset.openRoom;state.roomReturnView=state.view;state.modal=null;state.view='room:'+state.currentRoomId;render();
+  });
+  document.querySelectorAll('[data-join-room]').forEach(b=>b.onclick=()=>{
+    const room=getRoom(b.dataset.joinRoom);if(!room)return;
+    if(room.visibility==='private'&&room.hostId!=='queenbee'&&!room.invitedUserIds.includes('queenbee')){toast('초대받은 사용자만 입장할 수 있어요');return}
+    if(room.seats.includes('queenbee')){toast('이미 착석 중이에요');return}
+    const idx=room.seats.findIndex(x=>!x);if(idx<0){toast('빈 좌석이 없어요');return}
+    room.seats[idx]='queenbee';persistRooms();render();toast('테이블에 입장했어요');
+  });
+  document.querySelectorAll('[data-leave-room]').forEach(b=>b.onclick=()=>{
+    const room=getRoom(b.dataset.leaveRoom);if(!room)return;
+    if(room.hostId==='queenbee'){toast('호스트는 현재 버전에서 테이블을 나갈 수 없어요');return}
+    const idx=room.seats.indexOf('queenbee');if(idx>=0)room.seats[idx]=null;persistRooms();render();toast('테이블에서 나왔어요');
+  });
+  document.querySelectorAll('[data-invite-room]').forEach(b=>b.onclick=()=>{state.currentRoomId=b.dataset.inviteRoom;state.modal='roomInvite';render()});
+  document.querySelectorAll('[data-send-room-invite]').forEach(b=>b.onclick=()=>{
+    const room=getRoom(state.currentRoomId),toUserId=b.dataset.sendRoomInvite;if(!room||room.hostId!=='queenbee')return;
+    if(!room.invitedUserIds.includes(toUserId))room.invitedUserIds.push(toUserId);
+    const exists=state.roomInvites.some(i=>i.roomId===room.id&&i.toUserId===toUserId&&i.status==='pending');
+    if(!exists)state.roomInvites.unshift({id:'invite-'+Date.now()+'-'+toUserId,roomId:room.id,fromUserId:'queenbee',toUserId,status:'pending',createdAt:new Date().toISOString()});
+    persistRooms();persistRoomInvites();render();toast(getUser(toUserId).name+'님을 초대했어요');
+  });
+  document.querySelectorAll('[data-start-room]').forEach(b=>b.onclick=()=>{
+    const room=getRoom(b.dataset.startRoom);if(!room||room.hostId!=='queenbee')return;
+    if(roomSeatCount(room)<2){toast('2명 이상 착석해야 시작할 수 있어요');return}
+    room.status='playing';persistRooms();render();toast('플레이머니 테이블을 시작했어요');
+  });
+  const roomMenu=document.querySelector('[data-room-menu]');if(roomMenu)roomMenu.onclick=()=>{
+    const room=getRoom(state.currentRoomId);
+    if(room?.hostId==='queenbee'){state.modal='roomInvite';render()}else toast('Room 메뉴는 다음 단계에서 확장해요');
+  };
+
+  const anteToggle=document.querySelector('#roomAnteEnabled');if(anteToggle)anteToggle.onchange=()=>document.querySelector('#roomAnteField')?.classList.toggle('active',anteToggle.checked);
+  const blindToggle=document.querySelector('#roomBlindIncrease');if(blindToggle)blindToggle.onchange=()=>document.querySelector('#roomBlindIntervalField')?.classList.toggle('active',blindToggle.checked);
+  document.querySelectorAll('input[name="roomVisibility"]').forEach(i=>i.onchange=()=>{document.querySelectorAll('.visibility-option').forEach(x=>x.classList.remove('active'));i.closest('.visibility-option')?.classList.add('active')});
+
   document.querySelectorAll('[data-user]').forEach(b=>b.onclick=()=>{state.modal=null;state.view='user:'+b.dataset.user;render()});
 
   document.querySelectorAll('[data-follow]').forEach(b=>b.onclick=()=>{
