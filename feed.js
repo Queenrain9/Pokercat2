@@ -1,8 +1,18 @@
 function userRow(key){
-  const u=demoUsers[key],following=state.following.has(key);
+  const base=demoUsers[key]||demoUsers.riverkim;
+  const isMe=key==='queenbee';
+  const u=isMe
+    ?{...base,name:state.nickname,cat:state.selectedCat,pubBrand:state.pubBrand,pubBranch:state.pubBranch}
+    :base;
+  const pub=u.pubBrand&&u.pubBranch
+    ?`<span class="feed-pub-affiliation"><i>♠</i><b>${escapeHtml(u.pubBrand)}</b> <small>${escapeHtml(u.pubBranch)}</small></span>`
+    :'';
   return `<div class="user-row">
     <button class="avatar" data-user="${key}">${catAvatar(u.cat,'avatar-cat-image')}</button>
-    <div class="user-meta"><div class="user-name">${u.name}</div><div class="user-sub">${u.sub}</div></div>
+    <div class="user-meta">
+      <div class="user-name-line"><div class="user-name">${escapeHtml(u.name)}</div>${pub}</div>
+      <div class="user-sub">${u.time||'방금'}</div>
+    </div>
     <button class="more-btn">•••</button>
   </div>`;
 }
