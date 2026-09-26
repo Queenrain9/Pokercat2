@@ -305,6 +305,77 @@ function wire(){
     });
     refreshRange();
   }
+  if(state.view==='tool:bankroll'){
+    document.querySelectorAll('[data-bankroll-period]').forEach(button=>button.onclick=()=>{
+      state.bankrollPeriod=button.dataset.bankrollPeriod||'month';
+      render();
+    });
+    const editBase=document.querySelector('[data-edit-bankroll-base]');
+    if(editBase)editBase.onclick=()=>{state.modal='bankrollBase';render()};
+    const saveBase=document.querySelector('[data-save-bankroll-base]');
+    if(saveBase)saveBase.onclick=()=>{
+      const raw=(document.querySelector('#bankrollStartingAmount')?.value||'').trim();
+      const amount=Number(raw);
+      if(raw===''||!Number.isFinite(amount)||amount<0){toast('시작 Bankroll을 0원 이상으로 입력해 주세요');return}
+      const data=loadBankrollData();
+      data.startingBankroll=amount;
+      persistBankrollData(data);
+      state.modal=null;
+      render();
+      toast('시작 Bankroll을 저장했어요');
+    };
+    const addSession=document.querySelector('[data-add-bankroll-session]');
+    if(addSession)addSession.onclick=()=>{state.bankrollEditingId=null;state.modal='bankrollSession';render()};
+    document.querySelectorAll('[data-edit-bankroll-session]').forEach(button=>button.onclick=()=>{
+      state.bankrollEditingId=button.dataset.editBankrollSession;
+      state.modal='bankrollSession';
+      render();
+    });
+    const saveSession=document.querySelector('[data-save-bankroll-session]');
+    if(saveSession)saveSession.onclick=()=>{
+      const date=(document.querySelector('#bankrollDate')?.value||'').trim();
+      const resultRaw=(document.querySelector('#bankrollResult')?.value||'').trim();
+      const durationRaw=(document.querySelector('#bankrollDuration')?.value||'').trim();
+      const result=Number(resultRaw);
+      const duration=durationRaw===''?null:Number(durationRaw);
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){toast('세션 날짜를 선택해 주세요');return}
+      if(resultRaw===''||!Number.isFinite(result)){toast('세션 손익을 숫자로 입력해 주세요');return}
+      if(durationRaw!==''&&(!Number.isFinite(duration)||duration<0)){toast('플레이 시간을 올바르게 입력해 주세요');return}
+      const data=loadBankrollData();
+      const old=data.sessions.find(session=>session.id===state.bankrollEditingId);
+      const now=new Date().toISOString();
+      const session={
+        id:old?.id||('session-'+Date.now()),
+        date,
+        gameType:document.querySelector('#bankrollGameType')?.value||'MTT',
+        venueType:document.querySelector('#bankrollVenueType')?.value||'Live',
+        result,
+        durationHours:duration,
+        note:(document.querySelector('#bankrollNote')?.value||'').trim(),
+        createdAt:old?.createdAt||now,
+        updatedAt:now
+      };
+      data.sessions=old?data.sessions.map(item=>item.id===old.id?session:item):[session,...data.sessions];
+      persistBankrollData(data);
+      state.modal=null;
+      state.bankrollEditingId=null;
+      render();
+      toast(old?'세션 기록을 수정했어요':'세션 기록을 저장했어요');
+    };
+    const deleteSession=document.querySelector('[data-delete-bankroll-session]');
+    if(deleteSession)deleteSession.onclick=()=>{
+      const data=loadBankrollData();
+      const old=data.sessions.find(session=>session.id===state.bankrollEditingId);
+      if(!old)return;
+      if(!window.confirm('이 세션 기록을 삭제할까요?'))return;
+      data.sessions=data.sessions.filter(session=>session.id!==old.id);
+      persistBankrollData(data);
+      state.modal=null;
+      state.bankrollEditingId=null;
+      render();
+      toast('세션 기록을 삭제했어요');
+    };
+  }
   document.querySelectorAll('[data-open-hand-detail]').forEach(b=>b.onclick=()=>{state.handReturnView=state.view;state.view='hand:'+b.dataset.openHandDetail;render()});
   document.querySelectorAll('[data-hand-detail-back]').forEach(b=>b.onclick=()=>{state.view=state.handReturnView||'profile';render()});
 
@@ -402,7 +473,7 @@ function wire(){
   const blind=document.querySelector('#hhBlind');if(blind)blind.oninput=()=>state.handMeta.blind=blind.value;
   const pre=document.querySelector('#hhPre');if(pre)pre.oninput=()=>state.handActions.pre=pre.value;
   const preview=document.querySelector('[data-preview-hand]');if(preview)preview.onclick=()=>{state.previewHand=handDraftToData();state.modal='handPreview';render()};
-  const close=document.querySelector('[data-close-modal]');if(close)close.onclick=()=>{state.modal=null;state.editingCareerId=null;render()};
+  const close=document.querySelector('[data-close-modal]');if(close)close.onclick=()=>{state.modal=null;state.editingCareerId=null;state.bankrollEditingId=null;render()};
   const closePreview=document.querySelector('[data-close-preview]');if(closePreview)closePreview.onclick=()=>{state.modal=null;render()};
   document.querySelectorAll('[data-post-demo]').forEach(b=>b.onclick=()=>{
     if(!state.loggedIn){requireAuth('게시하려면 로그인해 주세요.',{type:'view',view:'compose'});return}
