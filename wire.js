@@ -28,6 +28,14 @@ function wire(){
   document.querySelectorAll('[data-like]').forEach(b=>b.onclick=()=>{const k=b.dataset.like;state.liked.has(k)?state.liked.delete(k):state.liked.add(k);render()});
   document.querySelectorAll('[data-profile-tab]').forEach(b=>b.onclick=()=>{state.profileTab=b.dataset.profileTab;render()});
   const close=document.querySelector('[data-close-modal]'); if(close) close.onclick=()=>{state.modal=null;render()};
+  const composeText=document.querySelector('#composeText'); if(composeText) composeText.oninput=()=>{state.composeText=composeText.value};
+  const syncHandDraft=()=>{
+    const map=[['hhGame','game'],['hhPlayers','players'],['hhPos','pos'],['hhStack','stack'],['hhBlind','blind']];
+    map.forEach(([id,key])=>{const el=document.querySelector('#'+id);if(el){el.oninput=el.onchange=()=>{state.handMeta[key]=el.value}}});
+    const actions=[['hhPre','pre'],['hhFlop','flop'],['hhTurn','turn'],['hhRiver','river']];
+    actions.forEach(([id,key])=>{const el=document.querySelector('#'+id);if(el){el.oninput=()=>{state.handActions[key]=el.value}}});
+  };
+  syncHandDraft();
   const toggleHand=document.querySelector('[data-toggle-hand]'); if(toggleHand) toggleHand.onclick=()=>{state.composeMode=state.composeMode==='hand'?'post':'hand';state.cardTarget=null;state.cardRank=null;render()};
   const removeHand=document.querySelector('[data-remove-hand]'); if(removeHand) removeHand.onclick=()=>{state.composeMode='post';state.cardTarget=null;state.cardRank=null;render()};
   document.querySelectorAll('[data-card-slot]').forEach(b=>b.onclick=()=>{state.cardTarget=b.dataset.cardSlot;state.cardRank=null;render()});
@@ -55,7 +63,14 @@ function wire(){
     state.modal='handPreview';render();
   };
   const closePreview=document.querySelector('[data-close-preview]'); if(closePreview) closePreview.onclick=()=>{state.modal=null;render()};
-  document.querySelectorAll('[data-post-demo]').forEach(b=>b.onclick=()=>{state.modal=null;state.view='home';state.composeMode='post';render();toast('베타 게시물로 등록했어요')});
+  document.querySelectorAll('[data-post-demo]').forEach(b=>b.onclick=()=>{
+    state.modal=null;state.view='home';state.composeMode='post';
+    state.composeText='';
+    state.handDraft={hero:['',''],flop:['','',''],turn:[''],river:['']};
+    state.cardTarget=null;state.cardRank=null;
+    state.handActions={pre:'',flop:'',turn:'',river:''};
+    render();toast('베타 게시물로 등록했어요');
+  });
   document.querySelectorAll('[data-toast]').forEach(b=>b.onclick=()=>toast(b.dataset.toast));
   const theme=document.querySelector('[data-theme]'); if(theme) theme.onclick=()=>{
     const next=document.documentElement.dataset.theme==='dark'?'light':'dark';
