@@ -187,3 +187,25 @@
 .career-empty>span{display:block;font-size:25px;color:#c89453}
 .career-empty b{display:block;color:#e2e7ed;font-size:12px;margin:9px 0 5px}
 .career-empty p{font-size:10px;line-height:1.5;margin:0 0 13px}
+
+/* Poker Room social cards */
+.room-social-card{
+  margin:8px 12px 12px;border:1px solid #2a3441;border-radius:15px;
+  background:linear-gradient(145deg,#111720,#0c1117);overflow:hidden;
+  box-shadow:0 12px 28px rgba(0,0,0,.16)
+}
+.room-social-top{display:grid;grid-template-columns:38px 1fr auto;gap:9px;align-items:center;padding:11px}
+.room-host-avatar{width:36px;height:36px}.room-card-avatar{width:100%;height:100%;border-radius:50%}
+.room-social-top small{display:block;font-size:8px;color:#7c8694}.room-social-top b{display:block;font-size:11px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.room-open-badge,.room-private-badge{font-size:7px;padding:4px 6px;border-radius:999px;background:#153024;color:#79d69f;font-weight:850}.room-private-badge{background:#26212e;color:#b89ee0}
+.room-card-table-art{position:relative;height:122px;background:radial-gradient(ellipse at 50% 55%,#173e34,#0d211d 52%,#09100f 80%);display:grid;place-items:center;overflow:hidden;border-top:1px solid #1c2729;border-bottom:1px solid #1c2729}
+.mini-table{width:68%;height:70px;border-radius:50%;border:5px solid #3e2d24;background:radial-gradient(ellipse,#174c3e,#10372d);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#b99464;box-shadow:0 12px 25px rgba(0,0,0,.35)}
+.mini-table span{font-size:15px}.mini-table b{font-size:9px;margin-top:3px}
+.mini-seats{position:absolute;inset:0}.mini-seats i{position:absolute;width:18px;height:18px;border-radius:50%;background:#121820;border:2px solid #2e3843}
+.mini-seats i.filled{background:#d7a45f;border-color:#f0c985}
+.mini-seats i:nth-child(1){left:50%;top:12%;transform:translateX(-50%)}.mini-seats i:nth-child(2){right:14%;top:27%}.mini-seats i:nth-child(3){right:14%;bottom:22%}.mini-seats i:nth-child(4){left:50%;bottom:8%;transform:translateX(-50%)}.mini-seats i:nth-child(5){left:14%;bottom:22%}.mini-seats i:nth-child(6){left:14%;top:27%}
+.room-social-specs{display:flex;gap:7px;align-items:center;flex-wrap:wrap;padding:9px 11px}.room-social-specs span{font-size:8px;color:#87919e}.room-social-specs b{color:#eef2f7}.room-social-specs strong{color:#ffcb83}
+.room-view-btn{width:calc(100% - 20px);height:36px;margin:0 10px 10px;border:1px solid #303a47;background:#171d25;color:#fff;border-radius:10px;font-size:9px;font-weight:850;display:flex;align-items:center;justify-content:center;gap:6px}.room-view-btn i{font-style:normal;color:#778190}
+.explore-room-card{margin:0 0 10px}
+.explore-room-section{padding:11px 12px 88px}.explore-room-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}.explore-room-head b{display:block;font-size:12px}.explore-room-head span{display:block;font-size:8px;color:#76808d;margin-top:3px;line-height:1.4}.explore-room-head button{border:1px solid #313a47;background:#151a22;color:#fff;border-radius:9px;padding:7px 9px;font-size:8px;font-weight:800}.explore-room-list{display:grid}
+.room-invite-notice .notice-detail{white-space:nowrap}
