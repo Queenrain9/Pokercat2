@@ -29,7 +29,11 @@ const state = {
   playPref: localStorage.getItem('pokercat_play') || '오프라인',
   modal:null,
   liked:new Set(),
-  following:new Set(['riverkim'])
+  following:new Set(['riverkim']),
+  composeMode:'post',
+  handDraft:{hero:['',''],flop:['','',''],turn:[''],river:['']},
+  cardTarget:null,
+  cardRank:null
 };
 
 function themeInit(){
@@ -116,7 +120,7 @@ function onboardView(){
 }
 
 function topbar(){
-  const titleMap={home:'Poker<span>Cat</span>',explore:'탐색',schedule:'대회 일정',profile:'프로필'};
+  const titleMap={home:'Poker<span>Cat</span>',explore:'탐색',schedule:'대회 일정',profile:'프로필',compose:'새 게시물'};
   return `<header class="topbar">
     <div class="logo">${titleMap[state.view]||'Poker<span>Cat</span>'}</div>
     <div class="theme-toggle">
@@ -130,6 +134,7 @@ function mainView(){
   if(state.view==='explore') return exploreView();
   if(state.view==='schedule') return scheduleView();
   if(state.view==='profile') return profileView('me');
+  if(state.view==='compose') return composeView();
   if(state.view.startsWith('user:')) return profileView(state.view.split(':')[1]);
   return homeView();
 }
