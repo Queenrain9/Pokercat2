@@ -246,7 +246,59 @@ function wire(){
     if(state.homePub){state.modal='homePubVerify';render()}else{state.modal='profileEdit';render()}
   });
 
-  document.querySelectorAll('[data-explore-tab]').forEach(b=>b.onclick=()=>{state.exploreTab=b.dataset.exploreTab;render()});
+  const requestStoreLocation=()=>{
+    if(!navigator.geolocation){
+      state.storeLocationStatus='error';
+      state.storeLocationError='이 브라우저에서는 현재 위치를 사용할 수 없어요. 아래에서 도시를 선택해 주세요.';
+      render();
+      return;
+    }
+    state.storeLocationStatus='locating';
+    state.storeLocationError='';
+    state.storeCity='';
+    navigator.geolocation.getCurrentPosition(
+      pos=>{
+        state.storeLocation={lat:pos.coords.latitude,lng:pos.coords.longitude};
+        state.storeLocationStatus='ready';
+        state.storeLocationError='';
+        state.storeCity='';
+        if(state.view==='explore'&&state.exploreTab==='stores')render();
+      },
+      err=>{
+        state.storeLocation=null;
+        state.storeLocationStatus='error';
+        state.storeLocationError=err?.code===1?'위치 권한이 꺼져 있어요. 아래에서 도시를 선택해 주세요.':'현재 위치를 확인하지 못했어요. 도시를 선택해 주세요.';
+        if(state.view==='explore'&&state.exploreTab==='stores')render();
+      },
+      {enableHighAccuracy:false,timeout:8000,maximumAge:300000}
+    );
+    render();
+  };
+  document.querySelectorAll('[data-explore-tab]').forEach(b=>b.onclick=()=>{
+    state.exploreTab=b.dataset.exploreTab;
+    if(state.exploreTab==='stores'&&!state.storeLocation&&state.storeLocationStatus==='idle'){requestStoreLocation();return}
+    render();
+  });
+  document.querySelectorAll('[data-store-location]').forEach(b=>b.onclick=()=>requestStoreLocation());
+  document.querySelectorAll('[data-store-city]').forEach(b=>b.onclick=()=>{
+    const preset=window.STORE_CITY_PRESETS?.[b.dataset.storeCity]||STORE_CITY_PRESETS?.[b.dataset.storeCity];
+    if(!preset)return;
+    state.storeLocation={lat:preset.lat,lng:preset.lng};
+    state.storeCity=b.dataset.storeCity;
+    state.storeLocationStatus='ready';
+    state.storeLocationError='';
+    render();
+  });
+  document.querySelectorAll('[data-store-map]').forEach(b=>b.onclick=()=>{
+    const query=b.dataset.storeMap||'포커룸';
+    window.open('https://map.naver.com/p/search/'+encodeURIComponent(query),'_blank','noopener');
+  });
+  document.querySelectorAll('[data-open-schedule]').forEach(b=>b.onclick=()=>{
+    state.view='explore';
+    state.exploreTab='schedule';
+    state.modal=null;
+    render();
+  });
   document.querySelectorAll('[data-profile-tab]').forEach(b=>b.onclick=()=>{state.profileTab=b.dataset.profileTab;render()});
   const openProfileMenu=document.querySelector('[data-open-profile-menu]');if(openProfileMenu)openProfileMenu.onclick=()=>{state.modal='profileUtility';render()};
   document.querySelectorAll('[data-open-tools]').forEach(b=>b.onclick=()=>{state.modal=null;state.view='tools';render()});
