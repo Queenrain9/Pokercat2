@@ -144,7 +144,8 @@ function normalizeRoom(room={}){
       ...sourceTable,
       id:sourceTable.id||room.id+'-table-1',
       status:status==='playing'?'playing':status==='closed'?'closed':'waiting',
-      seats
+      seats,
+      gameState:sourceTable.gameState||null
     },...(Array.isArray(room.tables)?room.tables.slice(1):[])],
     invitedUserIds:[...new Set(room.invitedUserIds||[])],
     createdAt,
