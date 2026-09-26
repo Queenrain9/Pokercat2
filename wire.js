@@ -238,5 +238,45 @@ function wire(){
     state.view='home';state.composeMode='post';state.modal=null;render();toast('게시했어요')
   });
 }
+function applyPendingAuth(pending){
+  if(!pending){render();return}
+  if(pending.type==='view'){
+    state.view=pending.view;state.modal=null;render();return;
+  }
+  if(pending.type==='modal'){
+    state.modal=pending.modal;render();return;
+  }
+  if(pending.type==='followingFeed'){
+    state.feedMode='following';state.view='home';state.modal=null;render();return;
+  }
+  if(pending.type==='follow'){
+    state.following.has(pending.key)?state.following.delete(pending.key):state.following.add(pending.key);
+    persistRelationships();render();return;
+  }
+  if(pending.type==='like'){
+    state.liked.has(pending.key)?state.liked.delete(pending.key):state.liked.add(pending.key);
+    render();return;
+  }
+  if(pending.type==='savePost'){
+    render();toast('저장했어요');return;
+  }
+  if(pending.type==='openRoom'){
+    state.currentRoomId=pending.id;state.roomReturnView=state.view;state.view='room:'+pending.id;state.modal=null;render();return;
+  }
+  if(pending.type==='joinRoom'){
+    state.currentRoomId=pending.id;state.view='room:'+pending.id;state.modal=null;
+    joinRoomById(pending.id);return;
+  }
+  render();
+}
+
+function joinRoomById(id){
+  const room=getRoom(id);if(!room)return;
+  if(room.visibility==='private'&&room.hostId!=='queenbee'&&!room.invitedUserIds.includes('queenbee')){state.view='room:'+id;render();toast('초대받은 사용자만 입장할 수 있어요');return}
+  if(room.seats.includes('queenbee')){state.view='room:'+id;render();toast('이미 착석 중이에요');return}
+  const idx=room.seats.findIndex(x=>!x);if(idx<0){state.view='room:'+id;render();toast('빈 좌석이 없어요');return}
+  room.seats[idx]='queenbee';persistRooms();state.view='room:'+id;render();toast('테이블에 입장했어요');
+}
+
 function toast(msg){const old=document.querySelector('.toast');if(old)old.remove();const el=document.createElement('div');el.className='toast';el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),1700)}
 render();
