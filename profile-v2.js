@@ -49,7 +49,7 @@ function profileView(key){
   const hp=verifiedHomePub(u);
   const followersCount=mine?state.followers.size:24;
   const followingCount=mine?state.following.size:18;
-  const postCount=mine?24:profileTimelinePosts(userKey).length+18;
+  const postCount=profileTimelinePosts(userKey).length;
   const followLabel=!mine?(state.following.has(userKey)?'팔로잉':'팔로우'):'프로필 편집';
   const tags=[
     {icon:'♠',label:mine?state.gamePref:'MTT'},
@@ -173,7 +173,7 @@ function careerCard(item,mine,index){
     '<div class="career-rank">'+String(index+1).padStart(2,'0')+'</div>'+
     '<div class="career-main">'+
       '<div class="career-category">'+escapeHtml(item.category||'Achievement')+(verified?'<span class="career-verified">✓ 인증</span>':'')+'</div>'+
-      '<h3>'+escapeHtml(item.title||'Career High')+'</h3>'+
+      '<h3>'+escapeHtml(item.title||'커리어')+'</h3>'+
       (item.tournamentName&&item.tournamentName!==item.title?'<div class="career-tournament">'+escapeHtml(item.tournamentName)+'</div>':'')+
       '<div class="career-meta">'+(month?'<span>'+escapeHtml(month)+'</span>':'')+(item.prize?'<strong>'+escapeHtml(item.prize)+'</strong>':'')+'</div>'+
       (item.description?'<p>'+escapeHtml(item.description)+'</p>':'')+
@@ -188,7 +188,7 @@ function bottomNav(){
 }
 
 function avatarPickerModal(){
-  const available=[0,1,2];
+  const available=cats.map((_,i)=>i);
   const currentPos=catByRef(state.selectedCat).pos;
   return '<div class="modal-backdrop" data-close-modal><div class="sheet avatar-picker-sheet" onclick="event.stopPropagation()">'+
     '<div class="grab"></div>'+
