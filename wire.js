@@ -22,6 +22,24 @@ function wire(){
   const markRead=document.querySelector('[data-mark-read]');if(markRead)markRead.onclick=()=>{state.notificationsRead=true;render();toast('알림을 모두 읽음 처리했어요')};
   document.querySelectorAll('[data-explore-tab]').forEach(b=>b.onclick=()=>{state.exploreTab=b.dataset.exploreTab;render()});
   document.querySelectorAll('[data-profile-tab]').forEach(b=>b.onclick=()=>{state.profileTab=b.dataset.profileTab;render()});
+
+  const editProfile=document.querySelector('[data-edit-profile]');if(editProfile)editProfile.onclick=()=>{state.modal='profileEdit';render()};
+  const closeProfileEdit=document.querySelector('[data-close-profile-edit]');if(closeProfileEdit)closeProfileEdit.onclick=()=>{state.modal=null;render()};
+  const saveProfile=document.querySelector('[data-save-profile]');if(saveProfile)saveProfile.onclick=()=>{
+    const nick=document.querySelector('#editNickname');
+    const brand=document.querySelector('#editPubBrand');
+    const branch=document.querySelector('#editPubBranch');
+    const nextName=(nick?.value||'').trim()||state.nickname;
+    const nextBrand=(brand?.value||'').trim();
+    const nextBranch=(branch?.value||'').trim();
+    if((nextBrand&&!nextBranch)||(!nextBrand&&nextBranch)){toast('브랜드와 지점명을 둘 다 입력해 주세요');return;}
+    state.nickname=nextName;state.pubBrand=nextBrand;state.pubBranch=nextBranch;
+    localStorage.setItem('pokercat_name',state.nickname);
+    localStorage.setItem('pokercat_pub_brand',state.pubBrand);
+    localStorage.setItem('pokercat_pub_branch',state.pubBranch);
+    state.modal=null;render();toast(state.pubBrand?'대표 홀덤펍을 저장했어요':'대표 홀덤펍을 제거했어요');
+  };
+
   document.querySelectorAll('[data-toast]').forEach(b=>b.onclick=()=>toast(b.dataset.toast));
   const composeText=document.querySelector('#composeText');if(composeText)composeText.oninput=()=>state.composeText=composeText.value;
   const toggleHand=document.querySelector('[data-toggle-hand]');if(toggleHand)toggleHand.onclick=()=>{state.composeMode='hand';state.cardTarget=null;state.cardRank=null;render()};
