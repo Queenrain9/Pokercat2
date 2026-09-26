@@ -59,7 +59,9 @@ function profileView(key){
 
   return '<section class="profile-screen activity-profile">'+
     '<div class="profile-hero compact-profile-hero">'+
-      '<div class="profile-avatar">'+catAvatar(u.cat,'profile-cat-image')+'</div>'+
+      (mine
+        ?'<button class="profile-avatar editable-avatar" data-edit-avatar aria-label="포커캣 변경">'+catAvatar(u.cat,'profile-cat-image')+'<span class="avatar-edit-badge">변경</span></button>'
+        :'<div class="profile-avatar">'+catAvatar(u.cat,'profile-cat-image')+'</div>')+
       '<div class="profile-name">'+escapeHtml(u.name)+'</div>'+
       '<div class="profile-handle">'+u.handle+'</div>'+
       '<div class="bio">'+(mine?'홀덤 치고, 핸드 남기고, 좋은 사람들 만나는 중.':'포커 좋아하는 평범한 플레이어. 핸드 토론 환영.')+'</div>'+
@@ -183,4 +185,25 @@ function careerCard(item,mine,index){
 function bottomNav(){
   if(state.view.startsWith('hand:')||state.view==='tools'||state.view.startsWith('tool:'))return '';
   return pokerRoomBottomNavV1();
+}
+
+function avatarPickerModal(){
+  const available=[0,1,2];
+  const currentPos=catByRef(state.selectedCat).pos;
+  return '<div class="modal-backdrop" data-close-modal><div class="sheet avatar-picker-sheet" onclick="event.stopPropagation()">'+
+    '<div class="grab"></div>'+
+    '<div class="sheet-title">포커캣 변경</div>'+
+    '<p class="avatar-picker-copy">프로필에 사용할 포커캣을 선택하세요.</p>'+
+    '<div class="avatar-picker-grid">'+
+      available.map(i=>{
+        const cat=cats[i];
+        const selected=cat.pos===currentPos;
+        return '<button class="avatar-picker-option '+(selected?'selected':'')+'" data-select-avatar="'+i+'">'+
+          catAvatar(i,'avatar-picker-image')+
+          '<b>'+escapeHtml(cat.name)+'</b>'+
+          (selected?'<span>✓</span>':'')+
+        '</button>';
+      }).join('')+
+    '</div>'+
+  '</div></div>';
 }
