@@ -201,7 +201,10 @@ if(state.view==='roomcreate')return `<header class="topbar utility-top"><button 
 if(state.view.startsWith('room:'))return `<header class="topbar utility-top"><button class="back-btn" data-room-back>‹</button><div class="page-title">Poker Room</div><button class="read-all" data-room-menu>•••</button></header>`;
 if(state.view.startsWith('hand:'))return `<header class="topbar utility-top"><button class="back-btn" data-hand-detail-back>‹</button><div class="page-title">핸드 상세</div><span class="topbar-spacer"></span></header>`;
 if(state.view==='compose')return '';
+if(state.view==='tools')return `<header class="topbar utility-top"><button class="back-btn" data-tools-back>‹</button><div class="page-title">Poker Tools</div><span class="topbar-spacer"></span></header>`;
+if(state.view.startsWith('tool:'))return `<header class="topbar utility-top"><button class="back-btn" data-tool-back>‹</button><div class="page-title">${pokerToolTitle(state.view.split(':')[1])}</div><span class="topbar-spacer"></span></header>`;
 const map={explore:'탐색',schedule:'일정',profile:'프로필'};
+if(state.view==='profile')return `<header class="topbar"><div class="page-title">프로필</div><button class="top-icon" data-open-profile-menu>•••</button></header>`;
 return `<header class="topbar"><div class="page-title">${map[state.view]||'PokerCat'}</div><button class="top-icon" data-toast="설정은 준비 중이에요">⚙</button></header>`
 }
 
@@ -212,6 +215,8 @@ if(state.view==='homepub')return homePubCommunityView();
 if(state.view==='roomcreate')return pokerRoomCreateView();
 if(state.view.startsWith('room:'))return pokerRoomView(state.view.split(':')[1]);
 if(state.view.startsWith('hand:'))return handDetailView(state.view.split(':')[1]);
+if(state.view==='tools')return pokerToolsHubView();
+if(state.view.startsWith('tool:'))return pokerToolView(state.view.split(':')[1]);
 if(state.view==='explore')return exploreView();
 if(state.view==='schedule')return scheduleView();
 if(state.view==='profile')return profileView('me');
@@ -223,6 +228,7 @@ return homeView()
 function modalView(){
 if(state.modal==='authGate')return authGateModal();
 if(state.modal==='feedSelector')return feedSelectorModal();
+if(state.modal==='profileUtility')return profileUtilityMenuModal();
 if(state.modal==='profileEdit')return profileEditModal();
 if(state.modal==='homePubVerify')return homePubVerifyModal();
 if(state.modal==='careerEdit')return careerEditModal();
