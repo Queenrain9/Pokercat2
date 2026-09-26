@@ -172,3 +172,28 @@
 }
 .bankroll-sheet-copy{margin:0 0 12px;color:#727e8b;font-size:8px;line-height:1.5}
 .bankroll-base-sheet .bankroll-save-btn{margin-top:13px}
+
+/* Functional Equity Calculator */
+.tool-card-slots .equity-card-select{
+  width:49px;height:64px;border:1px solid #39434f;background:linear-gradient(145deg,#f1f3f5,#cfd4da);
+  color:#11151a;border-radius:8px;font-size:13px;font-weight:900;text-align:center;text-align-last:center;
+  padding:0 3px;appearance:none;-webkit-appearance:none;outline:0
+}
+.tool-card-slots.board .equity-card-select{width:43px;height:58px}
+.equity-card-select.red{color:#a92935}
+.equity-card-select:focus{border-color:#9b8059;box-shadow:0 0 0 2px rgba(155,128,89,.16)}
+.equity-range-hint{font-size:7px;line-height:1.5;color:#697481;margin-top:7px}
+.equity-error{
+  margin-top:9px;border:1px solid rgba(197,89,98,.32);background:rgba(197,89,98,.08);color:#d98b92;
+  border-radius:9px;padding:8px 9px;font-size:7.5px;line-height:1.45
+}
+.equity-calc-btn{border-color:#594c38;background:#1c1913;color:#e9c78e}
+.equity-calc-btn:disabled{opacity:.55}
+.equity-result-note{
+  margin-top:9px;border:1px solid #28313d;background:#0b1016;border-radius:10px;padding:10px 11px;
+  display:flex;flex-direction:column;gap:4px
+}
+.equity-result-note b{font-size:8px;color:#d9dee5}
+.equity-result-note span{font-size:7px;line-height:1.45;color:#687381}
+.equity-result-note.calculated>div{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.equity-result-note.calculated strong{font-size:7px;color:#9b8059}
