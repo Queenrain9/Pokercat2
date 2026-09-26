@@ -1,155 +1,31 @@
-const AUTH_FLOW_VERSION = '2';
-if(localStorage.getItem('pokercat_auth_version') !== AUTH_FLOW_VERSION){
-  localStorage.removeItem('pokercat_onboarded');
-  localStorage.setItem('pokercat_auth_version', AUTH_FLOW_VERSION);
-}
-
-const cats = [
-  {id:'rock',name:'The Rock',pos:'0% 0%'},
-  {id:'shark',name:'The Shark',pos:'50% 0%'},
-  {id:'maniac',name:'The Maniac',pos:'100% 0%'},
-  {id:'solver',name:'The Solver',pos:'0% 50%'},
-  {id:'trapper',name:'The Trapper',pos:'50% 50%'},
-  {id:'hero-caller',name:'The Hero Caller',pos:'100% 50%'},
-  {id:'queen',name:'The Queen',pos:'0% 100%'},
-  {id:'darling',name:'The Darling',pos:'50% 100%'},
-  {id:'grinder',name:'The Grinder',pos:'100% 100%'}
-];
-
-const demoUsers = {
-  queenbee:{name:'QUEENBEE',handle:'@queenbee',cat:'queen',sub:'MTT · Live'},
-  riverkim:{name:'RIVERKIM',handle:'@riverkim',cat:'shark',sub:'Cash · Online'},
-  ninehigh:{name:'NINEHIGH',handle:'@ninehigh',cat:'rock',sub:'MTT · Live'},
-  minraise:{name:'MINRAISE',handle:'@minraise',cat:'solver',sub:'Mixed · Live'}
-};
-
-function catByRef(ref){
-  if(typeof ref==='number') return cats[ref] || cats[0];
-  if(typeof ref==='string') return cats.find(c=>c.id===ref) || cats[0];
-  return ref || cats[0];
-}
-
-function catAvatar(ref,className='cat-avatar-image'){
-  const cat=catByRef(ref);
-  return `<span class="poker-cat-avatar ${className}" style="--cat-pos:${cat.pos}" role="img" aria-label="${cat.name}"></span>`;
-}
-
-const state = {
-  view:'home',
-  profileTab:'posts',
-  onboarding: localStorage.getItem('pokercat_onboarded') === '1',
-  onboardStep:0,
-  authMode:'login',
-  selectedCat: Number(localStorage.getItem('pokercat_cat') || 6),
-  nickname: localStorage.getItem('pokercat_name') || 'QUEENBEE',
-  gamePref: localStorage.getItem('pokercat_game') || 'MTT',
-  playPref: localStorage.getItem('pokercat_play') || '오프라인',
-  modal:null,
-  liked:new Set(),
-  following:new Set(['riverkim']),
-  composeMode:'post',
-  handDraft:{hero:['',''],flop:['','',''],turn:[''],river:['']},
-  cardTarget:null,
-  cardRank:null,
-  composeText:'',
-  handMeta:{game:'MTT',players:'8-max',pos:'BTN',stack:'38BB',blind:'1K / 2K / 2K'},
-  handActions:{pre:'',flop:'',turn:'',river:''}
-};
-
-document.documentElement.dataset.theme = 'dark';
-localStorage.removeItem('pokercat_theme');
-
-function icon(name){
-  const map={home:'⌂',search:'⌕',plus:'＋',calendar:'▦',profile:'●'};
-  return map[name]||'•';
-}
-
-function render(){
-  const app=document.querySelector('#app');
-  if(!state.onboarding){
-    app.innerHTML = state.onboardStep===0 ? authView() : onboardView();
-  } else {
-    app.innerHTML = '<main class="phone">'+topbar()+mainView()+bottomNav()+'</main>'+modalView();
-  }
-  wire();
-}
-
+const AUTH_FLOW_VERSION='3';
+if(localStorage.getItem('pokercat_auth_version')!==AUTH_FLOW_VERSION){localStorage.removeItem('pokercat_onboarded');localStorage.setItem('pokercat_auth_version',AUTH_FLOW_VERSION);}
+const cats=[
+{id:'rock',name:'The Rock',pos:'0% 0%'},{id:'shark',name:'The Shark',pos:'50% 0%'},{id:'maniac',name:'The Maniac',pos:'100% 0%'},
+{id:'solver',name:'The Solver',pos:'0% 50%'},{id:'trapper',name:'The Trapper',pos:'50% 50%'},{id:'hero-caller',name:'The Hero Caller',pos:'100% 50%'},
+{id:'queen',name:'The Queen',pos:'0% 100%'},{id:'darling',name:'The Darling',pos:'50% 100%'},{id:'grinder',name:'The Grinder',pos:'100% 100%'}];
+const demoUsers={
+queenbee:{name:'QUEENBEE',handle:'@queenbee',cat:'darling',sub:'MTT · Live'},riverkim:{name:'riverkim',handle:'@riverkim',cat:'shark',sub:'2시간 전 · Manila'},
+minraise:{name:'minraise',handle:'@minraise',cat:'solver',sub:'Cash · Online'},chiplee:{name:'chiplee',handle:'@chiplee',cat:'grinder',sub:'MTT · Live'},ninehigh:{name:'ninehigh',handle:'@ninehigh',cat:'rock',sub:'MTT · Live'}};
+function catByRef(ref){if(typeof ref==='number')return cats[ref]||cats[0];if(typeof ref==='string')return cats.find(c=>c.id===ref)||cats[0];return ref||cats[0]}
+function catAvatar(ref,className='cat-avatar-image'){const cat=catByRef(ref);return `<span class="poker-cat-avatar ${className}" style="--cat-pos:${cat.pos}" role="img" aria-label="${cat.name}"></span>`}
+const state={
+view:'home',onboarding:localStorage.getItem('pokercat_onboarded')==='1',onboardStep:0,authMode:'landing',
+selectedCat:Number(localStorage.getItem('pokercat_cat')||7),nickname:localStorage.getItem('pokercat_name')||'QUEENBEE',
+gamePref:localStorage.getItem('pokercat_game')||'MTT',playPref:localStorage.getItem('pokercat_play')||'오프라인',
+feedTab:'all',exploreTab:'popular',scheduleTab:'events',profileTab:'posts',modal:null,liked:new Set(),following:new Set(['riverkim']),
+composeMode:'post',composeText:'',handDraft:{hero:['A♠','K♠'],flop:['Q♥','J♠','7♣'],turn:['2♦'],river:['9♣']},cardTarget:null,cardRank:null,
+handMeta:{game:'MTT',players:'8-max',pos:'BTN',stack:'38BB',blind:'1K / 2K (Ante 2K)'},handActions:{pre:'BTN 오픈에 BB에서 콜',flop:'플랍 체크-콜',turn:'턴 체크-레이즈',river:'리버 콜'}};
+document.documentElement.dataset.theme='dark';
+function icon(name){const map={home:'⌂',search:'⌕',plus:'＋',calendar:'▦',profile:'♙'};return map[name]||'•'}
+function render(){const app=document.querySelector('#app');if(!state.onboarding){app.innerHTML=state.onboardStep===0?authView():onboardView()}else{app.innerHTML='<main class="phone">'+topbar()+mainView()+bottomNav()+'</main>'+modalView()}wire()}
 function authView(){
-  if(state.authMode==='signup'){
-    return `<section class="auth-wrap">
-      <button class="auth-back" data-auth-back>‹ 로그인으로</button>
-      <div class="brand-lockup compact">
-        <div class="cat-mark">🐈‍⬛</div>
-        <div class="brand-title">Poker<span style="color:var(--brand-strong)">Cat</span></div>
-        <div class="brand-sub">새 계정을 만들 방법을 선택해.</div>
-      </div>
-      <div class="provider-list">
-        <button class="provider google" data-auth>G&nbsp; Google로 가입하기</button>
-        <button class="provider kakao" data-auth>●&nbsp; 카카오로 가입하기</button>
-        <button class="provider apple" data-auth>&nbsp; Apple로 가입하기</button>
-      </div>
-      <div class="auth-foot">가입을 계속하면 PokerCat 이용약관 및 개인정보처리방침에 동의하게 됩니다.<br>현재는 베타 UI라 실제 계정 연동 전입니다.</div>
-    </section>`;
-  }
-
-  return `<section class="auth-wrap">
-    <div class="brand-lockup">
-      <div class="cat-mark">🐈‍⬛</div>
-      <div class="brand-title">Poker<span style="color:var(--brand-strong)">Cat</span></div>
-      <div class="brand-sub">홀덤 플레이어들의 피드, 핸드,<br>그리고 포커 친구들.</div>
-    </div>
-    <div class="auth-form">
-      <div class="field"><label>아이디 또는 이메일</label><input id="loginId" autocomplete="username" placeholder="아이디 또는 이메일"></div>
-      <div class="field"><label>비밀번호</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="비밀번호"></div>
-      <div class="auth-row"><button class="text-link" data-toast="비밀번호 찾기는 실제 계정 연동 단계에서 연결할게요">비밀번호를 잊었어?</button></div>
-      <button class="btn full" data-login-demo>로그인</button>
-    </div>
-    <div class="auth-divider"><span>또는</span></div>
-    <button class="btn secondary full" data-open-signup>회원가입</button>
-    <div class="auth-foot">현재는 베타 UI라 로그인 버튼을 누르면 데모 계정으로 들어갑니다.</div>
-  </section>`;
-}
-
+if(state.authMode==='login')return `<section class="auth-wrap login-panel"><button class="auth-back" data-auth-back>‹ 돌아가기</button><div class="brand-lockup compact"><div class="brand-title">POKER<span>CAT</span></div><div class="brand-sub">포커하는 고양이들이 모이는 곳</div></div><div class="auth-form"><div class="field"><label>아이디 또는 이메일</label><input id="loginId" placeholder="아이디 또는 이메일"></div><div class="field"><label>비밀번호</label><input id="loginPassword" type="password" placeholder="비밀번호"></div><button class="btn full" data-login-demo>로그인</button></div><div class="auth-divider"><span>또는</span></div><div class="provider-list"><button class="provider kakao" data-auth>● 카카오로 계속</button><button class="provider apple" data-auth> Apple로 계속</button></div></section>`;
+return `<section class="landing"><div class="landing-art">${catAvatar('shark','landing-cat')}<div class="landing-glow"></div></div><div class="landing-copy"><div class="landing-logo">POKER<span>CAT</span></div><div class="landing-kicker">POKER COMMUNITY</div><p>포커하는 고양이들이 모이는 곳</p><button class="landing-cta" data-start>시작하기</button><button class="landing-login" data-open-login>이미 계정이 있나요? <b>로그인</b></button></div></section>`}
 function onboardView(){
-  if(state.onboardStep===1){
-    return `<section class="onboard">
-      <div class="step">PROFILE · 1/2</div>
-      <h1>너의 첫 PokerCat을 골라봐.</h1>
-      <p>9종 PokerCat 중 하나를 기본 프로필로 골라봐. 나중에 프로필에서 다시 바꿀 수 있어.</p>
-      <div class="cat-grid">${cats.map((cat,i)=>`<button class="cat-choice ${state.selectedCat===i?'selected':''}" data-cat="${i}">${catAvatar(i,'cat-choice-image')}<b>${cat.name}</b></button>`).join('')}</div>
-      <button class="btn full" data-next-onboard>다음</button>
-    </section>`;
-  }
-  return `<section class="onboard">
-    <div class="step">PROFILE · 2/2</div>
-    <h1>포커 프로필을 가볍게 만들자.</h1>
-    <p>언제든 프로필에서 바꿀 수 있어.</p>
-    <div class="form" style="margin-top:22px">
-      <div class="field"><label>닉네임</label><input id="nick" value="${state.nickname}" maxlength="16" placeholder="닉네임"></div>
-      <div class="row2">
-        <div class="field"><label>선호 게임</label><select id="gamePref"><option>MTT</option><option>Cash</option><option>Mixed</option></select></div>
-        <div class="field"><label>주로 어디서?</label><select id="playPref"><option>오프라인</option><option>온라인</option><option>둘 다</option></select></div>
-      </div>
-      <button class="btn full" data-finish-onboard>프로필 만들기</button>
-    </div>
-  </section>`;
-}
-
-function topbar(){
-  const titleMap={home:'Poker<span>Cat</span>',explore:'탐색',schedule:'대회 일정',profile:'프로필',compose:'새 게시물'};
-  return `<header class="topbar">
-    <div class="logo">${titleMap[state.view]||'Poker<span>Cat</span>'}</div>
-    <div></div>
-  </header>`;
-}
-
-function mainView(){
-  if(state.view==='home') return homeView();
-  if(state.view==='explore') return exploreView();
-  if(state.view==='schedule') return scheduleView();
-  if(state.view==='profile') return profileView('me');
-  if(state.view==='compose') return composeView();
-  if(state.view.startsWith('user:')) return profileView(state.view.split(':')[1]);
-  return homeView();
-}
-
+if(state.onboardStep===1)return `<section class="onboard"><div class="onboard-top"><b>프로필 설정</b><button data-skip-onboard>건너뛰기</button></div><h1>나를 표현하는 포커캣을 선택하세요</h1><p>언제든지 변경할 수 있어요.</p><div class="cat-grid">${cats.map((cat,i)=>`<button class="cat-choice ${state.selectedCat===i?'selected':''}" data-cat="${i}">${catAvatar(i,'cat-choice-image')}<b>${cat.name}</b></button>`).join('')}</div><div class="pager"><i class="active"></i><i></i><i></i><i></i></div><button class="onboard-next" data-next-onboard>다음</button></section>`;
+return `<section class="onboard"><div class="onboard-top"><b>프로필 설정</b><button data-skip-onboard>건너뛰기</button></div><h1>포커 프로필을 완성하세요</h1><p>간단하게 시작하고 나중에 더 채울 수 있어요.</p><div class="form onboard-form"><div class="selected-cat-preview">${catAvatar(state.selectedCat,'selected-cat')}</div><div class="field"><label>닉네임</label><input id="nick" value="${state.nickname}" maxlength="16"></div><div class="row2"><div class="field"><label>선호 게임</label><select id="gamePref"><option>MTT</option><option>Cash</option><option>Mixed</option></select></div><div class="field"><label>플레이</label><select id="playPref"><option>오프라인</option><option>온라인</option><option>둘 다</option></select></div></div><button class="onboard-next" data-finish-onboard>시작하기</button></div></section>`}
+function topbar(){if(state.view==='home')return `<header class="topbar home-top"><button class="top-icon" data-toast="카메라 기능은 준비 중이에요">◈</button><div class="logo">POKER<span>CAT</span></div><button class="top-icon" data-toast="설정은 준비 중이에요">⚙</button></header>`;if(state.view==='compose')return '';const map={explore:'탐색',schedule:'일정',profile:'프로필'};return `<header class="topbar"><div class="page-title">${map[state.view]||'PokerCat'}</div><button class="top-icon" data-toast="설정은 준비 중이에요">⚙</button></header>`}
+function mainView(){if(state.view==='home')return homeView();if(state.view==='explore')return exploreView();if(state.view==='schedule')return scheduleView();if(state.view==='profile')return profileView('me');if(state.view==='compose')return composeView();if(state.view.startsWith('user:'))return profileView(state.view.split(':')[1]);return homeView()}
+function modalView(){if(state.modal==='handPreview')return `<div class="modal-backdrop" data-close-modal><div class="sheet" onclick="event.stopPropagation()"><div class="grab"></div><div class="sheet-title">피드 미리보기</div>${hhCard(state.previewHand||handA)}<button class="btn full" data-close-preview>계속 작성하기</button></div></div>`;return ''}
+function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
