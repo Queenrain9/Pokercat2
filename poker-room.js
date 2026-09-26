@@ -175,14 +175,19 @@ function roomSeatNode(room,index,x,y){
 function roomInviteModal(){
   const room=getRoom(state.currentRoomId);
   if(!room)return '';
-  const candidates=[...new Set([...pokerFriendKeys(),...state.followers,...state.following])].filter(k=>k!=='queenbee');
+  const friendKeys=pokerFriendKeys();
+  const networkKeys=[...new Set([...state.followers,...state.following])].filter(k=>!friendKeys.includes(k));
+  const candidates=(state.roomInviteMode==='friends'?friendKeys:networkKeys).filter(k=>k!=='queenbee');
   return `<div class="modal-backdrop" data-close-modal><div class="sheet room-invite-sheet" onclick="event.stopPropagation()">
     <div class="grab"></div>
     <div class="sheet-title">PokerCat 친구 초대</div>
     <p class="room-invite-lead"><b>${escapeHtml(room.name)}</b>에 초대할 사용자를 선택하세요.</p>
-    <div class="invite-source-tabs"><button class="active">Poker Friends</button><button>Followers / Following</button></div>
+    <div class="invite-source-tabs">
+      <button class="${state.roomInviteMode==='friends'?'active':''}" data-invite-source="friends">Poker Friends</button>
+      <button class="${state.roomInviteMode==='network'?'active':''}" data-invite-source="network">Followers / Following</button>
+    </div>
     <div class="invite-list">
-      ${candidates.length?candidates.map(k=>roomInviteRow(room,k)).join(''):'<div class="relationship-empty">초대할 수 있는 사용자가 없어요.</div>'}
+      ${candidates.length?candidates.map(k=>roomInviteRow(room,k)).join(''):'<div class="relationship-empty">이 그룹에는 초대할 사용자가 없어요.</div>'}
     </div>
     <div class="external-share-placeholder"><span>↗</span><div><b>외부 링크 공유</b><small>추후 지원 예정</small></div><em>COMING SOON</em></div>
   </div></div>`;
