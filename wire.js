@@ -19,7 +19,7 @@ function wire(){
   const followingToggle=document.querySelector('[data-toggle-following]');if(followingToggle)followingToggle.onclick=()=>{state.feedMode=state.feedMode==='following'?'algorithm':'following';render()};
   const openNotifications=document.querySelector('[data-open-notifications]');if(openNotifications)openNotifications.onclick=()=>{state.view='notifications';render()};
   const notificationBack=document.querySelector('[data-notification-back]');if(notificationBack)notificationBack.onclick=()=>{state.view='home';render()};
-  const markRead=document.querySelector('[data-mark-read]');if(markRead)markRead.onclick=()=>{document.querySelectorAll('.notification-row.unread').forEach(el=>el.classList.remove('unread'));toast('알림을 모두 읽음 처리했어요')};
+  const markRead=document.querySelector('[data-mark-read]');if(markRead)markRead.onclick=()=>{state.notificationsRead=true;render();toast('알림을 모두 읽음 처리했어요')};
   document.querySelectorAll('[data-explore-tab]').forEach(b=>b.onclick=()=>{state.exploreTab=b.dataset.exploreTab;render()});
   document.querySelectorAll('[data-profile-tab]').forEach(b=>b.onclick=()=>{state.profileTab=b.dataset.profileTab;render()});
   document.querySelectorAll('[data-toast]').forEach(b=>b.onclick=()=>toast(b.dataset.toast));
