@@ -46,7 +46,7 @@ view:'home',onboarding:localStorage.getItem('pokercat_onboarded')==='1',onboardS
 selectedCat:Number(localStorage.getItem('pokercat_cat')||7),nickname:localStorage.getItem('pokercat_name')||'QUEENBEE',
 gamePref:localStorage.getItem('pokercat_game')||'MTT',playPref:localStorage.getItem('pokercat_play')||'오프라인',
 homePub:storedHomePub,careerHighs:Array.isArray(storedCareer)?storedCareer:[],
-rooms:Array.isArray(storedRooms)&&storedRooms.length?storedRooms:seededRooms,roomInvites:Array.isArray(storedRoomInvites)?storedRoomInvites:[],currentRoomId:null,
+rooms:Array.isArray(storedRooms)&&storedRooms.length?storedRooms:seededRooms,roomInvites:Array.isArray(storedRoomInvites)?storedRoomInvites:[],currentRoomId:null,roomReturnView:'home',
 feedMode:'algorithm',exploreTab:'popular',scheduleTab:'events',profileTab:'posts',notificationsRead:false,
 modal:null,relationshipMode:'friends',editingCareerId:null,liked:new Set(),
 following:new Set(Array.isArray(storedFollowing)?storedFollowing:['riverkim']),
