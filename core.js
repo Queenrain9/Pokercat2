@@ -7,9 +7,16 @@ function pubId(brand,branch){return (brand+'-'+branch).trim().toLowerCase().repl
 function verifiedHomePub(user){const hp=user?.homePub;return hp&&hp.status==='verified'?hp:null}
 
 const cats=[
-{id:'rock',name:'The Rock',pos:'0% 0%'},{id:'shark',name:'The Shark',pos:'50% 0%'},{id:'maniac',name:'The Maniac',pos:'100% 0%'},
-{id:'solver',name:'The Solver',pos:'0% 50%'},{id:'trapper',name:'The Trapper',pos:'50% 50%'},{id:'hero-caller',name:'The Hero Caller',pos:'100% 50%'},
-{id:'queen',name:'The Queen',pos:'0% 100%'},{id:'darling',name:'The Darling',pos:'50% 100%'},{id:'grinder',name:'The Grinder',pos:'100% 100%'}];
+{id:'rock',name:'The Rock',src:'./assets/pokercats/profile-cat-01.PNG?v=32'},
+{id:'shark',name:'The Shark',src:'./assets/pokercats/profile-cat-02.PNG?v=32'},
+{id:'maniac',name:'The Maniac',src:'./assets/pokercats/profile-cat-03.PNG?v=32'},
+{id:'solver',name:'The Solver',src:'./assets/pokercats/profile-cat-04.PNG?v=32'},
+{id:'trapper',name:'The Trapper',src:'./assets/pokercats/profile-cat-05.PNG?v=32'},
+{id:'hero-caller',name:'The Hero Caller',src:'./assets/pokercats/profile-cat-06.PNG?v=32'},
+{id:'queen',name:'The Queen',src:'./assets/pokercats/profile-cat-07.PNG?v=32'},
+{id:'darling',name:'The Darling',src:'./assets/pokercats/profile-cat-08.PNG?v=32'},
+{id:'grinder',name:'The Grinder',src:'./assets/pokercats/profile-cat-09.PNG?v=32'}
+]
 
 const demoUsers={
 queenbee:{name:'QUEENBEE',handle:'@queenbee',cat:'darling',time:'4시간 전',homePub:{id:'야자수-서울센터점',brand:'야자수',branch:'서울센터점',status:'verified',verification:{provider:'profile-seed',partnerId:'yajasu-seoul-center',verifiedAt:'2026-09-26T00:00:00.000Z'}}},
@@ -20,7 +27,7 @@ ninehigh:{name:'ninehigh',handle:'@ninehigh',cat:'rock',time:'6시간 전',homeP
 };
 
 function catByRef(ref){if(typeof ref==='number')return cats[ref]||cats[0];if(typeof ref==='string')return cats.find(c=>c.id===ref)||cats[0];return ref||cats[0]}
-function catAvatar(ref,className='cat-avatar-image'){const cat=catByRef(ref);return `<span class="poker-cat-avatar ${className}" style="--cat-pos:${cat.pos}" role="img" aria-label="${cat.name}"></span>`}
+function catAvatar(ref,className='cat-avatar-image'){const cat=catByRef(ref);return `<span class="poker-cat-avatar ${className}" style="background-image:url('${cat.src}')" role="img" aria-label="${cat.name}"></span>`}
 
 const legacyBrand=localStorage.getItem('pokercat_pub_brand')||'';
 const legacyBranch=localStorage.getItem('pokercat_pub_branch')||'';
