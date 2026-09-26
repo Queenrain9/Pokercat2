@@ -156,7 +156,7 @@ function careerEditModal(){
   </div></div>`;
 }
 function bottomNav(){
-  const nav=[['home','홈','home'],['search','탐색','explore'],['plus','작성','compose'],['calendar','일정','schedule'],['profile','프로필','profile']];
+  const nav=[['home','홈','home'],['search','탐색','explore'],['plus','작성','compose'],['tools','툴즈','tools'],['profile','프로필','profile']];
   return `<nav class="bottom-nav">${nav.map(n=>{const active=state.view===n[2]||(state.view==='homepub'&&n[2]==='profile');return `<button class="nav-item ${n[2]==='compose'?'compose':''} ${active?'active':''}" data-nav="${n[2]}"><span class="nav-icon">${icon(n[0])}</span><span>${n[1]}</span></button>`}).join('')}</nav>`;
 }
 
