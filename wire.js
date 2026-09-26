@@ -231,6 +231,29 @@ function wire(){
   document.querySelectorAll('[data-open-tool]').forEach(b=>b.onclick=()=>{state.view='tool:'+b.dataset.openTool;render()});
   document.querySelectorAll('[data-tools-back]').forEach(b=>b.onclick=()=>{state.view='profile';render()});
   document.querySelectorAll('[data-tool-back]').forEach(b=>b.onclick=()=>{state.view='tools';render()});
+  if(state.view==='tool:odds'){
+    const potInput=document.querySelector('#oddsPotSize');
+    const callInput=document.querySelector('#oddsCallAmount');
+    const outsInput=document.querySelector('#oddsOuts');
+    const potOddsOutput=document.querySelector('#oddsPotOdds');
+    const requiredEquityOutput=document.querySelector('#oddsRequiredEquity');
+    const turnOutput=document.querySelector('#oddsTurnChance');
+    const riverOutput=document.querySelector('#oddsRiverChance');
+
+    const refreshOdds=()=>{
+      const result=calculatePokerOdds(potInput?.value,callInput?.value,outsInput?.value);
+      if(potOddsOutput)potOddsOutput.textContent=result.pot?formatPotOddsRatio(result.pot.ratio):'--';
+      if(requiredEquityOutput)requiredEquityOutput.textContent=result.pot?result.pot.requiredEquity.toFixed(1)+'%':'--%';
+      if(turnOutput)turnOutput.textContent=result.outs?result.outs.turn.toFixed(1)+'%':'--%';
+      if(riverOutput)riverOutput.textContent=result.outs?result.outs.river.toFixed(1)+'%':'--%';
+    };
+
+    [potInput,callInput,outsInput].filter(Boolean).forEach(input=>{
+      input.addEventListener('input',refreshOdds);
+      input.addEventListener('change',refreshOdds);
+    });
+    refreshOdds();
+  }
   document.querySelectorAll('[data-open-hand-detail]').forEach(b=>b.onclick=()=>{state.handReturnView=state.view;state.view='hand:'+b.dataset.openHandDetail;render()});
   document.querySelectorAll('[data-hand-detail-back]').forEach(b=>b.onclick=()=>{state.view=state.handReturnView||'profile';render()});
 
