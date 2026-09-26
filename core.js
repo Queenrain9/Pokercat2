@@ -128,9 +128,11 @@ function normalizeRoom(room){
     audience:{type:audienceType},
     status,
     tables:[{
+      ...(room.tables?.[0]||{}),
       id:room.tables?.[0]?.id||room.id+'-table-1',
       status:status==='playing'?'playing':'waiting',
-      seats
+      seats,
+      gameState:room.tables?.[0]?.gameState||null
     }],
     invitedUserIds:[...(room.invitedUserIds||[])],
     createdAt:room.createdAt||new Date().toISOString(),
