@@ -5,8 +5,11 @@ const cats=[
 {id:'solver',name:'The Solver',pos:'0% 50%'},{id:'trapper',name:'The Trapper',pos:'50% 50%'},{id:'hero-caller',name:'The Hero Caller',pos:'100% 50%'},
 {id:'queen',name:'The Queen',pos:'0% 100%'},{id:'darling',name:'The Darling',pos:'50% 100%'},{id:'grinder',name:'The Grinder',pos:'100% 100%'}];
 const demoUsers={
-queenbee:{name:'QUEENBEE',handle:'@queenbee',cat:'darling',sub:'MTT · Live'},riverkim:{name:'riverkim',handle:'@riverkim',cat:'shark',sub:'2시간 전 · Manila'},
-minraise:{name:'minraise',handle:'@minraise',cat:'solver',sub:'Cash · Online'},chiplee:{name:'chiplee',handle:'@chiplee',cat:'grinder',sub:'MTT · Live'},ninehigh:{name:'ninehigh',handle:'@ninehigh',cat:'rock',sub:'MTT · Live'}};
+queenbee:{name:'QUEENBEE',handle:'@queenbee',cat:'darling',time:'4시간 전'},
+riverkim:{name:'riverkim',handle:'@riverkim',cat:'shark',pubBrand:'KMGM',pubBranch:'강남점',time:'2시간 전'},
+minraise:{name:'minraise',handle:'@minraise',cat:'solver',pubBrand:'KMGM',pubBranch:'홍대점',time:'3시간 전'},
+chiplee:{name:'chiplee',handle:'@chiplee',cat:'grinder',pubBrand:'J88',pubBranch:'수원점',time:'5시간 전'},
+ninehigh:{name:'ninehigh',handle:'@ninehigh',cat:'rock',pubBrand:'KMGM',pubBranch:'인천점',time:'6시간 전'}};
 function catByRef(ref){if(typeof ref==='number')return cats[ref]||cats[0];if(typeof ref==='string')return cats.find(c=>c.id===ref)||cats[0];return ref||cats[0]}
 function catAvatar(ref,className='cat-avatar-image'){const cat=catByRef(ref);return `<span class="poker-cat-avatar ${className}" style="--cat-pos:${cat.pos}" role="img" aria-label="${cat.name}"></span>`}
 const state={
