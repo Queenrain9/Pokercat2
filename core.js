@@ -1,3 +1,9 @@
+const AUTH_FLOW_VERSION = '2';
+if(localStorage.getItem('pokercat_auth_version') !== AUTH_FLOW_VERSION){
+  localStorage.removeItem('pokercat_onboarded');
+  localStorage.setItem('pokercat_auth_version', AUTH_FLOW_VERSION);
+}
+
 const cats = [
   ['🐱','Aggro Cat'],['🐈','Grinder Cat'],['😼','Bluff Cat'],
   ['😺','Social Cat'],['😸','Lucky Cat'],['🙀','Tilt Cat'],
