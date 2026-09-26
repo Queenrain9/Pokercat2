@@ -34,10 +34,10 @@ function pokerPhoto(type='chips'){
 function visibleRoomCards(filter='all'){
   return state.rooms
     .filter(r=>r.status!=='closed')
+    .filter(r=>!['invite','homepub'].includes(roomAudienceType(r)))
     .filter(r=>filter==='following'?state.following.has(r.hostId):true)
-    .filter(r=>r.visibility==='public'||(state.loggedIn&&(r.hostId==='queenbee'||r.invitedUserIds.includes('queenbee'))))
-    .filter(r=>r.feedPublished||filter==='explore')
-    .map(r=>pokerRoomFeedCard(r,filter==='explore'?'explore':'feed')).join('');
+    .filter(r=>roomVisibleToViewer(r,'feed'))
+    .map(r=>pokerRoomFeedCard(r,'feed')).join('');
 }
 function homeView(){
   const roomCards=visibleRoomCards('all');
@@ -71,9 +71,13 @@ function homePubCommunityView(){
   const memberKeys=['queenbee',...Object.keys(demoUsers).filter(k=>verifiedHomePub(demoUsers[k])?.id===hp.id)];
   const unique=[...new Set(memberKeys)];
   const otherKeys=unique.filter(k=>k!=='queenbee');
-  const communityPosts=otherKeys.length
+  const homePubRoomCards=state.rooms
+    .filter(r=>r.status!=='closed'&&roomAudienceType(r)==='homepub'&&roomVisibleToViewer(r,'homepub'))
+    .map(r=>pokerRoomFeedCard(r,'feed')).join('');
+  const regularCommunityPosts=otherKeys.length
     ?otherKeys.map((k,i)=>`<article class="feed-post">${userRow(k)}<div class="post-text">${i===0?'오늘 저녁 데일리 참가합니다. 같은 지점 분들 테이블에서 봬요 🐱':'어제 세션에서 재밌는 핸드가 하나 있었어요. 의견 궁금합니다.'}</div>${i===0?pokerPhoto('warm'):hhCard(handB)}${actions('hp-'+k,18+i*7,4+i)}</article>`).join('')
-    :`<div class="homepub-empty"><b>아직 이 지점의 게시물이 없어요.</b><span>전체 피드에서 같은 Home Pub 플레이어를 팔로우하면 관계가 자연스럽게 이어져요.</span></div>`;
+    :'';
+  const communityPosts=homePubRoomCards+regularCommunityPosts||`<div class="homepub-empty"><b>아직 이 지점의 게시물이 없어요.</b><span>전체 피드에서 같은 Home Pub 플레이어를 팔로우하면 관계가 자연스럽게 이어져요.</span></div>`;
   return `<section class="homepub-screen">
     <div class="homepub-community-head">
       <div class="homepub-community-label">VERIFIED HOME PUB</div>
@@ -96,7 +100,7 @@ function notificationView(){
         if(!room)return '';
         return `<article class="notification-row room-invite-notice ${state.notificationsRead?'':'unread'}">
           ${catAvatar(from.cat,'notice-avatar')}
-          <div class="notice-copy"><b>${escapeHtml(from.name)}</b>님이 포커 게임에 초대했습니다.<span>${escapeHtml(room.name)} · ${roomGameLabel(room)} · ${roomSeatCount(room)}/${room.maxPlayers} seated</span></div>
+          <div class="notice-copy"><b>${escapeHtml(from.name)}</b>님이 포커 게임에 초대했습니다.<span>${escapeHtml(room.name)} · ${roomGameLabel(room)} · ${roomSeatCount(room)}/${roomSettings(room).maxPlayers} seated</span></div>
           <button class="notice-detail" data-open-room="${room.id}">게임방</button>
         </article>`;
       }).join('')}
@@ -158,7 +162,7 @@ function scheduleView(){
 
 function pokerRoomExploreViewV1(){
   const tabs=[['popular','인기'],['rooms','포커룸'],['latest','최신'],['hands','핸드'],['events','대회'],['pubs','펍'],['users','유저']];
-  const roomList=state.rooms.filter(r=>r.status!=='closed'&&(r.visibility==='public'||(state.loggedIn&&(r.hostId==='queenbee'||r.invitedUserIds.includes('queenbee')))));
+  const roomList=state.rooms.filter(r=>r.status!=='closed'&&roomVisibleToViewer(r,'explore'));
   const body=state.exploreTab==='rooms'
     ?`<div class="explore-room-section">
         <div class="explore-room-head"><div><b>진행 중인 포커룸</b><span>호스트와 설정을 확인하고 같은 Poker Room으로 입장해요.</span></div><button data-create-game>＋ 만들기</button></div>
