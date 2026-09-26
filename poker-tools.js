@@ -112,7 +112,7 @@ function normalizeBankrollData(raw){
       gameType:String(session.gameType||'MTT'),
       venueType:String(session.venueType||'Live'),
       result:Number.isFinite(Number(session.result))?Number(session.result):0,
-      durationHours:Number.isFinite(Number(session.durationHours))&&Number(session.durationHours)>=0?Number(session.durationHours):null,
+      durationHours:session.durationHours===null||session.durationHours===undefined||session.durationHours===''?null:(Number.isFinite(Number(session.durationHours))&&Number(session.durationHours)>=0?Number(session.durationHours):null),
       note:String(session.note||''),
       createdAt:session.createdAt||new Date().toISOString(),
       updatedAt:session.updatedAt||session.createdAt||new Date().toISOString()
