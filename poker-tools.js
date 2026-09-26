@@ -185,32 +185,56 @@ function oddsToolView(){
     </div>
   </section>`;
 }
+function rangeCellClass(action){
+  return action==='primary'?'strong':action==='mix'?'mix':'fold';
+}
+function rangeCellMarkup(cell){
+  const freq=cell.action==='fold'?0:cell.frequency;
+  return `<button class="range-cell ${rangeCellClass(cell.action)}" data-range-hand="${cell.label}" title="${cell.label} · ${freq}%">${cell.label}</button>`;
+}
+function rangeSelectOptions(items,selected,formatter){
+  return items.map(item=>{
+    const value=String(item),label=formatter?formatter(item):value;
+    return `<option value="${value}" ${String(selected)===value?'selected':''}>${label}</option>`;
+  }).join('');
+}
 function rangeToolView(){
-  const ranks=['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
-  const cells=[];
-  for(let r=0;r<13;r++){
-    for(let c=0;c<13;c++){
-      const label=r===c?ranks[r]+ranks[c]:(r<c?ranks[r]+ranks[c]+'s':ranks[c]+ranks[r]+'o');
-      const cls=r<3&&c<3?'strong':r<6&&c<6?'mix':'fold';
-      cells.push(`<button class="range-cell ${cls}">${label}</button>`);
-    }
+  const api=window.PREFLOP_RANGE_DATA;
+  if(!api){
+    return `<section class="tools-screen tool-detail range-tool">
+      <div class="tool-intro"><span>13×13</span><div><b>Preflop Range Charts</b><small>상황별 프리플랍 레인지 조회</small></div></div>
+      <div class="tool-panel"><div class="range-placeholder-note">Range 데이터를 불러오지 못했어요.</div></div>
+    </section>`;
   }
+
+  const chart=api.getChart({format:'MTT',players:8,stack:40,position:'BTN',situation:'RFI'});
+  const options=api.getOptions(chart.filters);
+  const f=chart.filters;
+
   return `<section class="tools-screen tool-detail range-tool">
     <div class="tool-intro"><span>13×13</span><div><b>Preflop Range Charts</b><small>상황별 프리플랍 레인지 조회</small></div></div>
     <div class="tool-panel range-filters">
       ${toolSectionTitle('조건')}
       <div class="range-filter-grid">
-        <label class="tool-input-label">Format<select><option>MTT</option><option>Cash</option></select></label>
-        <label class="tool-input-label">Players<select><option>8-Max</option><option>9-Max</option><option>6-Max</option></select></label>
-        <label class="tool-input-label">Stack<select><option>40BB</option><option>100BB</option><option>25BB</option></select></label>
-        <label class="tool-input-label">Position<select><option>BTN</option><option>CO</option><option>HJ</option><option>BB</option></select></label>
+        <label class="tool-input-label">Format<select id="rangeFormat">${rangeSelectOptions(options.formats,f.format)}</select></label>
+        <label class="tool-input-label">Players<select id="rangePlayers">${rangeSelectOptions(options.players,f.players,x=>x+'-Max')}</select></label>
+        <label class="tool-input-label">Stack<select id="rangeStack">${rangeSelectOptions(options.stacks,f.stack,x=>x+'BB')}</select></label>
+        <label class="tool-input-label">Position<select id="rangePosition">${rangeSelectOptions(options.positions,f.position)}</select></label>
       </div>
-      <label class="tool-input-label">Situation<select><option>RFI</option><option>vs RFI</option><option>3Bet</option><option>vs 3Bet</option></select></label>
+      <label class="tool-input-label">Situation<select id="rangeSituation">${rangeSelectOptions(options.situations,f.situation)}</select></label>
     </div>
     <div class="tool-panel range-matrix-panel">
-      <div class="range-legend"><span class="strong">Raise</span><span class="mix">Mix</span><span class="fold">Fold</span></div>
-      <div class="range-matrix">${cells.join('')}</div>
-      <div class="range-placeholder-note">샘플 매트릭스 · 실제 전략 데이터는 추후 연결</div>
+      <div class="range-chart-meta">
+        <span id="rangeContext">${f.format} · ${f.players}-Max · ${f.stack}BB · ${f.position} · ${f.situation}</span>
+        <b id="rangeCoverage">${chart.stats.matrixCoverage}%</b>
+      </div>
+      <div class="range-legend">
+        <span class="strong" id="rangeLegendPrimary">${chart.labels.primary}</span>
+        <span class="mix" id="rangeLegendMix">${chart.labels.mix}</span>
+        <span class="fold" id="rangeLegendFold">${chart.labels.fold}</span>
+      </div>
+      <div class="range-matrix" id="rangeMatrix">${chart.cells.map(rangeCellMarkup).join('')}</div>
+      <div class="range-placeholder-note" id="rangeSourceNote">${chart.source} · ${chart.note}</div>
     </div>
   </section>`;
 }
