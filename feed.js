@@ -31,14 +31,26 @@ function actions(id,likes,comments){
 function pokerPhoto(type='chips'){
   return `<div class="poker-photo ${type}"><div class="felt"></div><div class="chip-stack c1"></div><div class="chip-stack c2"></div><div class="chip-stack c3"></div><div class="table-card a">A♠</div><div class="table-card k">K♥</div><div class="photo-shine"></div></div>`;
 }
+function visibleRoomCards(filter='all'){
+  return state.rooms
+    .filter(r=>r.status!=='closed')
+    .filter(r=>filter==='following'?state.following.has(r.hostId):true)
+    .filter(r=>r.visibility==='public'||r.hostId==='queenbee'||r.invitedUserIds.includes('queenbee'))
+    .filter(r=>r.feedPublished||filter==='explore')
+    .map(r=>pokerRoomFeedCard(r,filter==='explore'?'explore':'feed')).join('');
+}
 function homeView(){
+  const roomCards=visibleRoomCards('all');
+  const followedRoomCards=visibleRoomCards('following');
   const algorithmPosts=`
     <article class="feed-post">${userRow('riverkim')}<div class="post-text">오늘은 확실히 리드 잘 잡혔다<br>후반에 좀 아쉬운 스팟이 있었지만 전체적으로 굿<br>내일도 화이팅 🐱</div>${pokerPhoto('night')}${actions('p1',32,7)}</article>
+    ${roomCards}
     <article class="feed-post">${userRow('queenbee')}<div class="post-text">핸드 히스토리 하나 공유해요<br>여러분은 턴에서 어떤 라인 가시나요?</div>${hhCard(handA)}${actions('p2',42,18)}</article>
     <article class="feed-post">${userRow('minraise')}<div class="post-text">대회 끝나고 느낀 점. 오늘도 한 단계 배웠다.</div>${pokerPhoto('warm')}${actions('p3',76,31)}</article>
   `;
   const followingPosts=`
     <article class="feed-post">${userRow('riverkim')}<div class="post-text">오늘은 확실히 리드 잘 잡혔다<br>후반에 좀 아쉬운 스팟이 있었지만 전체적으로 굿<br>내일도 화이팅 🐱</div>${pokerPhoto('night')}${actions('fp1',32,7)}</article>
+    ${followedRoomCards}
     <div class="following-end"><b>팔로잉 피드의 끝이에요</b><span>지금 팔로우한 플레이어의 최신 게시물만 보여주고 있어요.</span></div>
   `;
   return `<section class="home-screen">
