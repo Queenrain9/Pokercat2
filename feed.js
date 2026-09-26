@@ -101,7 +101,10 @@ function notificationView(){
         return `<article class="notification-row room-invite-notice ${state.notificationsRead?'':'unread'}">
           ${catAvatar(from.cat,'notice-avatar')}
           <div class="notice-copy"><b>${escapeHtml(from.name)}</b>님이 포커 게임에 초대했습니다.<span>${escapeHtml(room.name)} · ${roomGameLabel(room)} · ${roomSeatCount(room)}/${roomSettings(room).maxPlayers} seated</span></div>
-          <button class="notice-detail" data-open-room="${room.id}">게임방</button>
+          <div class="room-invite-notice-actions">
+            <button class="notice-detail secondary" data-decline-room-invite="${room.id}">거절</button>
+            <button class="notice-detail" data-accept-room-invite="${room.id}">참가</button>
+          </div>
         </article>`;
       }).join('')}
       <article class="notification-row ${state.notificationsRead?'':'unread'}">
