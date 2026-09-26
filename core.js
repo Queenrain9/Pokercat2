@@ -32,12 +32,19 @@ if(!storedHomePub&&legacyBrand&&legacyBranch){
 const storedCareer=loadJSON('pokercat_career_highs_v1',[]);
 const storedFollowing=loadJSON('pokercat_following_v1',['riverkim']);
 const storedFollowers=loadJSON('pokercat_followers_v1',['riverkim','chiplee']);
+const seededRooms=[
+  {id:'room-river-night',mode:'single-table',game:'NLH',name:'River Night Table',hostId:'riverkim',maxPlayers:6,startStack:40,sb:1,bb:2,ante:{enabled:false,amount:0},blinds:{increase:false,intervalMinutes:0},visibility:'public',status:'open',seats:['riverkim','chiplee',null,null,null,null],invitedUserIds:[],feedPublished:true,createdAt:'2026-09-26T12:00:00.000Z',externalShare:{enabled:false,token:null},tournament:{mode:'single-table',mttConfig:null}},
+  {id:'room-minraise-study',mode:'single-table',game:'NLH',name:'Late Night 6-Max',hostId:'minraise',maxPlayers:6,startStack:100,sb:1,bb:2,ante:{enabled:true,amount:0.5},blinds:{increase:false,intervalMinutes:0},visibility:'public',status:'open',seats:['minraise','ninehigh','riverkim',null,null,null],invitedUserIds:[],feedPublished:true,createdAt:'2026-09-26T13:00:00.000Z',externalShare:{enabled:false,token:null},tournament:{mode:'single-table',mttConfig:null}}
+];
+const storedRooms=loadJSON('pokercat_rooms_v1',null);
+const storedRoomInvites=loadJSON('pokercat_room_invites_v1',[]);
 
 const state={
 view:'home',onboarding:localStorage.getItem('pokercat_onboarded')==='1',onboardStep:0,authMode:'landing',
 selectedCat:Number(localStorage.getItem('pokercat_cat')||7),nickname:localStorage.getItem('pokercat_name')||'QUEENBEE',
 gamePref:localStorage.getItem('pokercat_game')||'MTT',playPref:localStorage.getItem('pokercat_play')||'오프라인',
 homePub:storedHomePub,careerHighs:Array.isArray(storedCareer)?storedCareer:[],
+rooms:Array.isArray(storedRooms)&&storedRooms.length?storedRooms:seededRooms,roomInvites:Array.isArray(storedRoomInvites)?storedRoomInvites:[],currentRoomId:null,
 feedMode:'algorithm',exploreTab:'popular',scheduleTab:'events',profileTab:'posts',notificationsRead:false,
 modal:null,relationshipMode:'friends',editingCareerId:null,liked:new Set(),
 following:new Set(Array.isArray(storedFollowing)?storedFollowing:['riverkim']),
@@ -51,6 +58,10 @@ function pokerFriendKeys(){return [...state.following].filter(k=>state.followers
 function persistRelationships(){saveJSON('pokercat_following_v1',[...state.following]);saveJSON('pokercat_followers_v1',[...state.followers])}
 function persistHomePub(){saveJSON('pokercat_home_pub_v1',state.homePub)}
 function persistCareerHighs(){saveJSON('pokercat_career_highs_v1',state.careerHighs)}
+function persistRooms(){saveJSON('pokercat_rooms_v1',state.rooms)}
+function persistRoomInvites(){saveJSON('pokercat_room_invites_v1',state.roomInvites)}
+function getRoom(id){return state.rooms.find(r=>r.id===id)||null}
+function roomSeatCount(room){return (room?.seats||[]).filter(Boolean).length}
 
 document.documentElement.dataset.theme='dark';
 function icon(name){const map={home:'⌂',search:'⌕',plus:'＋',calendar:'▦',profile:'♙'};return map[name]||'•'}
@@ -74,6 +85,8 @@ function topbar(){
 if(state.view==='home')return `<header class="topbar home-top"><button class="feed-mode-toggle ${state.feedMode==='following'?'active':''}" data-toggle-following><span>✓</span> 팔로잉</button><div class="logo">POKER<span>CAT</span></div><button class="notification-btn" data-open-notifications aria-label="알림"><span>🔔</span><i></i></button></header>`;
 if(state.view==='notifications')return `<header class="topbar utility-top"><button class="back-btn" data-notification-back>‹</button><div class="page-title">알림</div><button class="read-all" data-mark-read>모두 읽음</button></header>`;
 if(state.view==='homepub')return `<header class="topbar utility-top"><button class="back-btn" data-homepub-back>‹</button><div class="page-title">Home Pub</div><button class="read-all" data-nav="profile">프로필</button></header>`;
+if(state.view==='roomcreate')return `<header class="topbar utility-top"><button class="back-btn" data-room-create-back>‹</button><div class="page-title">게임 만들기</div><button class="read-all" data-create-room-submit>생성</button></header>`;
+if(state.view.startsWith('room:'))return `<header class="topbar utility-top"><button class="back-btn" data-room-back>‹</button><div class="page-title">Poker Room</div><button class="read-all" data-room-menu>•••</button></header>`;
 if(state.view==='compose')return '';
 const map={explore:'탐색',schedule:'일정',profile:'프로필'};
 return `<header class="topbar"><div class="page-title">${map[state.view]||'PokerCat'}</div><button class="top-icon" data-toast="설정은 준비 중이에요">⚙</button></header>`
@@ -83,6 +96,8 @@ function mainView(){
 if(state.view==='home')return homeView();
 if(state.view==='notifications')return notificationView();
 if(state.view==='homepub')return homePubCommunityView();
+if(state.view==='roomcreate')return pokerRoomCreateView();
+if(state.view.startsWith('room:'))return pokerRoomView(state.view.split(':')[1]);
 if(state.view==='explore')return exploreView();
 if(state.view==='schedule')return scheduleView();
 if(state.view==='profile')return profileView('me');
@@ -96,6 +111,8 @@ if(state.modal==='profileEdit')return profileEditModal();
 if(state.modal==='homePubVerify')return homePubVerifyModal();
 if(state.modal==='careerEdit')return careerEditModal();
 if(state.modal==='relationships')return relationshipModal();
+if(state.modal==='createMenu')return createMenuModal();
+if(state.modal==='roomInvite')return roomInviteModal();
 if(state.modal==='handPreview')return `<div class="modal-backdrop" data-close-modal><div class="sheet" onclick="event.stopPropagation()"><div class="grab"></div><div class="sheet-title">피드 미리보기</div>${hhCard(state.previewHand||handA)}<button class="btn full" data-close-preview>계속 작성하기</button></div></div>`;
 return ''
 }
