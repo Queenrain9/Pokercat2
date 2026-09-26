@@ -1,0 +1,121 @@
+/* No-Limit Hold'em live table */
+.holdem-active-table .portrait-table-stage{padding-bottom:32px}
+.portrait-table.holdem-running{overflow:visible}
+.holdem-board{
+  position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);
+  display:flex;gap:4px;z-index:2
+}
+.holdem-card{
+  width:34px;height:47px;border-radius:6px;background:linear-gradient(145deg,#fff,#dfe3e8);
+  color:#111820;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;
+  padding:5px 5px 4px;box-sizing:border-box;box-shadow:0 5px 12px rgba(0,0,0,.28);
+  font-style:normal;border:1px solid rgba(0,0,0,.08)
+}
+.holdem-card b{font-size:13px;line-height:1;font-weight:950}
+.holdem-card i{font-size:13px;line-height:1;font-style:normal;align-self:flex-end}
+.holdem-card.red{color:#cf3845}
+.holdem-card.empty{
+  align-items:center;justify-content:center;color:#65717f;
+  background:rgba(10,17,22,.56);border:1px dashed rgba(203,218,222,.18);box-shadow:none
+}
+.holdem-hero{position:relative}
+.holdem-hero .hero-hand-cards{display:flex;gap:5px}
+.holdem-hero .hero-hand-cards .holdem-card{width:38px;height:52px}
+.holdem-hero>em{
+  margin-left:auto;font-style:normal;font-size:7px;font-weight:900;letter-spacing:.08em;
+  color:#0b1411;background:#80e0a7;padding:5px 7px;border-radius:999px
+}
+.portrait-table .table-seat{transition:border-color .16s,box-shadow .16s,opacity .16s}
+.portrait-table .table-seat.acting{
+  border-color:#86e0a9;box-shadow:0 0 0 2px rgba(134,224,169,.18),0 10px 24px rgba(0,0,0,.42)
+}
+.portrait-table .table-seat.folded{opacity:.48}
+.dealer-marker{
+  position:absolute;right:-7px;top:-8px;width:18px;height:18px;border-radius:50%;
+  display:grid;place-items:center;background:#eef0f2;color:#15191f;border:2px solid #9ca4ae;
+  font-size:7px;font-weight:950;box-shadow:0 2px 6px rgba(0,0,0,.35);z-index:5
+}
+.holdem-position{
+  position:absolute;left:-7px;top:-8px;min-width:20px;padding:3px 5px;border-radius:999px;
+  background:#222a33;border:1px solid #3a4653;color:#dce2e7;font-size:5px;font-weight:900;z-index:5
+}
+.holdem-last-action{
+  position:absolute;left:50%;bottom:-15px;transform:translateX(-50%);
+  padding:3px 6px;border-radius:999px;background:#121920;border:1px solid #2e3945;
+  color:#d6dee6;font-size:5px;font-weight:900;white-space:nowrap
+}
+.holdem-seat-cards{
+  height:13px;margin-top:3px;display:flex;gap:2px;justify-content:center
+}
+.holdem-mini-card{
+  width:10px;height:13px;border-radius:2px;background:#e7e9ec;color:#161b21;
+  display:grid;place-items:center;font-size:4px;font-weight:900
+}
+.holdem-mini-card.red{color:#c83d49}
+.holdem-mini-card.back{
+  background:repeating-linear-gradient(45deg,#6f2e91 0 2px,#3c174f 2px 4px);
+  border:1px solid rgba(255,255,255,.12)
+}
+.holdem-live-actions{
+  display:block;padding:11px;background:#0d1319;border-color:#2b3541
+}
+.holdem-passive-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.holdem-passive-actions:has(button:nth-child(2):last-child){grid-template-columns:repeat(2,1fr)}
+.holdem-passive-actions:has(button:only-child){grid-template-columns:1fr}
+.holdem-live-actions .holdem-passive-actions button{
+  height:42px;border-radius:11px;font-size:9px;font-weight:950;color:#e8edf2
+}
+.holdem-live-actions button.fold{background:#171c23;border-color:#303946;color:#abb4bf}
+.holdem-live-actions button.check{background:#172720;border-color:#2d5140;color:#99e2b6}
+.holdem-live-actions button.call{background:#1d2738;border-color:#354d71;color:#9fc6ff}
+.holdem-live-actions button span{font-size:.92em}
+.holdem-sizing{
+  margin-top:9px;padding-top:9px;border-top:1px solid #222c36
+}
+.holdem-sizing-line,.holdem-sizing-range{display:flex;justify-content:space-between;align-items:center}
+.holdem-sizing-line span{font-size:7px;color:#7f8b98;font-weight:850}
+.holdem-sizing-line b{font-size:12px;color:#f0d5aa}
+.holdem-sizing input[type=range]{width:100%;margin:9px 0 5px;accent-color:#d0a76a}
+.holdem-sizing-range{font-size:6px;color:#626d79}
+.holdem-primary-action{
+  width:100%;height:43px;margin-top:9px;border-radius:11px;border:1px solid #80623d;
+  background:linear-gradient(180deg,#4b3822,#2e2218);color:#f4d39f;font-size:9px;font-weight:950
+}
+.holdem-waiting-action{
+  margin:10px 14px 0;min-height:44px;border:1px solid #252e39;background:#0d1319;border-radius:13px;
+  display:flex;align-items:center;justify-content:center;gap:7px;color:#8994a1;font-size:8px
+}
+.pulse-dot{width:7px;height:7px;border-radius:50%;background:#78d9a0;box-shadow:0 0 0 0 rgba(120,217,160,.5);animation:holdemPulse 1.5s infinite}
+@keyframes holdemPulse{70%{box-shadow:0 0 0 7px rgba(120,217,160,0)}100%{box-shadow:0 0 0 0 rgba(120,217,160,0)}}
+.holdem-turn-line{margin:8px 14px 0;text-align:center;font-size:6px;color:#66717e;letter-spacing:.08em}
+.holdem-turn-line b{color:#b6c0cb}
+.holdem-action-log{
+  margin:8px 14px 0;border:1px solid #202934;background:#0a1015;border-radius:11px;overflow:hidden
+}
+.holdem-action-log div{display:flex;justify-content:space-between;gap:8px;padding:6px 9px;border-bottom:1px solid #1b232c;font-size:6px}
+.holdem-action-log div:last-child{border-bottom:0}
+.holdem-action-log span{color:#737f8b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.holdem-action-log b{color:#adb8c3;font-size:6px}
+.holdem-result-panel{
+  margin:10px 14px 0;padding:13px;border:1px solid #5b4930;border-radius:14px;
+  background:linear-gradient(180deg,#1c1812,#101318);text-align:center
+}
+.holdem-result-panel small{display:block;font-size:6px;letter-spacing:.13em;color:#a58d68}
+.holdem-result-panel b{display:block;margin-top:6px;font-size:10px;line-height:1.4;color:#f0d5aa}
+.holdem-next-hand{
+  margin-top:10px;width:100%;height:40px;border-radius:10px;border:1px solid #80623d;
+  background:#3b2c1c;color:#f2d09a;font-size:8px;font-weight:900
+}
+.holdem-engine-missing{
+  margin:22px 14px;padding:18px;border:1px solid #2b3541;border-radius:15px;background:#0d1319;text-align:center
+}
+.holdem-engine-missing b{display:block;font-size:11px}
+.holdem-engine-missing p{font-size:8px;line-height:1.5;color:#788491;margin:6px 0 12px}
+.holdem-engine-missing button{
+  border:1px solid #80623d;background:#3c2c1c;color:#f0d2a4;border-radius:10px;padding:10px 13px;font-size:8px;font-weight:900
+}
+@media(max-width:360px){
+  .holdem-card{width:29px;height:41px;padding:4px}
+  .holdem-card b,.holdem-card i{font-size:11px}
+  .holdem-board{gap:3px}
+}
