@@ -1,10 +1,10 @@
 function profileView(key){
   const mine=key==='me';
-  const u=mine?{name:state.nickname,handle:'@queenbee',cat:cats[state.selectedCat][0],sub:`${state.gamePref} · ${state.playPref}`} : demoUsers[key];
+  const u=mine?{name:state.nickname,handle:'@queenbee',cat:state.selectedCat,sub:`${state.gamePref} · ${state.playPref}`} : demoUsers[key];
   const following=!mine&&state.following.has(key);
   return `<section>
     <div class="profile-hero">
-      <div class="profile-avatar">${u.cat}</div>
+      <div class="profile-avatar">${catAvatar(u.cat,'profile-cat-image')}</div>
       <div class="profile-name">${u.name}</div>
       <div class="profile-handle">${u.handle}</div>
       <div class="bio">${mine?'홀덤 치고, 핸드 남기고, 좋은 사람들 만나는 중.':'포커 좋아하는 평범한 플레이어. 핸드 토론 환영.'}</div>
@@ -33,7 +33,7 @@ function composeView(){
   const handMode=state.composeMode==='hand';
   return `<section class="compose-page">
     <div class="compose-author">
-      <div class="avatar">${cats[state.selectedCat][0]}</div>
+      <div class="avatar">${catAvatar(state.selectedCat,'avatar-cat-image')}</div>
       <div class="user-meta"><div class="user-name">${state.nickname}</div><div class="user-sub">새 게시물 작성</div></div>
       <button class="btn compose-submit" data-post-demo>게시</button>
     </div>
