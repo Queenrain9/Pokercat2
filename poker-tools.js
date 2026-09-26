@@ -70,105 +70,119 @@ function placeholderCard(text='결과 계산 영역'){
   return `<div class="tool-result-placeholder"><span>PREVIEW</span><b>${text}</b><small>계산 로직은 다음 단계에서 연결됩니다.</small></div>`;
 }
 
+const EQUITY_SUIT_SYMBOL={s:'♠',h:'♥',d:'♦',c:'♣'};
+const equityToolState={
+  mode:'hand',
+  hero:['As','Ks'],
+  villain:['Qh','Qc'],
+  board:['Js','Ts','2d','',''],
+  rangeText:'QQ+, AKs, AKo',
+  result:null,
+  error:''
+};
+
+function equityCardLabel(card){return card?card[0]+EQUITY_SUIT_SYMBOL[card[1]]:'＋'}
+function equityCardTone(card){return card&&['h','d'].includes(card[1])?' red':''}
+function equityAllSelected(excludeGroup='',excludeIndex=-1){
+  const cards=[];
+  equityToolState.hero.forEach((c,i)=>{if(c&&!(excludeGroup==='hero'&&i===excludeIndex))cards.push(c)});
+  if(equityToolState.mode==='hand')equityToolState.villain.forEach((c,i)=>{if(c&&!(excludeGroup==='villain'&&i===excludeIndex))cards.push(c)});
+  equityToolState.board.forEach((c,i)=>{if(c&&!(excludeGroup==='board'&&i===excludeIndex))cards.push(c)});
+  return cards;
+}
+function equityCardOptions(selected){
+  const engine=window.PokerCatEquityEngine;
+  if(!engine)return '<option value="">＋</option>';
+  const cards=[];
+  for(const rank of engine.RANKS)for(const suit of engine.SUITS)cards.push(rank+suit);
+  return `<option value="">＋</option>${cards.map(card=>`<option value="${card}" ${selected===card?'selected':''}>${equityCardLabel(card)}</option>`).join('')}`;
+}
+function equityCardSelect(group,index,card,board=false){
+  return `<select class="equity-card-select${board?' board-card':''}${equityCardTone(card)}" data-equity-card-group="${group}" data-equity-card-index="${index}" aria-label="${group} card ${index+1}">${equityCardOptions(card)}</select>`;
+}
+function equityResultNote(){
+  const r=equityToolState.result;
+  if(!r)return `<div class="equity-result-note"><b>실제 Hold'em equity 계산</b><span>플랍 이후처럼 경우의 수가 작으면 정확한 전수 계산, 큰 경우는 Monte Carlo 방식으로 계산합니다.</span></div>`;
+  return `<div class="equity-result-note calculated"><div><b>${r.method==='exact'?'Exact':'Monte Carlo'}</b><strong>${r.total.toLocaleString()} ${r.method==='exact'?'runouts':'samples'}</strong></div><span>Hero ${r.wins.toLocaleString()}승 · Tie ${r.ties.toLocaleString()} · Villain ${r.losses.toLocaleString()}승${r.rangeCombos>1?` · Range ${r.rangeCombos} combos`:''}</span></div>`;
+}
+
 function equityToolView(){
+  const result=equityToolState.result;
+  const heroPct=result?result.heroEquity.toFixed(1)+'%':'--%';
+  const villainPct=result?result.villainEquity.toFixed(1)+'%':'--%';
   return `<section class="tools-screen tool-detail">
     <div class="tool-intro"><span>♠</span><div><b>Equity Calculator</b><small>Hand vs Hand / Range equity</small></div></div>
     <div class="tool-panel">
       ${toolSectionTitle('Hero Hand')}
-      <div class="tool-card-slots"><button>A♠</button><button>K♠</button></div>
+      <div class="tool-card-slots">${equityToolState.hero.map((card,i)=>equityCardSelect('hero',i,card)).join('')}</div>
     </div>
     <div class="tool-panel">
       ${toolSectionTitle('Villain','Hand 또는 Range')}
-      <div class="segmented-mini"><button class="active">Hand</button><button>Range</button></div>
-      <div class="tool-card-slots"><button>Q♥</button><button>Q♣</button></div>
-      <label class="tool-input-label">Range<input placeholder="예: QQ+, AKs, AKo"></label>
+      <div class="segmented-mini"><button type="button" class="${equityToolState.mode==='hand'?'active':''}" data-equity-mode="hand">Hand</button><button type="button" class="${equityToolState.mode==='range'?'active':''}" data-equity-mode="range">Range</button></div>
+      ${equityToolState.mode==='hand'
+        ?`<div class="tool-card-slots">${equityToolState.villain.map((card,i)=>equityCardSelect('villain',i,card)).join('')}</div>`
+        :`<label class="tool-input-label">Range<input id="equityRangeInput" value="${escapeHtml(equityToolState.rangeText)}" placeholder="예: QQ+, AKs, AKo"></label><div class="equity-range-hint">지원: QQ+ · 99-66 · AJs+ · AKs · AKo · A5s-A2s</div>`}
     </div>
     <div class="tool-panel">
-      ${toolSectionTitle('Board')}
-      <div class="tool-card-slots board"><button>J♠</button><button>T♠</button><button>2♦</button><button>＋</button><button>＋</button></div>
+      ${toolSectionTitle('Board','0~5 cards')}
+      <div class="tool-card-slots board">${equityToolState.board.map((card,i)=>equityCardSelect('board',i,card,true)).join('')}</div>
     </div>
     <div class="tool-panel">
       ${toolSectionTitle('Equity')}
       <div class="equity-result-shell">
-        <div><small>HERO</small><b>--%</b><span>Equity</span></div>
+        <div><small>HERO</small><b>${heroPct}</b><span>Equity</span></div>
         <div class="equity-vs">VS</div>
-        <div><small>VILLAIN</small><b>--%</b><span>Equity</span></div>
+        <div><small>VILLAIN</small><b>${villainPct}</b><span>Equity</span></div>
       </div>
-      ${placeholderCard('Equity 결과')}
+      ${equityToolState.error?`<div class="equity-error">${escapeHtml(equityToolState.error)}</div>`:''}
+      <button type="button" class="tool-secondary-cta equity-calc-btn" data-equity-calculate>Equity 계산</button>
+      ${equityResultNote()}
     </div>
   </section>`;
 }
 
-const BANKROLL_STORAGE_KEY='pokercat_bankroll_v1';
-
-function normalizeBankrollData(raw){
-  const source=raw&&typeof raw==='object'?raw:{};
-  const sessions=Array.isArray(source.sessions)?source.sessions:[];
-  return {
-    startingBankroll:Number.isFinite(Number(source.startingBankroll))?Math.max(0,Number(source.startingBankroll)):0,
-    sessions:sessions.map((session,index)=>({
-      id:String(session.id||('session-'+index)),
-      date:String(session.date||''),
-      gameType:String(session.gameType||'MTT'),
-      venueType:String(session.venueType||'Live'),
-      result:Number.isFinite(Number(session.result))?Number(session.result):0,
-      durationHours:session.durationHours===null||session.durationHours===undefined||session.durationHours===''?null:(Number.isFinite(Number(session.durationHours))&&Number(session.durationHours)>=0?Number(session.durationHours):null),
-      note:String(session.note||''),
-      createdAt:session.createdAt||new Date().toISOString(),
-      updatedAt:session.updatedAt||session.createdAt||new Date().toISOString()
-    })).filter(session=>/^\d{4}-\d{2}-\d{2}$/.test(session.date))
-  };
+function buildEquityCalculation(){
+  const engine=window.PokerCatEquityEngine;
+  if(!engine)throw new Error('Equity engine을 불러오지 못했습니다.');
+  const hero=equityToolState.hero.filter(Boolean),board=equityToolState.board.filter(Boolean),blocked=[...hero,...board];
+  if(hero.length!==2)throw new Error('Hero Hand 2장을 선택해 주세요.');
+  let villainCombos;
+  if(equityToolState.mode==='hand'){
+    const villain=equityToolState.villain.filter(Boolean);
+    if(villain.length!==2)throw new Error('Villain Hand 2장을 선택해 주세요.');
+    if(villain.some(c=>blocked.includes(c))||villain[0]===villain[1])throw new Error('Hero/Board와 겹치는 Villain 카드가 있습니다.');
+    villainCombos=[villain];
+  }else villainCombos=engine.parseRange(equityToolState.rangeText,blocked);
+  return engine.calculate({hero,villainCombos,board,seedText:[hero.join(''),equityToolState.mode,equityToolState.mode==='range'?equityToolState.rangeText:equityToolState.villain.join(''),board.join('')].join('|')});
 }
 
-function loadBankrollData(){
-  return normalizeBankrollData(loadJSON(BANKROLL_STORAGE_KEY,{startingBankroll:0,sessions:[]}));
+function installEquityToolEvents(){
+  if(window.__pokercatEquityEventsInstalled)return;
+  window.__pokercatEquityEventsInstalled=true;
+  document.addEventListener('input',event=>{
+    if(event.target.id!=='equityRangeInput')return;
+    equityToolState.rangeText=event.target.value;equityToolState.result=null;equityToolState.error='';
+  });
+  document.addEventListener('change',event=>{
+    const select=event.target.closest?.('[data-equity-card-group]');
+    if(!select)return;
+    const group=select.dataset.equityCardGroup,index=Number(select.dataset.equityCardIndex),card=select.value;
+    if(card&&equityAllSelected(group,index).includes(card)){
+      equityToolState.error='이미 사용 중인 카드입니다.';render();return;
+    }
+    equityToolState[group][index]=card;equityToolState.result=null;equityToolState.error='';render();
+  });
+  document.addEventListener('click',event=>{
+    const mode=event.target.closest?.('[data-equity-mode]');
+    if(mode){equityToolState.mode=mode.dataset.equityMode;equityToolState.result=null;equityToolState.error='';render();return}
+    const calc=event.target.closest?.('[data-equity-calculate]');
+    if(!calc)return;
+    const input=document.querySelector('#equityRangeInput');if(input)equityToolState.rangeText=input.value;
+    calc.disabled=true;calc.textContent='계산 중…';
+    setTimeout(()=>{try{equityToolState.result=buildEquityCalculation();equityToolState.error=''}catch(error){equityToolState.result=null;equityToolState.error=error?.message||'Equity 계산 중 오류가 발생했습니다.'}render()},0);
+  });
 }
-
-function persistBankrollData(data){
-  saveJSON(BANKROLL_STORAGE_KEY,normalizeBankrollData(data));
-}
-
-function bankrollToday(){
-  const now=new Date();
-  const pad=value=>String(value).padStart(2,'0');
-  return now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
-}
-
-function bankrollPeriodInfo(period){
-  if(period==='30d')return {label:'최근 30일',short:'30일'};
-  if(period==='all')return {label:'전체 기간',short:'전체'};
-  return {label:'이번 달',short:'이번 달'};
-}
-
-function bankrollSessionsForPeriod(sessions,period){
-  if(period==='all')return sessions.slice();
-  const now=new Date();
-  if(period==='30d'){
-    const cutoff=new Date(now.getFullYear(),now.getMonth(),now.getDate()-29);
-    return sessions.filter(session=>{
-      const date=new Date(session.date+'T00:00:00');
-      return Number.isFinite(date.getTime())&&date>=cutoff&&date<=now;
-    });
-  }
-  const prefix=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-';
-  return sessions.filter(session=>session.date.startsWith(prefix));
-}
-
-function formatBankrollWon(value,{signed=false}={}){
-  const number=Number(value)||0;
-  const abs=Math.abs(Math.round(number)).toLocaleString('ko-KR');
-  if(signed){
-    if(number>0)return '+₩'+abs;
-    if(number<0)return '-₩'+abs;
-  }
-  return (number<0?'-':'')+'₩'+abs;
-}
-
-function formatBankrollDate(date){
-  const parts=String(date||'').split('-');
-  if(parts.length!==3)return date||'';
-  return Number(parts[0])===new Date().getFullYear()?parts[1]+'.'+parts[2]:parts[0].slice(2)+'.'+parts[1]+'.'+parts[2];
-}
+installEquityToolEvents();
 
 function bankrollToolView(){
   const data=loadBankrollData();
