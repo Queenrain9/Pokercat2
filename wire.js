@@ -29,52 +29,125 @@ function wire(){
   });
   document.querySelectorAll('[data-create-game]').forEach(b=>b.onclick=()=>{
     if(!state.loggedIn){requireAuth('Poker Room을 만들려면 로그인해 주세요.',{type:'view',view:'roomcreate'});return}
-    state.modal=null;state.view='roomcreate';render()
+    resetRoomDraft();state.modal=null;state.view='roomcreate';render()
   });
-  const roomCreateBack=document.querySelector('[data-room-create-back]');if(roomCreateBack)roomCreateBack.onclick=()=>{state.view='home';render()};
+  const roomCreateBack=document.querySelector('[data-room-create-back]');if(roomCreateBack)roomCreateBack.onclick=()=>{state.roomDraft=null;state.view='home';render()};
   const roomBack=document.querySelector('[data-room-back]');if(roomBack)roomBack.onclick=()=>{state.view=state.roomReturnView||'home';render()};
+
+  if(state.view==='roomcreate'){
+    const draft=ensureRoomDraft();
+    const nameInput=document.querySelector('#roomName');if(nameInput)nameInput.oninput=()=>draft.roomName=nameInput.value;
+    const gameInput=document.querySelector('#roomGame');if(gameInput)gameInput.onchange=()=>draft.settings.gameType=gameInput.value;
+    const maxInput=document.querySelector('#roomMaxPlayers');if(maxInput)maxInput.onchange=()=>draft.settings.maxPlayers=Number(maxInput.value);
+    const chipsInput=document.querySelector('#roomStartingChips');if(chipsInput)chipsInput.oninput=()=>draft.settings.startingChips=Number(chipsInput.value||0);
+    const sbInput=document.querySelector('#roomSb');if(sbInput)sbInput.oninput=()=>draft.settings.blinds.smallBlind=Number(sbInput.value||0);
+    const bbInput=document.querySelector('#roomBb');if(bbInput)bbInput.oninput=()=>draft.settings.blinds.bigBlind=Number(bbInput.value||0);
+
+    document.querySelectorAll('[data-room-option]').forEach(b=>b.onclick=()=>{
+      state.roomOptionOpen=state.roomOptionOpen===b.dataset.roomOption?null:b.dataset.roomOption;render()
+    });
+    const anteMode=document.querySelector('#roomAnteMode');if(anteMode)anteMode.onchange=()=>{
+      draft.settings.ante.mode=anteMode.value;
+      if(anteMode.value==='none')draft.settings.ante.amount=0;
+      else if(!draft.settings.ante.amount)draft.settings.ante.amount=draft.settings.blinds.smallBlind||100;
+      render()
+    };
+    const anteAmount=document.querySelector('#roomAnteAmount');if(anteAmount)anteAmount.oninput=()=>draft.settings.ante.amount=Number(anteAmount.value||0);
+    const blindMode=document.querySelector('#roomBlindMode');if(blindMode)blindMode.onchange=()=>{
+      draft.settings.blindProgression.mode=blindMode.value;
+      if(blindMode.value==='auto'){
+        draft.settings.blindProgression.levelMinutes=draft.settings.blindProgression.levelMinutes||10;
+        draft.settings.blindProgression.structureId=draft.settings.blindProgression.structureId||'standard-x2';
+      }else{
+        draft.settings.blindProgression.levelMinutes=null;draft.settings.blindProgression.structureId=null;
+      }
+      render()
+    };
+    const blindInterval=document.querySelector('#roomBlindInterval');if(blindInterval)blindInterval.onchange=()=>draft.settings.blindProgression.levelMinutes=Number(blindInterval.value);
+    const blindStructure=document.querySelector('#roomBlindStructure');if(blindStructure)blindStructure.onchange=()=>draft.settings.blindProgression.structureId=blindStructure.value;
+    document.querySelectorAll('[data-room-audience]').forEach(b=>b.onclick=()=>{
+      draft.audience.type=b.dataset.roomAudience;render()
+    });
+  }
+
+  document.querySelectorAll('[data-open-room-presets]').forEach(b=>b.onclick=()=>{state.modal='roomPresetLoader';render()});
+  document.querySelectorAll('[data-load-preset]').forEach(b=>b.onclick=()=>{
+    const preset=(window.POKER_ROOM_PRESETS||[]).find(x=>x.id===b.dataset.loadPreset);if(!preset)return;
+    const draft=ensureRoomDraft();draft.settings=normalizeGameSettings(cloneData(preset.settings));draft.sourceLabel='PokerCat 프리셋 · '+preset.name;
+    state.editingSavedRoomSettingId=null;state.modal=null;render();toast(preset.name+' 설정을 불러왔어요')
+  });
+  document.querySelectorAll('[data-load-saved-setting]').forEach(b=>b.onclick=()=>{
+    const item=state.savedRoomSettings.find(x=>x.id===b.dataset.loadSavedSetting);if(!item)return;
+    const draft=ensureRoomDraft();draft.settings=normalizeGameSettings(cloneData(item.settings));draft.sourceLabel='내 저장 설정 · '+item.name;
+    state.editingSavedRoomSettingId=item.id;state.modal=null;render();toast(item.name+' 설정을 불러왔어요')
+  });
+  document.querySelectorAll('[data-open-save-room-setting]').forEach(b=>b.onclick=()=>{state.modal='roomSaveSetting';render()});
+  const saveRoomSetting=document.querySelector('[data-save-room-setting]');if(saveRoomSetting)saveRoomSetting.onclick=()=>{
+    const name=(document.querySelector('#savedRoomSettingName')?.value||'').trim();if(!name){toast('설정 이름을 입력해 주세요');return}
+    const draft=ensureRoomDraft(),now=new Date().toISOString();
+    state.savedRoomSettings.unshift({
+      id:'setting-'+Date.now(),name,settings:normalizeGameSettings(cloneData(draft.settings)),
+      audience:null,includeAudience:false,createdAt:now,updatedAt:now
+    });
+    persistSavedRoomSettings();state.modal=null;render();toast('내 게임 설정으로 저장했어요')
+  };
+  document.querySelectorAll('[data-rename-saved-setting]').forEach(b=>b.onclick=()=>{
+    state.editingSavedRoomSettingId=b.dataset.renameSavedSetting;state.modal='roomRenameSetting';render()
+  });
+  const confirmRename=document.querySelector('[data-confirm-rename-setting]');if(confirmRename)confirmRename.onclick=()=>{
+    const name=(document.querySelector('#renameRoomSettingName')?.value||'').trim();if(!name){toast('새 이름을 입력해 주세요');return}
+    const item=state.savedRoomSettings.find(x=>x.id===state.editingSavedRoomSettingId);if(!item)return;
+    item.name=name;item.updatedAt=new Date().toISOString();persistSavedRoomSettings();state.modal='roomPresetLoader';render();toast('설정 이름을 변경했어요')
+  };
+  document.querySelectorAll('[data-overwrite-saved-setting]').forEach(b=>b.onclick=()=>{
+    const item=state.savedRoomSettings.find(x=>x.id===b.dataset.overwriteSavedSetting);if(!item)return;
+    const draft=ensureRoomDraft();item.settings=normalizeGameSettings(cloneData(draft.settings));item.updatedAt=new Date().toISOString();
+    persistSavedRoomSettings();state.modal='roomPresetLoader';render();toast(item.name+' 설정을 덮어썼어요')
+  });
+  document.querySelectorAll('[data-delete-saved-setting]').forEach(b=>b.onclick=()=>{
+    state.savedRoomSettings=state.savedRoomSettings.filter(x=>x.id!==b.dataset.deleteSavedSetting);
+    if(state.editingSavedRoomSettingId===b.dataset.deleteSavedSetting)state.editingSavedRoomSettingId=null;
+    persistSavedRoomSettings();render();toast('저장 설정을 삭제했어요')
+  });
 
   document.querySelectorAll('[data-create-room-submit]').forEach(b=>b.onclick=()=>{
     if(!state.loggedIn){requireAuth('Poker Room을 만들려면 로그인해 주세요.',{type:'view',view:'roomcreate'});return}
     if(state.view!=='roomcreate')return;
-    const name=(document.querySelector('#roomName')?.value||'').trim();
-    const maxPlayers=Number(document.querySelector('#roomMaxPlayers')?.value||6);
-    const startStack=Number(document.querySelector('#roomStartStack')?.value||40);
-    const sb=Number(document.querySelector('#roomSb')?.value||1);
-    const bb=Number(document.querySelector('#roomBb')?.value||2);
-    const anteEnabled=Boolean(document.querySelector('#roomAnteEnabled')?.checked);
-    const anteAmount=Number(document.querySelector('#roomAnteAmount')?.value||0);
-    const blindIncrease=Boolean(document.querySelector('#roomBlindIncrease')?.checked);
-    const intervalMinutes=Number(document.querySelector('#roomBlindInterval')?.value||0);
-    const visibility=document.querySelector('input[name="roomVisibility"]:checked')?.value||'public';
-    const feedPublished=Boolean(document.querySelector('#roomFeedPublished')?.checked);
+    const draft=ensureRoomDraft(),settings=normalizeGameSettings(cloneData(draft.settings));
+    const name=(draft.roomName||'').trim();
     if(!name){toast('방 이름을 입력해 주세요');return}
-    if(sb<=0||bb<=sb){toast('Big Blind는 Small Blind보다 커야 해요');return}
-    if(startStack<10){toast('시작 스택은 10BB 이상으로 설정해 주세요');return}
-    const id='room-'+Date.now();
-    const room={id,mode:'single-table',game:'NLH',name,hostId:'queenbee',maxPlayers,startStack,sb,bb,
-      ante:{enabled:anteEnabled,amount:anteEnabled?anteAmount:0},
-      blinds:{increase:blindIncrease,intervalMinutes:blindIncrease?intervalMinutes:0},
-      visibility,status:'open',seats:Array.from({length:maxPlayers},(_,i)=>i===0?'queenbee':null),
-      invitedUserIds:[],feedPublished,createdAt:new Date().toISOString(),
-      externalShare:{enabled:false,token:null},tournament:{mode:'single-table',mttConfig:null}};
-    state.rooms=[room,...state.rooms];persistRooms();state.currentRoomId=id;state.roomReturnView='home';state.view='room:'+id;render();toast('Poker Room을 만들었어요');
+    if(settings.startingChips<1000){toast('시작 칩은 1,000 이상으로 설정해 주세요');return}
+    if(settings.blinds.smallBlind<=0||settings.blinds.bigBlind<=settings.blinds.smallBlind){toast('Big Blind는 Small Blind보다 커야 해요');return}
+    if(settings.ante.mode!=='none'&&settings.ante.amount<=0){toast('Ante 칩을 설정해 주세요');return}
+    if(draft.audience.type==='homepub'&&!verifiedHomePub(myUser())){toast('Home Pub 인증 후 선택할 수 있어요');return}
+    const id='room-'+Date.now(),tableId=id+'-table-1';
+    const room={
+      id,mode:'single-table',name,hostId:'queenbee',settings,audience:{type:draft.audience.type},
+      status:'lobby',
+      tables:[{id:tableId,status:'waiting',seats:Array.from({length:settings.maxPlayers},(_,i)=>i===0?'queenbee':null)}],
+      invitedUserIds:[],createdAt:new Date().toISOString(),
+      social:{externalShare:{enabled:false,token:null}},
+      tournament:{mode:'single-table',mttConfig:null}
+    };
+    state.rooms=[room,...state.rooms];persistRooms();state.currentRoomId=id;state.roomReturnView='home';state.roomDraft=null;state.view='room:'+id;render();toast('게임방을 만들었어요')
   });
 
   document.querySelectorAll('[data-open-room]').forEach(b=>b.onclick=()=>{
     const room=getRoom(b.dataset.openRoom);if(!room)return;
-    if(room.visibility==='private'&&!state.loggedIn){requireAuth('비공개 Poker Room을 보려면 로그인해 주세요.',{type:'openRoom',id:room.id});return}
-    state.currentRoomId=room.id;state.roomReturnView=state.view;state.modal=null;state.view='room:'+room.id;render();
+    if(roomAudienceType(room)!=='public'&&!state.loggedIn){requireAuth('이 Poker Room을 보려면 로그인해 주세요.',{type:'openRoom',id:room.id});return}
+    if(state.loggedIn&&!canEnterRoom(room)){toast('이 게임방의 공개 대상이 아니에요');return}
+    state.currentRoomId=room.id;state.roomReturnView=state.view;state.modal=null;state.view='room:'+room.id;render()
   });
   document.querySelectorAll('[data-join-room]').forEach(b=>b.onclick=()=>{
-    if(!state.loggedIn){requireAuth('테이블에 입장하려면 로그인해 주세요.',{type:'joinRoom',id:b.dataset.joinRoom});return}
-    joinRoomById(b.dataset.joinRoom);
+    if(!state.loggedIn){requireAuth('대기방에서 자리에 앉으려면 로그인해 주세요.',{type:'joinRoom',id:b.dataset.joinRoom});return}
+    joinRoomById(b.dataset.joinRoom)
   });
   document.querySelectorAll('[data-leave-room]').forEach(b=>b.onclick=()=>{
-    if(!state.loggedIn){requireAuth('테이블 기능을 사용하려면 로그인해 주세요.');return}
+    if(!state.loggedIn){requireAuth('게임방 기능을 사용하려면 로그인해 주세요.');return}
     const room=getRoom(b.dataset.leaveRoom);if(!room)return;
-    if(room.hostId==='queenbee'){toast('호스트는 현재 버전에서 테이블을 나갈 수 없어요');return}
-    const idx=room.seats.indexOf('queenbee');if(idx>=0)room.seats[idx]=null;persistRooms();render();toast('테이블에서 나왔어요');
+    if(room.hostId==='queenbee'){toast('방장은 대기방을 나가기 전에 방 종료 기능이 필요해요');return}
+    const seats=roomSeats(room),idx=seats.indexOf('queenbee');if(idx>=0)seats[idx]=null;
+    persistRooms();render();toast('자리에서 나왔어요')
   });
   document.querySelectorAll('[data-invite-room]').forEach(b=>b.onclick=()=>{
     if(!state.loggedIn){requireAuth('사용자를 초대하려면 로그인해 주세요.');return}
@@ -87,23 +160,20 @@ function wire(){
     if(!room.invitedUserIds.includes(toUserId))room.invitedUserIds.push(toUserId);
     const exists=state.roomInvites.some(i=>i.roomId===room.id&&i.toUserId===toUserId&&i.status==='pending');
     if(!exists)state.roomInvites.unshift({id:'invite-'+Date.now()+'-'+toUserId,roomId:room.id,fromUserId:'queenbee',toUserId,status:'pending',createdAt:new Date().toISOString()});
-    persistRooms();persistRoomInvites();render();toast(getUser(toUserId).name+'님을 초대했어요');
+    persistRooms();persistRoomInvites();render();toast(getUser(toUserId).name+'님을 초대했어요')
   });
   document.querySelectorAll('[data-start-room]').forEach(b=>b.onclick=()=>{
     if(!state.loggedIn){requireAuth('게임을 시작하려면 로그인해 주세요.');return}
     const room=getRoom(b.dataset.startRoom);if(!room||room.hostId!=='queenbee')return;
     if(roomSeatCount(room)<2){toast('2명 이상 착석해야 시작할 수 있어요');return}
-    room.status='playing';persistRooms();render();toast('플레이머니 테이블을 시작했어요');
+    room.status='playing';const table=roomTable(room);if(table)table.status='playing';
+    persistRooms();render();toast('플레이머니 테이블을 시작했어요')
   });
   const roomMenu=document.querySelector('[data-room-menu]');if(roomMenu)roomMenu.onclick=()=>{
     if(!state.loggedIn){requireAuth('Poker Room 관리 기능을 사용하려면 로그인해 주세요.');return}
     const room=getRoom(state.currentRoomId);
-    if(room?.hostId==='queenbee'){state.modal='roomInvite';render()}else toast('Room 메뉴는 다음 단계에서 확장해요');
+    if(room?.hostId==='queenbee'){state.modal='roomInvite';render()}else toast('Room 메뉴는 다음 단계에서 확장해요')
   };
-
-  const anteToggle=document.querySelector('#roomAnteEnabled');if(anteToggle)anteToggle.onchange=()=>document.querySelector('#roomAnteField')?.classList.toggle('active',anteToggle.checked);
-  const blindToggle=document.querySelector('#roomBlindIncrease');if(blindToggle)blindToggle.onchange=()=>document.querySelector('#roomBlindIntervalField')?.classList.toggle('active',blindToggle.checked);
-  document.querySelectorAll('input[name="roomVisibility"]').forEach(i=>i.onchange=()=>{document.querySelectorAll('.visibility-option').forEach(x=>x.classList.remove('active'));i.closest('.visibility-option')?.classList.add('active')});
 
   document.querySelectorAll('[data-user]').forEach(b=>b.onclick=()=>{state.modal=null;state.view='user:'+b.dataset.user;render()});
 
