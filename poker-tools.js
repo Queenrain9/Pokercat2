@@ -402,31 +402,98 @@ function rangeToolView(){
   </section>`;
 }
 
+function normalizeIcmDraft(draft){
+  const requested=Number(draft?.playerCount||5);
+  const playerCount=Math.min(9,Math.max(2,Number.isFinite(requested)?Math.round(requested):5));
+  const stacks=Array.from({length:playerCount},(_,index)=>String(draft?.stacks?.[index]??''));
+  const payouts=Array.from({length:playerCount},(_,index)=>String(draft?.payouts?.[index]??''));
+  return {playerCount,stacks,payouts};
+}
+
+function ensureIcmDraft(){
+  const draft=normalizeIcmDraft(state.icmDraft);
+  state.icmDraft=draft;
+  return draft;
+}
+
+function formatIcmNumber(value){
+  const number=Number(value)||0;
+  return Math.round(number).toLocaleString('ko-KR');
+}
+
+function formatIcmMoney(value){
+  return '₩'+formatIcmNumber(value);
+}
+
+function icmResultMarkup(result){
+  if(!result?.ok)return '';
+  return `<div class="icm-result-summary">
+      <div><small>TOTAL PRIZE</small><b>${formatIcmMoney(result.totalPayout)}</b></div>
+      <div><small>MODEL</small><b>Exact ICM</b></div>
+    </div>
+    <div class="icm-result-list">
+      ${result.players.map((player,index)=>`<div class="icm-result-row">
+        <div class="icm-result-player">
+          <b>${index===0?'Hero':'Player '+(index+1)}</b>
+          <small>Stack ${formatIcmNumber(player.stack)} · Chips ${player.chipShare.toFixed(1)}%</small>
+        </div>
+        <div class="icm-result-value">
+          <b>${formatIcmMoney(player.icmValue)}</b>
+          <small>${player.prizePoolShare.toFixed(2)}% of prize pool</small>
+        </div>
+      </div>`).join('')}
+    </div>
+    <div class="icm-result-check">ICM Value 합계 ${formatIcmMoney(result.calculatedPayout)} · 총상금과 일치</div>`;
+}
+
 function icmToolView(){
-  return `<section class="tools-screen tool-detail">
-    <div class="tool-intro"><span>ICM</span><div><b>ICM Calculator</b><small>Tournament chip value & decision</small></div></div>
+  const draft=ensureIcmDraft();
+  return `<section class="tools-screen tool-detail icm-tool">
+    <div class="tool-intro"><span>ICM</span><div><b>ICM Calculator</b><small>Exact Independent Chip Model</small></div></div>
+
     <div class="tool-panel">
-      ${toolSectionTitle('Players & Stacks')}
-      <label class="tool-input-label">남은 플레이어 수<select><option>5 Players</option><option>6 Players</option><option>9 Players</option></select></label>
-      <div class="icm-stack-list">
-        ${[['Hero','420,000'],['Player 2','310,000'],['Player 3','250,000'],['Player 4','180,000'],['Player 5','90,000']].map(x=>`<div class="icm-row"><span>${x[0]}</span><input value="${x[1]}"></div>`).join('')}
+      ${toolSectionTitle('Players & Stacks','2–9 Players')}
+      <label class="tool-input-label">남은 플레이어 수
+        <select id="icmPlayerCount">
+          ${Array.from({length:8},(_,index)=>index+2).map(count=>`<option value="${count}" ${draft.playerCount===count?'selected':''}>${count} Players</option>`).join('')}
+        </select>
+      </label>
+      <div class="icm-stack-list" id="icmStackList">
+        ${draft.stacks.map((value,index)=>`<label class="icm-row">
+          <span>${index===0?'Hero':'Player '+(index+1)}</span>
+          <input type="text" inputmode="numeric" data-icm-stack-index="${index}" value="${escapeHtml(value)}" placeholder="예: ${index===0?'420000':'250000'}">
+        </label>`).join('')}
       </div>
     </div>
+
     <div class="tool-panel">
-      ${toolSectionTitle('Payouts')}
-      <div class="icm-payout-grid"><input value="₩5,000,000"><input value="₩3,000,000"><input value="₩2,000,000"><input value="₩1,200,000"><input value="₩800,000"></div>
-    </div>
-    <div class="tool-panel">
-      ${toolSectionTitle('Hero Decision')}
-      <label class="tool-input-label">상황<textarea placeholder="예: BTN 12BB, folded to Hero, payout jump..."></textarea></label>
-    </div>
-    <div class="tool-panel">
-      ${toolSectionTitle('ICM Result')}
-      <div class="tool-result-grid">
-        <div><small>ICM Value</small><b>--</b></div>
-        <div><small>Push / Fold</small><b>--</b></div>
+      ${toolSectionTitle('Payouts','미지급 순위는 0 또는 빈칸')}
+      <div class="icm-payout-list" id="icmPayoutList">
+        ${draft.payouts.map((value,index)=>`<label class="icm-payout-row">
+          <span>${index+1}위</span>
+          <div><i>₩</i><input type="text" inputmode="numeric" data-icm-payout-index="${index}" value="${escapeHtml(value)}" placeholder="${index<3?['5000000','3000000','2000000'][index]:'0'}"></div>
+        </label>`).join('')}
       </div>
-      ${placeholderCard('ICM 결과')}
+      <div class="range-placeholder-note">상금은 높은 순위부터 같거나 작아야 합니다.</div>
+    </div>
+
+    <div class="tool-panel">
+      ${toolSectionTitle('ICM Result','각 플레이어 기대 상금')}
+      <button class="btn full icm-calc-btn" data-calculate-icm>ICM 계산</button>
+      <div class="icm-result-shell" id="icmResultShell">
+        <div class="icm-empty-result">
+          <b>스택과 상금을 입력해 주세요.</b>
+          <span>각 순위 도달 확률을 계산해 플레이어별 ICM Value를 표시합니다.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tool-panel icm-future-panel">
+      <div class="icm-future-slot">
+        <div><b>Decision Model</b><small>Hero Decision · Push / Fold</small></div>
+        <span>후속 확장</span>
+      </div>
+      <p>기본 ICM 엔진과 입력 구조를 분리해 두어 이후 액션 EV와 Push/Fold 모델을 연결할 수 있습니다.</p>
     </div>
   </section>`;
 }
