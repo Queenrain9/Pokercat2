@@ -305,6 +305,66 @@ function wire(){
     });
     refreshRange();
   }
+  if(state.view==='tool:icm'){
+    const api=window.ICM_CALCULATOR;
+    const playerCountInput=document.querySelector('#icmPlayerCount');
+    const resultShell=document.querySelector('#icmResultShell');
+    const calculateButton=document.querySelector('[data-calculate-icm]');
+
+    const collectIcmDraft=()=>{
+      const playerCount=Number(playerCountInput?.value||state.icmDraft?.playerCount||5);
+      const stacks=Array.from({length:playerCount},(_,index)=>document.querySelector('[data-icm-stack-index="'+index+'"]')?.value??state.icmDraft?.stacks?.[index]??'');
+      const payouts=Array.from({length:playerCount},(_,index)=>document.querySelector('[data-icm-payout-index="'+index+'"]')?.value??state.icmDraft?.payouts?.[index]??'');
+      return normalizeIcmDraft({playerCount,stacks,payouts});
+    };
+
+    const resetIcmResult=()=>{
+      if(!resultShell||resultShell.dataset.calculated!=='1')return;
+      resultShell.dataset.calculated='0';
+      resultShell.innerHTML='<div class="icm-empty-result"><b>입력이 변경됐어요.</b><span>다시 계산하면 최신 스택과 상금 구조로 ICM Value를 표시합니다.</span></div>';
+    };
+
+    document.querySelectorAll('[data-icm-stack-index]').forEach(input=>input.addEventListener('input',()=>{
+      const draft=ensureIcmDraft();
+      draft.stacks[Number(input.dataset.icmStackIndex)]=input.value;
+      resetIcmResult();
+    }));
+    document.querySelectorAll('[data-icm-payout-index]').forEach(input=>input.addEventListener('input',()=>{
+      const draft=ensureIcmDraft();
+      draft.payouts[Number(input.dataset.icmPayoutIndex)]=input.value;
+      resetIcmResult();
+    }));
+
+    if(playerCountInput)playerCountInput.onchange=()=>{
+      const current=collectIcmDraft();
+      state.icmDraft=normalizeIcmDraft({
+        playerCount:Number(playerCountInput.value),
+        stacks:current.stacks,
+        payouts:current.payouts
+      });
+      render();
+    };
+
+    if(calculateButton)calculateButton.onclick=()=>{
+      if(!api){toast('ICM 계산 모듈을 불러오지 못했어요');return}
+      const draft=collectIcmDraft();
+      state.icmDraft=draft;
+      const result=api.calculate({stacks:draft.stacks,payouts:draft.payouts});
+      if(!result.ok){
+        const message=result.errors?.[0]||'입력값을 확인해 주세요.';
+        if(resultShell){
+          resultShell.dataset.calculated='0';
+          resultShell.innerHTML='<div class="icm-empty-result"><b>입력값을 확인해 주세요.</b><span>'+escapeHtml(message)+'</span></div>';
+        }
+        toast(message);
+        return;
+      }
+      if(resultShell){
+        resultShell.dataset.calculated='1';
+        resultShell.innerHTML=icmResultMarkup(result);
+      }
+    };
+  }
   if(state.view==='tool:bankroll'){
     document.querySelectorAll('[data-bankroll-period]').forEach(button=>button.onclick=()=>{
       state.bankrollPeriod=button.dataset.bankrollPeriod||'month';
