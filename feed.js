@@ -91,6 +91,15 @@ function notificationView(){
     <div class="notification-filter"><button class="active">전체</button><button>활동</button><button>일정</button></div>
     <div class="notification-group">
       <h3>오늘</h3>
+      ${state.roomInvites.filter(i=>i.toUserId==='queenbee'&&i.status==='pending').map(inv=>{
+        const room=getRoom(inv.roomId),from=getUser(inv.fromUserId);
+        if(!room)return '';
+        return `<article class="notification-row room-invite-notice ${state.notificationsRead?'':'unread'}">
+          ${catAvatar(from.cat,'notice-avatar')}
+          <div class="notice-copy"><b>${escapeHtml(from.name)}</b>님이 포커 게임에 초대했습니다.<span>${escapeHtml(room.name)} · ${roomGameLabel(room)} · ${roomSeatCount(room)}/${room.maxPlayers} seated</span></div>
+          <button class="notice-detail" data-open-room="${room.id}">게임방</button>
+        </article>`;
+      }).join('')}
       <article class="notification-row ${state.notificationsRead?'':'unread'}">
         ${catAvatar('shark','notice-avatar')}
         <div class="notice-copy"><b>riverkim</b>님이 회원님의 핸드에 댓글을 남겼어요.<span>“턴에서는 작은 사이즈도 좋아 보여요.” · 12분</span></div>
