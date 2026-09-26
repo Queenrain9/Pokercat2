@@ -37,7 +37,7 @@
 
 .poker-cat-avatar{
   display:block;
-  background-image:url('./assets/pokercats/pokercat-sprite.webp');
+  background-image:url('./assets/pokercats/pokercat-sprite.webp?v=11');
   background-repeat:no-repeat;
   background-size:300% 300%;
   background-position:var(--cat-pos);
