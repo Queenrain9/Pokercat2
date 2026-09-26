@@ -37,7 +37,9 @@ const seededRooms=[
   {id:'room-minraise-study',mode:'single-table',game:'NLH',name:'Late Night 6-Max',hostId:'minraise',maxPlayers:6,startStack:100,sb:1,bb:2,ante:{enabled:true,amount:0.5},blinds:{increase:false,intervalMinutes:0},visibility:'public',status:'open',seats:['minraise','ninehigh','riverkim',null,null,null],invitedUserIds:[],feedPublished:true,createdAt:'2026-09-26T13:00:00.000Z',externalShare:{enabled:false,token:null},tournament:{mode:'single-table',mttConfig:null}}
 ];
 const storedRooms=loadJSON('pokercat_rooms_v1',null);
-const storedRoomInvites=loadJSON('pokercat_room_invites_v1',[]);
+const storedRoomInvites=loadJSON('pokercat_room_invites_v1',[
+  {id:'invite-river-demo',roomId:'room-river-night',fromUserId:'riverkim',toUserId:'queenbee',status:'pending',createdAt:'2026-09-26T13:10:00.000Z'}
+]);
 
 const state={
 view:'home',onboarding:localStorage.getItem('pokercat_onboarded')==='1',onboardStep:0,authMode:'landing',
