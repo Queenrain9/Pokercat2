@@ -1,12 +1,12 @@
 function profileView(key){
   const mine=key==='me';
-  const u=mine?{name:state.nickname,handle:'@queenbee',cat:state.selectedCat,sub:`${state.gamePref} · ${state.playPref}`,pubBrand:state.pubBrand,pubBranch:state.pubBranch}:demoUsers[key]||demoUsers.riverkim;
+  const u=mine?{name:state.nickname,handle:'@queenbee',cat:state.selectedCat,pubBrand:state.pubBrand,pubBranch:state.pubBranch}:demoUsers[key]||demoUsers.riverkim;
   return `<section class="profile-screen">
     <div class="profile-hero">
       <div class="profile-avatar">${catAvatar(u.cat,'profile-cat-image')}</div>
       <div class="profile-name-row">
         <div class="profile-name">${u.name}</div>
-        ${mine&&state.pubBrand&&state.pubBranch?`<span class="profile-pub-badge" title="대표 홀덤펍"><i>♠</i><b>${escapeHtml(state.pubBrand)}</b> <small>${escapeHtml(state.pubBranch)}</small></span>`:''}
+        ${u.pubBrand&&u.pubBranch?`<span class="profile-pub-badge" title="대표 홀덤펍"><i>♠</i><b>${escapeHtml(u.pubBrand)}</b> <small>${escapeHtml(u.pubBranch)}</small></span>`:''}
       </div>
       <div class="profile-handle">${u.handle}</div>
       <div class="bio">${mine?'홀덤 치고, 핸드 남기고, 좋은 사람들 만나는 중.':'포커 좋아하는 평범한 플레이어. 핸드 토론 환영.'}</div>
