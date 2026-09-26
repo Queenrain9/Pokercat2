@@ -1,17 +1,18 @@
 function wire(){
-  document.querySelectorAll('[data-start],[data-auth]').forEach(b=>b.onclick=()=>{state.onboardStep=1;state.authMode='landing';render()});
-  const openLogin=document.querySelector('[data-open-login]');if(openLogin)openLogin.onclick=()=>{state.authMode='login';render()};
-  const authBack=document.querySelector('[data-auth-back]');if(authBack)authBack.onclick=()=>{state.authMode='landing';render()};
-  const login=document.querySelector('[data-login-demo]');if(login)login.onclick=()=>{localStorage.setItem('pokercat_onboarded','1');state.onboarding=true;state.view='home';render()};
-  document.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{state.selectedCat=Number(b.dataset.cat);render()});
-  const next=document.querySelector('[data-next-onboard]');if(next)next.onclick=()=>{state.onboardStep=2;render()};
-  document.querySelectorAll('[data-skip-onboard]').forEach(b=>b.onclick=()=>{localStorage.setItem('pokercat_onboarded','1');state.onboarding=true;state.view='home';render()});
-  const finish=document.querySelector('[data-finish-onboard]');if(finish)finish.onclick=()=>{
-    state.nickname=document.querySelector('#nick').value.trim()||'QUEENBEE';
-    state.gamePref=document.querySelector('#gamePref').value;state.playPref=document.querySelector('#playPref').value;
-    localStorage.setItem('pokercat_name',state.nickname);localStorage.setItem('pokercat_game',state.gamePref);localStorage.setItem('pokercat_play',state.playPref);localStorage.setItem('pokercat_cat',state.selectedCat);localStorage.setItem('pokercat_onboarded','1');
-    state.onboarding=true;state.view='home';render();
-  };
+  document.querySelectorAll('[data-auth-mode]').forEach(b=>b.onclick=()=>{state.authGateMode=b.dataset.authMode;render()});
+  document.querySelectorAll('[data-close-auth]').forEach(b=>b.onclick=e=>{if(e.target!==b&&b.classList.contains('auth-gate-backdrop'))return;state.modal=null;state.pendingAuth=null;render()});
+  document.querySelectorAll('[data-auth-complete]').forEach(b=>b.onclick=()=>{
+    if(state.authGateMode==='signup'){
+      const nick=(document.querySelector('#authNickname')?.value||'').trim();
+      if(nick){state.nickname=nick;localStorage.setItem('pokercat_name',nick)}
+    }
+    localStorage.setItem('pokercat_logged_in','1');
+    localStorage.setItem('pokercat_onboarded','1');
+    state.loggedIn=true;state.onboarding=true;
+    const pending=state.pendingAuth;
+    state.pendingAuth=null;state.modal=null;
+    applyPendingAuth(pending);
+  });
 
   document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{state.view=b.dataset.nav;state.modal=null;if(state.view!=='compose')state.composeMode='post';render()});
   document.querySelectorAll('[data-open-create-menu]').forEach(b=>b.onclick=()=>{state.modal='createMenu';render()});
