@@ -42,20 +42,20 @@ const storedRoomInvites=loadJSON('pokercat_room_invites_v1',[
 ]);
 
 const state={
-view:'home',onboarding:localStorage.getItem('pokercat_onboarded')==='1',onboardStep:0,authMode:'landing',
+view:'home',loggedIn:localStorage.getItem('pokercat_logged_in')==='1',onboarding:localStorage.getItem('pokercat_onboarded')==='1',onboardStep:0,authMode:'landing',
 selectedCat:Number(localStorage.getItem('pokercat_cat')||7),nickname:localStorage.getItem('pokercat_name')||'QUEENBEE',
 gamePref:localStorage.getItem('pokercat_game')||'MTT',playPref:localStorage.getItem('pokercat_play')||'오프라인',
 homePub:storedHomePub,careerHighs:Array.isArray(storedCareer)?storedCareer:[],
 rooms:Array.isArray(storedRooms)&&storedRooms.length?storedRooms:seededRooms,roomInvites:Array.isArray(storedRoomInvites)?storedRoomInvites:[],currentRoomId:null,roomReturnView:'home',
 feedMode:'algorithm',exploreTab:'popular',scheduleTab:'events',profileTab:'posts',notificationsRead:false,
-modal:null,relationshipMode:'following',roomInviteMode:'followers',editingCareerId:null,liked:new Set(),
+modal:null,authGateMode:'login',authReason:'',pendingAuth:null,relationshipMode:'following',roomInviteMode:'followers',editingCareerId:null,liked:new Set(),
 following:new Set(Array.isArray(storedFollowing)?storedFollowing:['riverkim']),
 followers:new Set(Array.isArray(storedFollowers)?storedFollowers:['riverkim','chiplee']),
 composeMode:'post',composeText:'',handDraft:{hero:['A♠','K♠'],flop:['Q♥','J♠','7♣'],turn:['2♦'],river:['9♣']},cardTarget:null,cardRank:null,
 handMeta:{game:'MTT',players:'8-max',pos:'BTN',stack:'38BB',blind:'1K / 2K (Ante 2K)'},handActions:{pre:'BTN 오픈에 BB에서 콜',flop:'플랍 체크-콜',turn:'턴 체크-레이즈',river:'리버 콜'}};
 
 function myUser(){return {name:state.nickname,handle:'@queenbee',cat:state.selectedCat,time:'4시간 전',homePub:state.homePub}}
-function getUser(key){return key==='queenbee'?myUser():(demoUsers[key]||demoUsers.riverkim)}
+function getUser(key){return key==='queenbee'?(state.loggedIn?myUser():demoUsers.queenbee):(demoUsers[key]||demoUsers.riverkim)}
 function persistRelationships(){saveJSON('pokercat_following_v1',[...state.following]);saveJSON('pokercat_followers_v1',[...state.followers])}
 function persistHomePub(){saveJSON('pokercat_home_pub_v1',state.homePub)}
 function persistCareerHighs(){saveJSON('pokercat_career_highs_v1',state.careerHighs)}
@@ -69,9 +69,18 @@ function icon(name){const map={home:'⌂',search:'⌕',plus:'＋',calendar:'▦'
 
 function render(){
   const app=document.querySelector('#app');
-  if(!state.onboarding){app.innerHTML=state.onboardStep===0?authView():onboardView()}
-  else{app.innerHTML='<main class="phone">'+topbar()+mainView()+bottomNav()+'</main>'+modalView()}
+  app.innerHTML='<main class="phone">'+topbar()+mainView()+bottomNav()+'</main>'+modalView();
   wire()
+}
+
+function requireAuth(reason,pending=null){
+  if(state.loggedIn)return true;
+  state.authGateMode='login';
+  state.authReason=reason||'이 기능을 사용하려면 로그인이 필요해요.';
+  state.pendingAuth=pending;
+  state.modal='authGate';
+  render();
+  return false;
 }
 
 function authView(){
@@ -108,6 +117,7 @@ return homeView()
 }
 
 function modalView(){
+if(state.modal==='authGate')return authGateModal();
 if(state.modal==='profileEdit')return profileEditModal();
 if(state.modal==='homePubVerify')return homePubVerifyModal();
 if(state.modal==='careerEdit')return careerEditModal();
@@ -118,3 +128,31 @@ if(state.modal==='handPreview')return `<div class="modal-backdrop" data-close-mo
 return ''
 }
 function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
+
+function authGateModal(){
+  const signup=state.authGateMode==='signup';
+  return `<div class="modal-backdrop auth-gate-backdrop" data-close-auth>
+    <div class="sheet auth-gate-sheet" onclick="event.stopPropagation()">
+      <div class="grab"></div>
+      <div class="auth-gate-brand">POKER<span>CAT</span></div>
+      <h2>${signup?'PokerCat 시작하기':'다시 오셨네요'}</h2>
+      <p class="auth-gate-reason">${escapeHtml(state.authReason||'계정으로 로그인하면 PokerCat의 모든 기능을 사용할 수 있어요.')}</p>
+      <div class="auth-gate-tabs">
+        <button class="${!signup?'active':''}" data-auth-mode="login">로그인</button>
+        <button class="${signup?'active':''}" data-auth-mode="signup">회원가입</button>
+      </div>
+      <div class="auth-gate-form">
+        ${signup?`<label>닉네임<input id="authNickname" maxlength="16" placeholder="PokerCat에서 사용할 이름"></label>`:''}
+        <label>아이디 또는 이메일<input id="authId" autocomplete="username" placeholder="아이디 또는 이메일"></label>
+        <label>비밀번호<input id="authPassword" type="password" autocomplete="${signup?'new-password':'current-password'}" placeholder="비밀번호"></label>
+        <button class="btn full auth-primary" data-auth-complete>${signup?'회원가입하고 계속':'로그인하고 계속'}</button>
+      </div>
+      <div class="auth-divider"><span>또는</span></div>
+      <div class="provider-list">
+        <button class="provider kakao" data-auth-complete>● 카카오로 계속</button>
+        <button class="provider apple" data-auth-complete> Apple로 계속</button>
+      </div>
+      <button class="continue-browsing" data-close-auth>로그인 없이 계속 둘러보기</button>
+    </div>
+  </div>`;
+}
