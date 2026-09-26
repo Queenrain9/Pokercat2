@@ -189,7 +189,6 @@ function bottomNav(){
 
 function avatarPickerModal(){
   const available=cats.map((_,i)=>i);
-  const currentPos=catByRef(state.selectedCat).pos;
   return '<div class="modal-backdrop" data-close-modal><div class="sheet avatar-picker-sheet" onclick="event.stopPropagation()">'+
     '<div class="grab"></div>'+
     '<div class="sheet-title">포커캣 변경</div>'+
