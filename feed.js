@@ -1,18 +1,10 @@
 function userRow(key){
-  const base=demoUsers[key]||demoUsers.riverkim;
-  const isMe=key==='queenbee';
-  const u=isMe
-    ?{...base,name:state.nickname,cat:state.selectedCat,pubBrand:state.pubBrand,pubBranch:state.pubBranch}
-    :base;
-  const pub=u.pubBrand&&u.pubBranch
-    ?`<span class="feed-pub-affiliation"><i>♠</i><b>${escapeHtml(u.pubBrand)}</b> <small>${escapeHtml(u.pubBranch)}</small></span>`
-    :'';
+  const u=getUser(key);
+  const hp=verifiedHomePub(u);
+  const pub=hp?`<span class="feed-pub-affiliation"><i>🏠</i><b>${escapeHtml(hp.brand)}</b> <small>${escapeHtml(hp.branch)}</small></span>`:'';
   return `<div class="user-row">
     <button class="avatar" data-user="${key}">${catAvatar(u.cat,'avatar-cat-image')}</button>
-    <div class="user-meta">
-      <div class="user-name-line"><div class="user-name">${escapeHtml(u.name)}</div>${pub}</div>
-      <div class="user-sub">${u.time||'방금'}</div>
-    </div>
+    <div class="user-meta"><div class="user-name-line"><div class="user-name">${escapeHtml(u.name)}</div>${pub}</div><div class="user-sub">${u.time||'방금'}</div></div>
     <button class="more-btn">•••</button>
   </div>`;
 }
@@ -52,6 +44,33 @@ function homeView(){
   return `<section class="home-screen">
     <div class="feed-context">${state.feedMode==='following'?'팔로잉 중인 플레이어':'추천 피드'}</div>
     <div class="feed-list">${state.feedMode==='following'?followingPosts:algorithmPosts}</div>
+  </section>`;
+}
+
+function homePubCommunityView(){
+  const me=myUser();
+  const hp=verifiedHomePub(me);
+  if(!state.homePub){
+    return `<section class="homepub-screen"><div class="homepub-gate"><div class="homepub-gate-icon">🏠</div><h2>Home Pub을 등록해 주세요</h2><p>인증된 대표 지점을 등록하면 같은 Home Pub 플레이어의 게시물을 따로 볼 수 있어요.</p><button class="btn" data-edit-profile>Home Pub 등록</button></div></section>`;
+  }
+  if(!hp){
+    return `<section class="homepub-screen"><div class="homepub-gate"><div class="homepub-gate-icon">🔐</div><h2>${escapeHtml(state.homePub.brand)} ${escapeHtml(state.homePub.branch)}</h2><p>Home Pub 인증이 완료되어야 지점 전용 커뮤니티에 입장할 수 있어요.</p><button class="btn" data-open-homepub-verify>Home Pub 인증하기</button></div></section>`;
+  }
+  const memberKeys=['queenbee',...Object.keys(demoUsers).filter(k=>verifiedHomePub(demoUsers[k])?.id===hp.id)];
+  const unique=[...new Set(memberKeys)];
+  const otherKeys=unique.filter(k=>k!=='queenbee');
+  const communityPosts=otherKeys.length
+    ?otherKeys.map((k,i)=>`<article class="feed-post">${userRow(k)}<div class="post-text">${i===0?'오늘 저녁 데일리 참가합니다. 같은 지점 분들 테이블에서 봬요 🐱':'어제 세션에서 재밌는 핸드가 하나 있었어요. 의견 궁금합니다.'}</div>${i===0?pokerPhoto('warm'):hhCard(handB)}${actions('hp-'+k,18+i*7,4+i)}</article>`).join('')
+    :`<div class="homepub-empty"><b>아직 이 지점의 게시물이 없어요.</b><span>전체 피드에서 같은 Home Pub 플레이어를 팔로우하면 관계가 자연스럽게 이어져요.</span></div>`;
+  return `<section class="homepub-screen">
+    <div class="homepub-community-head">
+      <div class="homepub-community-label">VERIFIED HOME PUB</div>
+      <h1>🏠 ${escapeHtml(hp.brand)} ${escapeHtml(hp.branch)}</h1>
+      <p>인증된 같은 지점 플레이어의 게시물만 모아보는 커뮤니티예요.</p>
+      <div class="homepub-member-strip">${unique.slice(0,6).map(k=>`<button data-user="${k}" title="${escapeHtml(getUser(k).name)}">${catAvatar(getUser(k).cat,'homepub-member-avatar')}</button>`).join('')}<span><b>${unique.length}</b> 인증 멤버</span></div>
+    </div>
+    <div class="homepub-feed-label"><span>Home Pub Community</span><em>전체 피드와 별도</em></div>
+    <div class="feed-list">${communityPosts}</div>
   </section>`;
 }
 
