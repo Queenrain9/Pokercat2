@@ -140,20 +140,21 @@ function relationshipRow(key){
 }
 
 function careerEditModal(){
-  const item=state.careerHighs.find(x=>x.id===state.editingCareerId)||{id:'',title:'',category:'',tournamentName:'',date:'',prize:'',description:'',photoUrl:null};
+  const item=state.careerHighs.find(x=>x.id===state.editingCareerId)||{id:'',title:'',category:'기타',tournamentName:'',date:'',prize:'',description:'',imageUrl:null};
+  const categories=['Day 2','Final Table','우승','ITM','최고 상금','기타'];
+  if(item.category&&!categories.includes(item.category))categories.push(item.category);
   return `<div class="modal-backdrop" data-close-modal><div class="sheet career-edit-sheet" onclick="event.stopPropagation()">
     <div class="grab"></div><div class="sheet-title">${item.id?'커리어 수정':'커리어 기록 추가'}</div>
     <div class="career-form">
-      <label>기록명 *<input id="careerTitle" value="${escapeHtml(item.title)}" placeholder="예: Main Event Day 2"></label>
-      <label>분류<select id="careerCategory"><option ${item.category==='Day 2'?'selected':''}>Day 2</option><option ${item.category==='Final Table'?'selected':''}>Final Table</option><option ${item.category==='우승'?'selected':''}>우승</option><option ${item.category==='최고 상금'?'selected':''}>최고 상금</option><option ${item.category==='기타'?'selected':''}>기타</option></select></label>
-      <label>대회명<input id="careerTournament" value="${escapeHtml(item.tournamentName||'')}" placeholder="선택"></label>
-      <div class="career-form-row"><label>날짜<input id="careerDate" type="date" value="${escapeHtml(item.date||'')}"></label><label>상금<input id="careerPrize" value="${escapeHtml(item.prize||'')}" placeholder="₩5,000,000"></label></div>
-      <label>설명<textarea id="careerDescription" placeholder="이 기록에 대한 짧은 설명">${escapeHtml(item.description||'')}</textarea></label>
-      <button class="btn full" data-save-career>저장</button>
+      <label>기록명 *<input id="careerTitle" value="${escapeHtml(item.title)}" maxlength="80" required placeholder="예: Main Event Day 2"></label>
+      <label>분류<select id="careerCategory">${categories.map(category=>`<option ${item.category===category?'selected':''}>${escapeHtml(category)}</option>`).join('')}</select></label>
+      <label>대회명<input id="careerTournament" value="${escapeHtml(item.tournamentName||'')}" maxlength="100" placeholder="선택"></label>
+      <div class="career-form-row"><label>날짜<input id="careerDate" type="date" value="${escapeHtml(item.date||'')}"></label><label>상금<input id="careerPrize" value="${escapeHtml(item.prize||'')}" maxlength="40" placeholder="₩5,000,000"></label></div>
+      <label>설명<textarea id="careerDescription" maxlength="280" placeholder="이 기록에 대한 짧은 설명">${escapeHtml(item.description||'')}</textarea></label>
+      <button class="btn full" data-save-career>${item.id?'수정 저장':'기록 저장'}</button>
     </div>
   </div></div>`;
 }
-
 function bottomNav(){
   const nav=[['home','홈','home'],['search','탐색','explore'],['plus','작성','compose'],['calendar','일정','schedule'],['profile','프로필','profile']];
   return `<nav class="bottom-nav">${nav.map(n=>{const active=state.view===n[2]||(state.view==='homepub'&&n[2]==='profile');return `<button class="nav-item ${n[2]==='compose'?'compose':''} ${active?'active':''}" data-nav="${n[2]}"><span class="nav-icon">${icon(n[0])}</span><span>${n[1]}</span></button>`}).join('')}</nav>`;
