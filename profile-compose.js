@@ -38,7 +38,7 @@ function composeView(){
       <button class="btn compose-submit" data-post-demo>게시</button>
     </div>
 
-    <textarea class="compose-text" id="composeText" placeholder="무슨 생각을 하고 있어?"></textarea>
+    <textarea class="compose-text" id="composeText" placeholder="무슨 생각을 하고 있어?">${escapeHtml(state.composeText)}</textarea>
 
     <div class="compose-tools">
       <button class="compose-tool" data-toast="사진 업로드는 실제 저장소 연결 단계에서 붙일게요">▧ 사진</button>
@@ -57,13 +57,13 @@ function handComposer(){
     </div>
 
     <div class="hand-basic-grid">
-      <label>게임<select id="hhGame"><option>MTT</option><option>Cash</option></select></label>
-      <label>테이블<select id="hhPlayers"><option>9-max</option><option selected>8-max</option><option>6-max</option></select></label>
-      <label>Hero<select id="hhPos"><option>UTG</option><option>UTG+1</option><option>HJ</option><option>CO</option><option selected>BTN</option><option>SB</option><option>BB</option></select></label>
-      <label>Eff. Stack<input id="hhStack" value="38BB" inputmode="decimal"></label>
+      <label>게임<select id="hhGame"><option ${state.handMeta.game==='MTT'?'selected':''}>MTT</option><option ${state.handMeta.game==='Cash'?'selected':''}>Cash</option></select></label>
+      <label>테이블<select id="hhPlayers"><option ${state.handMeta.players==='9-max'?'selected':''}>9-max</option><option ${state.handMeta.players==='8-max'?'selected':''}>8-max</option><option ${state.handMeta.players==='6-max'?'selected':''}>6-max</option></select></label>
+      <label>Hero<select id="hhPos">${['UTG','UTG+1','HJ','CO','BTN','SB','BB'].map(p=>`<option ${state.handMeta.pos===p?'selected':''}>${p}</option>`).join('')}</select></label>
+      <label>Eff. Stack<input id="hhStack" value="${escapeHtml(state.handMeta.stack)}" inputmode="decimal"></label>
     </div>
 
-    <label class="inline-label">블라인드<input id="hhBlind" value="1K / 2K / 2K" placeholder="SB / BB / Ante"></label>
+    <label class="inline-label">블라인드<input id="hhBlind" value="${escapeHtml(state.handMeta.blind)}" placeholder="SB / BB / Ante"></label>
 
     <div class="card-section">
       <div class="card-section-title"><b>내 핸드</b><span>2장</span></div>
@@ -88,10 +88,10 @@ function handComposer(){
     ${state.cardTarget?cardPicker():''}
 
     <div class="street-actions">
-      <label><b>PREFLOP</b><textarea id="hhPre" placeholder="예: CO 2.2BB → BTN 7BB → CO Call"></textarea></label>
-      <label><b>FLOP</b><textarea id="hhFlop" placeholder="예: CO Check → BTN 33% → Call"></textarea></label>
-      <label><b>TURN</b><textarea id="hhTurn" placeholder="예: CO Check → Hero ?"></textarea></label>
-      <label><b>RIVER</b><textarea id="hhRiver" placeholder="아직 안 나왔으면 비워둬"></textarea></label>
+      <label><b>PREFLOP</b><textarea id="hhPre" placeholder="예: CO 2.2BB → BTN 7BB → CO Call">${escapeHtml(state.handActions.pre)}</textarea></label>
+      <label><b>FLOP</b><textarea id="hhFlop" placeholder="예: CO Check → BTN 33% → Call">${escapeHtml(state.handActions.flop)}</textarea></label>
+      <label><b>TURN</b><textarea id="hhTurn" placeholder="예: CO Check → Hero ?">${escapeHtml(state.handActions.turn)}</textarea></label>
+      <label><b>RIVER</b><textarea id="hhRiver" placeholder="아직 안 나왔으면 비워둬">${escapeHtml(state.handActions.river)}</textarea></label>
     </div>
 
     <button class="btn secondary full" data-preview-hand>핸드 카드 미리보기</button>
@@ -122,24 +122,24 @@ function cardPicker(){
 
 function handDraftToData(){
   return {
-    title:(document.querySelector('#hhPos')?.value||'BTN')+' Hand · '+(document.querySelector('#hhGame')?.value||'MTT'),
-    blinds:document.querySelector('#hhBlind')?.value||'Blinds',
-    players:document.querySelector('#hhPlayers')?.value||'table',
-    pos:document.querySelector('#hhPos')?.value||'BTN',
-    stack:document.querySelector('#hhStack')?.value||'—',
+    title:state.handMeta.pos+' Hand · '+state.handMeta.game,
+    blinds:state.handMeta.blind||'Blinds',
+    players:state.handMeta.players||'table',
+    pos:state.handMeta.pos||'BTN',
+    stack:state.handMeta.stack||'—',
     hole:state.handDraft.hero.filter(Boolean),
     board:[...state.handDraft.flop,...state.handDraft.turn,...state.handDraft.river].filter(Boolean),
-    pre:document.querySelector('#hhPre')?.value||'',
-    flop:document.querySelector('#hhFlop')?.value||'',
-    turn:document.querySelector('#hhTurn')?.value||'',
-    river:document.querySelector('#hhRiver')?.value||''
+    pre:state.handActions.pre,
+    flop:state.handActions.flop,
+    turn:state.handActions.turn,
+    river:state.handActions.river
   };
 }
 
 function modalView(){
   if(state.modal==='handPreview'){
     const d=state.previewHand||handA;
-    return sheet(`<div class="sheet-title">피드에서 이렇게 보여</div>${hhCard(d)}<button class="btn full" data-close-preview>계속 작성하기</button></div>`);
+    return sheet(`<div class="sheet-title">피드에서 이렇게 보여</div>${hhCard(d)}<button class="btn full" data-close-preview>계속 작성하기</button>`);
   }
   return '';
 }
@@ -159,3 +159,7 @@ function parseCards(txt){
   return txt.replaceAll('/',' ').split(/\s+/).filter(Boolean).map(parseCard);
 }
 
+
+function escapeHtml(value){
+  return String(value ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
