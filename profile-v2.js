@@ -71,10 +71,9 @@ function profileView(key){
       '</div>'+
       '<button class="profile-edit" '+(mine?'data-edit-profile':'data-follow="'+userKey+'"')+'>'+followLabel+'</button>'+
     '</div>'+
-    '<div class="profile-tabs three-tabs">'+
+    '<div class="profile-tabs two-tabs">'+
       '<button class="'+(state.profileTab==='posts'?'active':'')+'" data-profile-tab="posts">게시물</button>'+
-      '<button class="'+(state.profileTab==='hands'?'active':'')+'" data-profile-tab="hands">핸드</button>'+
-      '<button class="'+(state.profileTab==='career'?'active':'')+'" data-profile-tab="career">Career High</button>'+
+      '<button class="'+(state.profileTab==='career'?'active':'')+'" data-profile-tab="career">커리어</button>'+
     '</div>'+
     profileBody(mine,userKey,u)+
   '</section>';
@@ -82,9 +81,8 @@ function profileView(key){
 
 function profileBody(mine,key,u){
   if(state.profileTab==='career')return careerHighView(mine,key);
-  const allPosts=profileTimelinePosts(key);
-  const list=state.profileTab==='hands'?allPosts.filter(p=>p.type==='hand'):allPosts;
-  if(!list.length)return '<div class="profile-timeline-empty"><b>'+(state.profileTab==='hands'?'아직 공개한 핸드가 없어요.':'아직 게시물이 없어요.')+'</b><span>'+(state.profileTab==='hands'?'핸드 게시물은 일반 게시물 데이터에서 자동으로 모아 보여줘요.':'첫 활동을 남겨보세요.')+'</span></div>';
+  const list=profileTimelinePosts(key);
+  if(!list.length)return '<div class="profile-timeline-empty"><b>아직 게시물이 없어요.</b><span>첫 활동을 남겨보세요.</span></div>';
   return '<div class="profile-timeline">'+list.map(p=>profileTimelineCard(p)).join('')+'</div>';
 }
 
@@ -160,9 +158,9 @@ function careerHighView(mine,key){
   ];
   const items=mine?state.careerHighs:demoCareer;
   return '<div class="career-section profile-career-section">'+
-    '<div class="career-head"><div><b>Career High</b><span>포커에서 기억하고 싶은 성과를 전시해요.</span></div>'+(mine?'<button data-career-add>＋ 기록 추가</button>':'')+'</div>'+
+    '<div class="career-head"><div><b>커리어</b><span>포커에서 기억하고 싶은 성과를 전시해요.</span></div>'+(mine?'<button data-career-add>＋ 기록 추가</button>':'')+'</div>'+
     '<div class="career-list">'+
-      (items.length?items.map((item,i)=>careerCard(item,mine,i)).join(''):'<div class="career-empty"><span>♠</span><b>아직 Career High가 없어요</b><p>Day 2, 우승, Final Table, 최고 상금 같은 기록을 추가해 보세요.</p>'+(mine?'<button data-career-add>첫 Career High 등록</button>':'')+'</div>')+
+      (items.length?items.map((item,i)=>careerCard(item,mine,i)).join(''):'<div class="career-empty"><span>♠</span><b>아직 커리어 기록이 없어요</b><p>Day 2, 우승, Final Table, 최고 상금 같은 기록을 추가해 보세요.</p>'+(mine?'<button data-career-add>첫 커리어 기록 추가</button>':'')+'</div>')+
     '</div>'+
   '</div>';
 }
