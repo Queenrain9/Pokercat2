@@ -175,16 +175,16 @@ function roomSeatNode(room,index,x,y){
 function roomInviteModal(){
   const room=getRoom(state.currentRoomId);
   if(!room)return '';
-  const friendKeys=pokerFriendKeys();
-  const networkKeys=[...new Set([...state.followers,...state.following])].filter(k=>!friendKeys.includes(k));
-  const candidates=(state.roomInviteMode==='friends'?friendKeys:networkKeys).filter(k=>k!=='queenbee');
+  const followers=[...state.followers];
+  const following=[...state.following];
+  const candidates=(state.roomInviteMode==='followers'?followers:following).filter(k=>k!=='queenbee');
   return `<div class="modal-backdrop" data-close-modal><div class="sheet room-invite-sheet" onclick="event.stopPropagation()">
     <div class="grab"></div>
-    <div class="sheet-title">PokerCat 친구 초대</div>
+    <div class="sheet-title">PokerCat 사용자 초대</div>
     <p class="room-invite-lead"><b>${escapeHtml(room.name)}</b>에 초대할 사용자를 선택하세요.</p>
     <div class="invite-source-tabs">
-      <button class="${state.roomInviteMode==='friends'?'active':''}" data-invite-source="friends">Poker Friends</button>
-      <button class="${state.roomInviteMode==='network'?'active':''}" data-invite-source="network">Followers / Following</button>
+      <button class="${state.roomInviteMode==='followers'?'active':''}" data-invite-source="followers">Followers</button>
+      <button class="${state.roomInviteMode==='following'?'active':''}" data-invite-source="following">Following</button>
     </div>
     <div class="invite-list">
       ${candidates.length?candidates.map(k=>roomInviteRow(room,k)).join(''):'<div class="relationship-empty">이 그룹에는 초대할 사용자가 없어요.</div>'}
@@ -195,10 +195,10 @@ function roomInviteModal(){
 
 function roomInviteRow(room,key){
   const u=getUser(key),invited=room.invitedUserIds.includes(key);
-  const friend=state.following.has(key)&&state.followers.has(key);
+  const relation=state.followers.has(key)&&state.following.has(key)?'Follower · Following':state.followers.has(key)?'Follower':'Following';
   return `<div class="room-invite-row">
     ${catAvatar(u.cat,'relationship-avatar')}
-    <div><b>${escapeHtml(u.name)}</b><span>${friend?'Poker Friend':state.followers.has(key)?'Follower':'Following'}</span></div>
+    <div><b>${escapeHtml(u.name)}</b><span>${relation}</span></div>
     <button class="${invited?'sent':''}" data-send-room-invite="${key}" ${invited?'disabled':''}>${invited?'초대됨':'초대'}</button>
   </div>`;
 }
