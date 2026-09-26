@@ -128,7 +128,7 @@ function notificationView(){
       <article class="notification-row event-notice">
         <div class="notice-event-icon">♠</div>
         <div class="notice-copy"><b>HPT Premium Day1A</b>가 곧 시작돼요.<span>09.12 (토) 12:00 · 5일 전 알림</span></div>
-        <button class="notice-detail" data-nav="schedule">보기</button>
+        <button class="notice-detail" data-open-schedule>보기</button>
       </article>
       <article class="notification-row">
         ${catAvatar('rock','notice-avatar')}
@@ -203,13 +203,72 @@ function exploreMockContent(tab){
   const rows=data[tab]||data.popular;
   return '<div class="trend-list">'+rows.map(x=>'<article class="trend-card"><div class="trend-thumb '+x[0]+'"></div><div><b>'+escapeHtml(x[1])+'</b><span>'+escapeHtml(x[2])+'</span></div><em>›</em></article>').join('')+'</div>';
 }
+
+const POKERCAT_STORE_DIRECTORY=[
+  {id:'yajasu-seoul-center',name:'야자수 서울센터',brand:'야자수',address:'서울 광진구 능동로19길 35 지하 1층',phone:'',games:['홀덤'],lat:37.5467,lng:127.0710},
+  {id:'kmgm-konkuk',name:'KMGM 건대점',brand:'KMGM',address:'서울 광진구 능동로11길 7 1층',phone:'',games:['홀덤'],lat:37.5407,lng:127.0693},
+  {id:'kmgm-hongdae',name:'KMGM 홍대점',brand:'KMGM',address:'서울 마포구 잔다리로 21 2층',phone:'010-7389-4446',games:['홀덤'],lat:37.5505,lng:126.9205},
+  {id:'kmgm-suyu',name:'KMGM 수유점',brand:'KMGM',address:'서울 강북구 도봉로87길 46',phone:'010-5787-3773',games:['홀덤'],lat:37.6392364,lng:127.0234418},
+  {id:'aria-yatap',name:'Aria 홀덤펍 야탑',brand:'Aria',address:'경기 성남시 분당구 야탑동 366-8 4층',phone:'010-7742-5230',games:['홀덤'],lat:37.4106368,lng:127.1302034},
+  {id:'kmgm-jongno',name:'KMGM 서울종로점',brand:'KMGM',address:'서울 종로구 관철동 19-1 4층',phone:'',games:['홀덤'],lat:37.5698,lng:126.9854}
+];
+const STORE_CITY_PRESETS={
+  '서울':{lat:37.5665,lng:126.9780},
+  '수원':{lat:37.2636,lng:127.0286},
+  '성남':{lat:37.4200,lng:127.1265},
+  '인천':{lat:37.4563,lng:126.7052},
+  '대전':{lat:36.3504,lng:127.3845},
+  '부산':{lat:35.1796,lng:129.0756}
+};
+function storeDistanceKm(a,b){
+  const rad=x=>x*Math.PI/180,R=6371;
+  const dLat=rad(b.lat-a.lat),dLng=rad(b.lng-a.lng);
+  const x=Math.sin(dLat/2)**2+Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+function nearestPokerStores(coords){
+  if(!coords)return POKERCAT_STORE_DIRECTORY.slice(0,3).map(store=>({...store,distance:null}));
+  return POKERCAT_STORE_DIRECTORY
+    .map(store=>({...store,distance:storeDistanceKm(coords,store)}))
+    .sort((a,b)=>a.distance-b.distance)
+    .slice(0,3);
+}
+function storeFinderContent(){
+  const coords=state.storeLocation;
+  const stores=nearestPokerStores(coords);
+  const status=state.storeLocationStatus;
+  const locationLabel=state.storeCity||((status==='ready'&&coords)?'현재 위치':'위치 미설정');
+  return '<div class="store-finder">'+
+    '<div class="store-finder-head"><div><b>플레이할 포커룸 찾기</b><span>'+escapeHtml(locationLabel)+' 기준 가까운 매장을 보여줘요.</span></div>'+
+    '<button class="store-location-btn '+(status==='locating'?'loading':'')+'" data-store-location>'+(status==='locating'?'위치 확인 중…':'⌖ 현재 위치')+'</button></div>'+
+    (state.storeLocationError?'<div class="store-location-error">'+escapeHtml(state.storeLocationError)+'</div>':'')+
+    '<div class="store-city-row">'+Object.keys(STORE_CITY_PRESETS).map(city=>'<button class="'+(state.storeCity===city?'active':'')+'" data-store-city="'+city+'">'+city+'</button>').join('')+'</div>'+
+    '<div class="store-nearby-label"><b>가까운 매장 3곳</b><span>'+(coords?'직선거리 기준':'위치를 허용하거나 도시를 선택해 주세요')+'</span></div>'+
+    '<div class="store-card-list">'+stores.map((store,index)=>'<article class="store-card">'+
+      '<div class="store-rank">'+(index+1)+'</div><div class="store-card-main"><div class="store-card-title"><b>'+escapeHtml(store.name)+'</b>'+(store.distance!=null?'<em>'+store.distance.toFixed(store.distance<10?1:0)+'km</em>':'')+'</div>'+
+      '<span>'+escapeHtml(store.address)+'</span><small>'+escapeHtml(store.games.join(' · '))+(store.phone?' · '+escapeHtml(store.phone):'')+'</small></div>'+
+      '<button data-store-map="'+escapeHtml(store.name)+'">지도</button></article>').join('')+'</div>'+
+    '<div class="store-finder-note">매장 정보는 등록된 디렉터리 기준이며 운영 시간과 게임 일정은 방문 전 매장에 확인해 주세요.</div>'+
+  '</div>';
+}
+function scheduleExploreContent(){
+  return '<div class="explore-schedule-wrap">'+scheduleView()+'</div>';
+}
+
 function pokerRoomExploreViewV1(){
-  const tabs=[['popular','인기'],['rooms','포커룸'],['latest','최신'],['hands','핸드'],['events','대회'],['pubs','펍'],['users','유저']];
+  const tabs=[['popular','인기'],['rooms','포커룸'],['stores','매장 찾기'],['schedule','일정'],['latest','최신'],['hands','핸드'],['events','대회'],['pubs','펍'],['users','유저']];
   const roomList=state.rooms.filter(r=>r.status!=='closed'&&roomVisibleToViewer(r,'explore'));
-  const body=state.exploreTab==='rooms'
-    ?'<div class="explore-room-section"><div class="explore-room-head"><div><b>진행 중인 포커룸</b><span>호스트와 설정을 확인하고 같은 Poker Room으로 입장해요.</span></div><button data-create-game>＋ 만들기</button></div><div class="explore-room-list">'+(roomList.map(r=>pokerRoomFeedCard(r,'explore')).join('')||'<div class="homepub-empty"><b>열린 포커룸이 없어요.</b><span>직접 Single Table을 만들어 친구를 초대해 보세요.</span></div>')+'</div></div>'
-    :exploreMockContent(state.exploreTab);
-  return '<section class="explore-screen"><div class="search-box"><span>⌕</span><input placeholder="플레이어, 핸드, 대회, 포커룸 검색"><button>⌘</button></div><div class="explore-tabs">'+tabs.map(t=>'<button class="'+(state.exploreTab===t[0]?'active':'')+'" data-explore-tab="'+t[0]+'">'+t[1]+'</button>').join('')+'</div>'+body+'</section>';
+  let body='';
+  if(state.exploreTab==='rooms'){
+    body='<div class="explore-room-section"><div class="explore-room-head"><div><b>진행 중인 포커룸</b><span>호스트와 설정을 확인하고 같은 Poker Room으로 입장해요.</span></div><button data-create-game>＋ 만들기</button></div><div class="explore-room-list">'+(roomList.map(r=>pokerRoomFeedCard(r,'explore')).join('')||'<div class="homepub-empty"><b>열린 포커룸이 없어요.</b><span>직접 Single Table을 만들어 친구를 초대해 보세요.</span></div>')+'</div></div>';
+  }else if(state.exploreTab==='stores'){
+    body=storeFinderContent();
+  }else if(state.exploreTab==='schedule'){
+    body=scheduleExploreContent();
+  }else{
+    body=exploreMockContent(state.exploreTab);
+  }
+  return '<section class="explore-screen"><div class="search-box"><span>⌕</span><input placeholder="플레이어, 핸드, 대회, 포커룸, 매장 검색"><button>⌘</button></div><div class="explore-tabs">'+tabs.map(t=>'<button class="'+(state.exploreTab===t[0]?'active':'')+'" data-explore-tab="'+t[0]+'">'+t[1]+'</button>').join('')+'</div>'+body+'</section>';
 }
 function exploreView(){return pokerRoomExploreViewV1()}
 
