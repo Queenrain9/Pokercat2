@@ -1,100 +1,72 @@
 function userRow(key){
-  const u=demoUsers[key];
-  const isFollowing=state.following.has(key);
+  const u=demoUsers[key],following=state.following.has(key);
   return `<div class="user-row">
-    <button class="avatar" data-user="${key}" style="border:none">${catAvatar(u.cat,'avatar-cat-image')}</button>
-    <div class="user-meta"><div class="user-name">${u.name}</div><div class="user-sub">${u.sub} · 18분</div></div>
-    <button class="follow-btn ${isFollowing?'following':''}" data-follow="${key}">${isFollowing?'팔로잉':'팔로우'}</button>
+    <button class="avatar" data-user="${key}">${catAvatar(u.cat,'avatar-cat-image')}</button>
+    <div class="user-meta"><div class="user-name">${u.name}</div><div class="user-sub">${u.sub}</div></div>
+    <button class="more-btn">•••</button>
   </div>`;
 }
-
-function hhCard(data){
-  return `<div class="hh-card">
-    <div class="hh-head"><div><div class="hh-title">${data.title}</div><div class="user-sub">${data.blinds} · ${data.players}</div></div><span class="tag">HAND</span></div>
-    <div class="hh-summary">
-      <div><div class="user-sub" style="margin-bottom:6px">HERO · ${data.pos}</div><div class="hole-cards">${cards(data.hole)}</div></div>
-      <div class="stack-box"><strong>${data.stack}</strong><span>effective</span></div>
-    </div>
-    <div class="board-row">${cards(data.board,true)}</div>
-    <div class="street-list">
-      ${data.pre?`<div class="street"><b>PREFLOP</b>${data.pre}</div>`:''}
-      ${data.flop?`<div class="street"><b>FLOP</b>${data.flop}</div>`:''}
-      ${data.turn?`<div class="street"><b>TURN</b>${data.turn}</div>`:''}
-      ${data.river?`<div class="street"><b>RIVER</b>${data.river}</div>`:''}
-    </div>
-  </div>`;
+function storyRow(){
+  const users=['queenbee','riverkim','minraise','chiplee','ninehigh'];
+  return `<div class="story-strip">${users.map((k,i)=>`<button class="story" data-user="${k}"><span class="story-ring">${catAvatar(demoUsers[k].cat,'story-cat')}</span><small>${i===0?'내 스토리':demoUsers[k].name}</small></button>`).join('')}</div>`;
+}
+function feedTabs(){
+  const tabs=[['all','전체'],['following','팔로잉'],['hands','핸드'],['tournaments','대회'],['live','라이브'],['pubs','펍']];
+  return `<div class="feed-tabs">${tabs.map(t=>`<button class="${state.feedTab===t[0]?'active':''}" data-feed-tab="${t[0]}">${t[1]}</button>`).join('')}</div>`;
 }
 function cards(list){
-  if(!list) return '';
-  return list.map(c=>{
-    const red=/[♥♦]/.test(c);
-    return `<div class="playing-card ${red?'red':''}">${c}</div>`;
-  }).join('');
+  return (list||[]).map(c=>`<div class="playing-card ${/[♥♦]/.test(c)?'red':''}"><b>${c.slice(0,-1)}</b><span>${c.slice(-1)}</span></div>`).join('');
 }
-
-const handA={title:'BTN vs BB · 3Bet Pot',blinds:'1K / 2K / 2K',players:'8-max',pos:'BTN',stack:'38.5BB',hole:['A♥','Q♥'],board:['Q♣','8♥','4♥','6♠'],pre:'CO 2.2BB → BTN 7BB → CO Call',flop:'CO Check → BTN 33% → Call',turn:'CO Check → Hero ?'};
-const handB={title:'SB vs BB · Single Raised Pot',blinds:'2K / 4K / 4K',players:'9-max',pos:'BB',stack:'24BB',hole:['9♠','8♠'],board:['J♠','7♦','2♣','T♥','3♣'],pre:'SB 2.5BB → BB Call',flop:'SB 30% → BB Call',turn:'SB Check → BB 70% → Call',river:'SB Check → BB ?'};
-
-function homeView(){
-  return `<section class="content">
-    <article class="card feed-card">
-      ${userRow('ninehigh')}
-      <div class="post-text">어제 데일리에서 이 턴 진짜 고민했음. 여기 사이즈 뭐가 제일 자연스러워 보여?</div>
-      ${hhCard(handA)}
-      ${actions('p1',28,12)}
-    </article>
-
-    <article class="card feed-card">
-      ${userRow('riverkim')}
-      <div class="post-text">오랜만에 온라인 캐시. 새벽 세션 끝 🌙<br>오늘은 블러프보다 밸류를 더 잘 챙긴 날.</div>
-      <div class="post-photo">SESSION SNAPSHOT<br><span style="font-size:12px;opacity:.72">image placeholder</span></div>
-      ${actions('p2',42,7)}
-    </article>
-
-    <article class="card feed-card">
-      ${userRow('minraise')}
-      <div class="post-text">리버에서 얇게 한 번 더 갈 수 있었나? 의견 궁금.</div>
-      ${hhCard(handB)}
-      ${actions('p3',17,19)}
-    </article>
-  </section>`;
+const handA={title:'BTN vs BB · 3Bet Pot',blinds:'MTT · 1k/2k (Ante 2k)',players:'8-max',pos:'BTN',stack:'38BB',hole:['A♠','K♠'],board:['Q♥','J♠','7♣','2♦','9♣'],pre:'BTN 오픈 → BB 콜',flop:'플랍 체크-콜',turn:'턴 체크-레이즈',river:'리버 콜'};
+const handB={title:'SB vs BB · Single Raised Pot',blinds:'Cash · 1/2',players:'6-max',pos:'BB',stack:'102BB',hole:['9♠','8♠'],board:['J♠','7♦','2♣','T♥','3♣'],pre:'SB 2.5BB → BB Call',flop:'SB 30% → BB Call',turn:'SB Check → BB 70% → Call',river:'SB Check → BB ?'};
+function hhCard(d){
+  return `<div class="hh-card">
+    <div class="hh-kicker">🔥 ${d.blinds}</div>
+    <div class="hh-row"><div><small>MY HAND</small><div class="cards-row">${cards(d.hole)}</div></div><div><small>FLOP</small><div class="cards-row">${cards(d.board.slice(0,3))}</div></div><div><small>TURN</small><div class="cards-row">${cards(d.board.slice(3,4))}</div></div><div><small>RIVER</small><div class="cards-row">${cards(d.board.slice(4,5))}</div></div></div>
+    <div class="hh-action">${d.pre}<br>${d.flop}, ${d.turn}, ${d.river}</div>
+  </div>`;
 }
-
 function actions(id,likes,comments){
   const liked=state.liked.has(id);
   return `<div class="post-actions">
     <button class="${liked?'liked':''}" data-like="${id}">${liked?'♥':'♡'} ${likes+(liked?1:0)}</button>
-    <button data-comment>◯ ${comments}</button>
-    <button data-toast="저장했어요">⌑ 저장</button>
-    <button data-toast="공유 링크를 준비했어요">↗ 공유</button>
+    <button>◯ ${comments}</button><span class="post-spacer"></span>
+    <button data-toast="저장했어요">⌑</button><button data-toast="공유 링크를 준비했어요">↗</button>
   </div>`;
 }
-
-function exploreView(){
-  return `<section class="content">
-    <div class="empty-state">
-      <div class="empty-icon">⌕</div>
-      <h3>탐색은 아직 비워두었어.</h3>
-      <p>플레이어 검색, 트렌딩 핸드, 태그, 추천 구조는 다음 기획에서 정하면 돼.</p>
+function pokerPhoto(type='chips'){
+  return `<div class="poker-photo ${type}"><div class="felt"></div><div class="chip-stack c1"></div><div class="chip-stack c2"></div><div class="chip-stack c3"></div><div class="table-card a">A♠</div><div class="table-card k">K♥</div><div class="photo-shine"></div></div>`;
+}
+function homeView(){
+  return `<section class="home-screen">
+    ${storyRow()}${feedTabs()}
+    <div class="feed-list">
+      <article class="feed-post">${userRow('riverkim')}<div class="post-text">오늘은 확실히 리드 잘 잡혔다<br>후반에 좀 아쉬운 스팟이 있었지만 전체적으로 굿<br>내일도 화이팅 🐱</div>${pokerPhoto('night')}${actions('p1',32,7)}</article>
+      <article class="feed-post">${userRow('queenbee')}<div class="post-text">핸드 히스토리 하나 공유해요<br>여러분은 턴에서 어떤 라인 가시나요?</div>${hhCard(handA)}${actions('p2',42,18)}</article>
+      <article class="feed-post">${userRow('minraise')}<div class="post-text">대회 끝나고 느낀 점. 오늘도 한 단계 배웠다.</div>${pokerPhoto('warm')}${actions('p3',76,31)}</article>
     </div>
   </section>`;
 }
-
-function scheduleView(){
-  const events=[
-    ['SEP 27','PokerCat Weekly 100K','서울 · NLH MTT','100K','14:00'],
-    ['OCT 02','Autumn Main Event Day 1A','수도권 · Main Event','300K','13:00'],
-    ['OCT 03','Autumn Main Event Day 1B','수도권 · Main Event','300K','13:00'],
-    ['OCT 09','Mystery Bounty Night','서울 · Mystery Bounty','150K','18:00']
-  ];
-  return `<section class="content">
-    <div class="section-title">다가오는 대회</div>
-    ${events.map(e=>`<article class="card schedule-card">
-      <div class="schedule-date">${e[0]}</div>
-      <div class="schedule-name">${e[1]}</div>
-      <div class="schedule-meta"><span>📍 ${e[2]}</span><span>🎟 ${e[3]}</span><span>◷ ${e[4]}</span></div>
-    </article>`).join('')}
-    <div class="helper" style="text-align:center;margin:18px 0">현재는 레이아웃용 샘플 일정입니다.</div>
+function exploreView(){
+  const tabs=[['popular','인기'],['latest','최신'],['hands','핸드'],['events','대회'],['pubs','펍'],['users','유저']];
+  return `<section class="explore-screen">
+    <div class="search-box"><span>⌕</span><input placeholder="플레이어, 핸드, 대회 검색"><button>⌘</button></div>
+    <div class="explore-tabs">${tabs.map(t=>`<button class="${state.exploreTab===t[0]?'active':''}" data-explore-tab="${t[0]}">${t[1]}</button>`).join('')}</div>
+    <div class="trend-list">
+      <article class="trend-card"><div class="trend-thumb chips"></div><div><b>오늘 이 핸드 어떻게 보세요?</b><span>🔥 120　◯ 62</span></div><em>›</em></article>
+      <article class="trend-card"><div class="trend-thumb arena"></div><div><b>대박에서 느낀 점</b><span>♡ 98　◯ 24</span></div><em>›</em></article>
+      <article class="trend-card"><div class="trend-thumb pub"></div><div><b>요즘 여기 펍 추천</b><span>서울 홍대 근처 괜찮은 펍 있을까요?</span></div><em>›</em></article>
+      <article class="trend-card"><div class="trend-thumb cats"></div><div><b>HPT 새틀 후기</b><span>핸드 몇개 공유합니다</span></div><em>›</em></article>
+      <article class="trend-card"><div class="trend-thumb night"></div><div><b>그라인더들의 새벽 세션</b><span>♡ 44　◯ 11</span></div><em>›</em></article>
+    </div>
   </section>`;
 }
-
+function scheduleView(){
+  const days=Array.from({length:30},(_,i)=>i+1);
+  const events=[['HPT Premium Day1A','09.12 (토) 12:00 · Korea','D-5','orange'],['다바오 시리즈 Main Event','09.20 (일) 12:00 · Davao','D-13','blue'],['APL Seoul','09.24 (목) 14:00 · Korea','D-17','red']];
+  return `<section class="schedule-screen">
+    <div class="schedule-switch"><button class="active">대회</button><button data-toast="펍 이벤트는 다음 단계에서 연결해요">펍 이벤트</button><button data-toast="내 일정 저장 기능은 다음 단계에서 연결해요">내 일정</button></div>
+    <div class="calendar-card"><div class="calendar-head"><b>2026년 9월</b><span>‹　›</span></div><div class="weekdays">${['월','화','수','목','금','토','일'].map(x=>`<span>${x}</span>`).join('')}</div><div class="calendar-grid">${days.map(d=>`<span class="${[3,12,15,20,24].includes(d)?'marked':''} ${d===20?'hot':''}">${d}</span>`).join('')}</div></div>
+    <div class="event-list">${events.map(e=>`<article class="event-row"><div class="event-logo ${e[3]}">♠</div><div><b>${e[0]}</b><span>${e[1]}</span></div><em class="${e[3]}">${e[2]}</em></article>`).join('')}</div>
+  </section>`;
+}
