@@ -1,15 +1,18 @@
 function profileView(key){
   const mine=key==='me';
-  const u=mine?{name:state.nickname,handle:'@queenbee',cat:state.selectedCat,sub:`${state.gamePref} · ${state.playPref}`}:demoUsers[key]||demoUsers.riverkim;
+  const u=mine?{name:state.nickname,handle:'@queenbee',cat:state.selectedCat,sub:`${state.gamePref} · ${state.playPref}`,pubBrand:state.pubBrand,pubBranch:state.pubBranch}:demoUsers[key]||demoUsers.riverkim;
   return `<section class="profile-screen">
     <div class="profile-hero">
       <div class="profile-avatar">${catAvatar(u.cat,'profile-cat-image')}</div>
-      <div class="profile-name">${u.name}</div>
+      <div class="profile-name-row">
+        <div class="profile-name">${u.name}</div>
+        ${mine&&state.pubBrand&&state.pubBranch?`<span class="profile-pub-badge" title="대표 홀덤펍"><i>♠</i><b>${escapeHtml(state.pubBrand)}</b> <small>${escapeHtml(state.pubBranch)}</small></span>`:''}
+      </div>
       <div class="profile-handle">${u.handle}</div>
       <div class="bio">${mine?'홀덤 치고, 핸드 남기고, 좋은 사람들 만나는 중.':'포커 좋아하는 평범한 플레이어. 핸드 토론 환영.'}</div>
       <div class="poker-tags"><span>♠ ${mine?state.gamePref:'MTT'}</span><span>● ${mine?state.playPref:'Live'}</span><span>🇰🇷 Korea</span></div>
       <div class="stats"><div><b>24</b><span>게시물</span></div><div><b>312</b><span>팔로워</span></div><div><b>188</b><span>팔로잉</span></div></div>
-      <button class="profile-edit" ${mine?'data-toast="프로필 편집 기능은 준비 중이에요"':`data-follow="${key}"`}>${mine?'프로필 편집':state.following.has(key)?'팔로잉':'팔로우'}</button>
+      <button class="profile-edit" ${mine?'data-edit-profile':`data-follow="${key}"`}>${mine?'프로필 편집':state.following.has(key)?'팔로잉':'팔로우'}</button>
     </div>
     <div class="profile-tabs">
       <button class="${state.profileTab==='posts'?'active':''}" data-profile-tab="posts">게시물</button>
@@ -23,6 +26,33 @@ function profileBody(){
   if(state.profileTab==='hands')return `<div class="profile-body"><article class="feed-post detail-post">${hhCard(handA)}${actions('profilehand',42,18)}</article><article class="feed-post detail-post">${hhCard(handB)}${actions('profilehand2',21,9)}</article></div>`;
   if(state.profileTab==='saved')return `<div class="profile-body saved-state"><div class="saved-icon">⌑</div><b>저장한 게시물</b><span>마음에 든 핸드와 글을 여기에 모아둘 수 있어요.</span></div>`;
   return `<div class="profile-gallery">${['chips','arena','cards','cat','night','city','table','orange','crowd'].map(x=>`<div class="gallery-tile ${x}"></div>`).join('')}</div>`;
+}
+
+function profileEditModal(){
+  const pubPreview=state.pubBrand&&state.pubBranch?`${escapeHtml(state.pubBrand)} ${escapeHtml(state.pubBranch)}`:'등록된 대표 홀덤펍 없음';
+  return `<div class="modal-backdrop" data-close-modal>
+    <div class="sheet profile-edit-sheet" onclick="event.stopPropagation()">
+      <div class="grab"></div>
+      <div class="profile-edit-head">
+        <div><div class="sheet-title">프로필 편집</div><p>대표 홀덤펍은 닉네임 옆에 소속처럼 표시돼요.</p></div>
+        <button data-close-profile-edit>닫기</button>
+      </div>
+      <div class="profile-edit-preview">
+        ${catAvatar(state.selectedCat,'profile-edit-avatar')}
+        <div><div class="edit-preview-name">${escapeHtml(state.nickname)}</div><div class="edit-preview-pub">${pubPreview}</div></div>
+      </div>
+      <div class="profile-edit-form">
+        <label>닉네임<input id="editNickname" value="${escapeHtml(state.nickname)}" maxlength="16"></label>
+        <div class="pub-edit-block">
+          <div class="pub-edit-title"><b>대표 홀덤펍</b><span>브랜드와 지점명을 각각 입력해 주세요.</span></div>
+          <label>브랜드<input id="editPubBrand" value="${escapeHtml(state.pubBrand)}" maxlength="20" placeholder="예: KMGM"></label>
+          <label>지점명<input id="editPubBranch" value="${escapeHtml(state.pubBranch)}" maxlength="24" placeholder="예: 수원점"></label>
+          <div class="pub-edit-helper">프로필에는 <b>KMGM 수원점</b>처럼 표시됩니다. 둘 다 비우면 소속이 제거돼요.</div>
+        </div>
+        <button class="btn full" data-save-profile>저장</button>
+      </div>
+    </div>
+  </div>`;
 }
 function bottomNav(){
   const nav=[['home','홈','home'],['search','탐색','explore'],['plus','작성','compose'],['calendar','일정','schedule'],['profile','프로필','profile']];
